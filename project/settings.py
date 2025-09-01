@@ -48,8 +48,10 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "corsheaders",
+    "wmsAdapter",
     "wmsAdapterV2",
     "wmsBase",
+    "contapyme",
 ]
 
 MIDDLEWARE = [
