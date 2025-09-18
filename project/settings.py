@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     "corsheaders",
     "wmsAdapterV2",
     "wmsBase",
+    "mercadolibre",
 ]
 
 MIDDLEWARE = [
