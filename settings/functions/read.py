@@ -1,11 +1,11 @@
 """Dependencies"""
 
+from settings.settings import global_settings
 import os
 from pymongo import MongoClient
 from dotenv import load_dotenv
 
 """ Local Dependencies """
-from settings.settings import global_settings
 
 load_dotenv()
 
@@ -25,7 +25,7 @@ def get_collections() -> list:
         client = MongoClient(global_settings.CONNECTION_STRING)
 
         # select the database
-        db = client[apidbmongo]
+        db = client[apidbmongo]  # type: ignore
 
         # get the collections
         collections = db.list_collection_names()
@@ -55,7 +55,7 @@ def get_apikeys() -> dict:
         client = MongoClient(global_settings.CONNECTION_STRING)
 
         # select the database
-        db = client[apidbmongo]
+        db = client[apidbmongo]  # type: ignore
 
         # initialize the dictionary
         apikeys = {}
@@ -102,7 +102,7 @@ def get_db_connection() -> dict:
             raise ValueError("Could not connect to the database")
 
         # select the database
-        db = client[apidbmongo]
+        db = client[apidbmongo]  # type: ignore
 
         # initialize the dictionary
         db_connection = {}
@@ -148,7 +148,7 @@ def get_time_zones() -> dict:
         client = MongoClient(global_settings.CONNECTION_STRING)
 
         # select the database
-        db = client[apidbmongo]
+        db = client[apidbmongo]  # type: ignore
 
         # initialize the dictionary
         time_zones = {}

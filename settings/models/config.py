@@ -27,7 +27,7 @@ class Config:
     def _initialize(self):
         self.CONNECTION_STRING = global_settings.CONNECTION_STRING
         self.client = MongoClient(self.CONNECTION_STRING)
-        self.db = self.client[apidbmongo]
+        self.db = self.client[apidbmongo]  # type: ignore
         self.collections = self.db.list_collection_names()
         self.config_data = None
 

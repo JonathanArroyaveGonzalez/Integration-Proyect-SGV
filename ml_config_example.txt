@@ -1,0 +1,13 @@
+# Agregar al archivo .env
+
+# MercadoLibre API Configuration
+ML_APP_ID=tu_app_id_de_mercadolibre
+ML_CLIENT_SECRET=tu_client_secret_de_mercadolibre
+ML_ACCESS_TOKEN=tu_access_token_de_mercadolibre
+ML_REFRESH_TOKEN=tu_refresh_token_de_mercadolibre
+ML_USER_ID=tu_user_id_de_mercadolibre
+ML_API_BASE_URL=https://api.mercadolibre.com
+
+# Para testing/desarrollo (opcional)
+ML_SANDBOX=true
+ML_SANDBOX_BASE_URL=https://api.mercadolibre.com

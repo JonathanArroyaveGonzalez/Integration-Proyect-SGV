@@ -9,7 +9,7 @@ def delete_clt(request, db_name):
         else:
             if len(list(clt)) == 1:
                 clt = clt[0]
-                clt.delete(using=db_name)
+                clt.delete(using=db_name)  # pyright: ignore[reportAttributeAccessIssue]
                 return 'Deleted successfully'
             elif len(list(clt)) == 0:
                 return 'Clt not found'
