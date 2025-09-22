@@ -1,8 +1,7 @@
 from mercadolibre.utils.api_client import make_authenticated_request, get_meli_api_base_url
+from mercadolibre.utils.data_mapper import ProductMapper
 from .extract_id import extract_product_ids
 import requests
-import json
-import os
 from django.conf import settings
 
 base_url = get_meli_api_base_url()
@@ -84,7 +83,7 @@ def sync_products_to_wms(auth_headers=None):
 
 def map_products_to_wms_format(meli_items):
     """
-    Mapea productos de MercadoLibre al formato del WMS (TdaWmsArt)
+    Mapea productos de MercadoLibre al formato del WMS usando ProductMapper
     """
     wms_products = []
     
@@ -96,38 +95,30 @@ def map_products_to_wms_format(meli_items):
             else:
                 product_data = item
             
-            # Mapear a formato WMS según el modelo TdaWmsArt
-            wms_product = {
-                "productoean": str(product_data.get("id", "")),  # Campo obligatorio
-                "descripcion": product_data.get("title", "")[:250],  # Máximo 250 caracteres
-                "referencia": str(product_data.get("id", "")),  # Campo obligatorio
-                "inventariable": 1,  # Por defecto inventariable
-                "um1": "UND",  # Unidad de medida por defecto
-                "presentacion": product_data.get("condition", "new"),
-                "costo": float(product_data.get("price", 0)),
-                "preciounitario": float(product_data.get("price", 0)),
-                "descripcioningles": product_data.get("title", "")[:250],
-                "item": str(product_data.get("id", "")),
-                "grupo": product_data.get("category_id", ""),
-                "subgrupo": product_data.get("listing_type_id", ""),
-                "nuevoean": str(product_data.get("id", "")),  # Campo obligatorio
-                "tipo": "MERCADOLIBRE",
-                "factor": 1.0,
-                "bodega": "PRINCIPAL",
-                "procedencia": "MERCADOLIBRE",
-                "estadotransferencia": 0,
-                "proveedor": "MERCADOLIBRE",
-                "observacion": f"Sincronizado desde MercadoLibre - {product_data.get('permalink', '')}",
-                "estado": 1 if product_data.get("status") == "active" else 0,
-                "controla_status_calidad": 0,
-            }
+            # Usar ProductMapper para mapear el producto
+            product_mapper = ProductMapper.from_meli_item(product_data)
             
-            # Solo agregar si tiene datos mínimos necesarios (campos obligatorios)
-            if (wms_product["productoean"] and 
-                wms_product["descripcion"] and 
-                wms_product["referencia"] and 
-                wms_product["nuevoean"]):
+            # Convertir a diccionario y agregar campos específicos del WMS
+            wms_product = product_mapper.to_dict()
+            
+            # Asegurar campos obligatorios y valores por defecto para WMS
+            wms_product.update({
+                "bodega": wms_product.get("bodega", "PRINCIPAL"),
+                "inventariable": wms_product.get("inventariable", 1),
+                "um1": wms_product.get("um1", "UND"),
+                "factor": wms_product.get("factor", 1.0),
+                "estado": wms_product.get("estado", 1),
+                "estadotransferencia": wms_product.get("estadotransferencia", 0),
+                "controla_status_calidad": wms_product.get("controla_status_calidad", 0),
+                "tipo": wms_product.get("tipo", "MERCADOLIBRE"),
+            })
+            
+            # Validar campos obligatorios
+            required_fields = ["productoean", "descripcion", "referencia", "nuevoean"]
+            if all(wms_product.get(field) for field in required_fields):
                 wms_products.append(wms_product)
+            else:
+                print(f"Producto omitido por campos obligatorios faltantes: {product_data.get('id', 'N/A')}")
                 
         except Exception as e:
             print(f"Error mapeando producto: {str(e)}")
@@ -194,13 +185,24 @@ def sync_products():
 
 def map_products(meli_items):
     """
-    Método legacy que mapea la información de los productos de MercadoLibre
+    Método legacy que mapea la información de los productos de MercadoLibre usando ProductMapper
     Params: meli_items: lista de items de MercadoLibre
     return: lista mapeada de productos
     """
     mapped_products = []
     for item in meli_items:
-        if "body" in item:
-            mapped_products.append(item["body"])
+        try:
+            if "body" in item:
+                product_data = item["body"]
+            else:
+                product_data = item
+            
+            # Usar ProductMapper para consistencia
+            product_mapper = ProductMapper.from_meli_item(product_data)
+            mapped_products.append(product_mapper.to_dict())
+        except Exception as e:
+            print(f"Error mapeando producto legacy: {str(e)}")
+            continue
+    
     return mapped_products
 

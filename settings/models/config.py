@@ -1,15 +1,8 @@
-from settings.settings import global_settings
 from threading import Lock
-import os
-from pymongo import MongoClient
 from dotenv import load_dotenv
+from project.mongodb_service import mongodb_service
 
 load_dotenv()
-
-try:
-    apidbmongo = os.getenv("APIDBMONGO")
-except KeyError as e:
-    raise RuntimeError("Could not find a APIDBMONGO in environment") from e
 
 
 class Config:
@@ -25,27 +18,14 @@ class Config:
         return cls._instance
 
     def _initialize(self):
-        self.CONNECTION_STRING = global_settings.CONNECTION_STRING
-        self.client = MongoClient(self.CONNECTION_STRING)
-        self.db = self.client[apidbmongo]
-        self.collections = self.db.list_collection_names()
+        self.mongodb_service = mongodb_service
         self.config_data = None
 
-    def _load_config(self, database: str, platform: str):
-        collection = self.db[database]
-        json_query = {platform: {"$exists": True}}
-        item_details = collection.find(json_query)
-        config = []
-        for item in item_details:
-            item.pop("_id", None)
-            config.append(item)
-        return config[0] if config else {}
-
     def get_collections(self):
-        return self.collections
+        return self.mongodb_service.list_collections()
 
     def get_config(self, database: str, platform: str):
-        self.config_data = self._load_config(database, platform)
+        self.config_data = self.mongodb_service.get_config(database, platform)
         return self.config_data
 
     def reload_config(self, database: str, platform: str):

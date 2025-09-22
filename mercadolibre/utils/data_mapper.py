@@ -132,3 +132,4 @@ class ProductMapper:
 
     def __repr__(self):
         return f"ProductMapper({self.productoean}, {self.descripcion}, qty={self.qtyequivalente}, estado={self.estado})"
+
