@@ -5,4 +5,3 @@ from .api_client import (
     get_meli_api_base_url
 )
 
-from .data_mapper import ProductMapper

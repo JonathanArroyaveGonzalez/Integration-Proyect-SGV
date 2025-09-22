@@ -2,7 +2,7 @@ import logging
 import requests
 from django.conf import settings
 from mercadolibre.utils.api_client import make_authenticated_request, get_meli_api_base_url
-from mercadolibre.utils.data_mapper import ProductMapper
+from mercadolibre.utils.mapper.data_mapper import ProductMapper
 from .extract_id import extract_product_ids
 
 logger = logging.getLogger(__name__)
