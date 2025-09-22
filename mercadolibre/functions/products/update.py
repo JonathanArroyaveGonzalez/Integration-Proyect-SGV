@@ -123,6 +123,7 @@ def update_product_from_meli_to_wms(product_id, auth_headers=None):
     1. Obtiene el producto de MercadoLibre por ID
     2. Lo mapea al formato del WMS
     3. Lo actualiza en el WMS usando PUT
+    4. Sincroniza o actualiza el código de barras correspondiente
     
     Args:
         product_id (str): ID del producto en MercadoLibre
@@ -149,14 +150,44 @@ def update_product_from_meli_to_wms(product_id, auth_headers=None):
         logger.info("Producto mapeado exitosamente al formato WMS")
         
         # 3. Actualizar en WMS
-        result = update_product_in_wms(wms_product, auth_headers)
+        product_result = update_product_in_wms(wms_product, auth_headers)
         
-        if result["success"]:
-            logger.info(f"Producto {product_id} actualizado exitosamente")
+        # 4. Sincronizar/actualizar código de barras
+        if product_result["success"]:
+            logger.info("Sincronizando código de barras...")
+            try:
+                from ..BarCode.update import sync_or_update_barcode_from_meli_item
+                barcode_result = sync_or_update_barcode_from_meli_item(meli_item, auth_headers)
+                
+                # Combinar resultados
+                combined_result = {
+                    "success": True,
+                    "message": f"Producto: {product_result['message']}",
+                    "product_data": product_result.get("data"),
+                    "barcode_success": barcode_result["success"],
+                    "barcode_message": barcode_result["message"]
+                }
+                
+                if barcode_result.get("data"):
+                    combined_result["barcode_data"] = barcode_result["data"]
+                
+                if not barcode_result["success"]:
+                    combined_result["message"] += f" | Código de barras: {barcode_result['message']}"
+                else:
+                    combined_result["message"] += f" | {barcode_result['message']}"
+                
+                logger.info(f"Producto {product_id} actualizado exitosamente con código de barras")
+                return combined_result
+                
+            except Exception as e:
+                logger.error(f"Error sincronizando código de barras para producto {product_id}: {e}")
+                # Si falla el código de barras, al menos devolver el éxito del producto
+                product_result["barcode_error"] = f"Error en código de barras: {e}"
+                return product_result
         else:
-            logger.error(f"Error actualizando producto {product_id}: {result['message']}")
+            logger.error(f"Error actualizando producto {product_id}: {product_result['message']}")
         
-        return result
+        return product_result
         
     except Exception as e:
         logger.exception(f"Error en actualización del producto {product_id}")

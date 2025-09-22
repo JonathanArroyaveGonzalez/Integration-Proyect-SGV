@@ -1,1 +1,1 @@
-from .data_mapper import ProductMapper
+from .data_mapper import ProductMapper, BarCodeMapper

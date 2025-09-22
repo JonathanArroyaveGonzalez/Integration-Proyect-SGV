@@ -110,7 +110,74 @@ def sync_products_to_wms(auth_headers=None):
         wms_products = map_products_to_wms_format(meli_items)
         
         logger.info("Enviando productos al WMS...")
-        return send_products_to_wms(wms_products, auth_headers)
+        products_result = send_products_to_wms(wms_products, auth_headers)
+        
+        # Sincronizar códigos de barras después de sincronizar productos
+        if products_result["success"]:
+            logger.info("Sincronizando códigos de barras...")
+            try:
+                from ..BarCode.update import sync_or_update_barcode_from_meli_item
+                
+                barcodes_results = []
+                barcodes_errors = []
+                
+                # Procesar cada item individualmente para manejar creación/actualización
+                for item in meli_items:
+                    try:
+                        product_data = item.get("body", item)
+                        barcode_result = sync_or_update_barcode_from_meli_item(product_data, auth_headers)
+                        
+                        if barcode_result["success"]:
+                            barcodes_results.append({
+                                "item_id": product_data.get("id", "N/A"),
+                                "result": barcode_result
+                            })
+                        else:
+                            barcodes_errors.append({
+                                "item_id": product_data.get("id", "N/A"),
+                                "error": barcode_result["message"]
+                            })
+                    except Exception as e:
+                        logger.error(f"Error procesando código de barras para item {item.get('id', 'N/A')}: {e}")
+                        barcodes_errors.append({
+                            "item_id": item.get("id", "N/A"),
+                            "error": str(e)
+                        })
+                
+                # Crear resultado combinado
+                barcodes_success = len(barcodes_results) > 0
+                barcodes_message = f"Códigos de barras: {len(barcodes_results)} procesados exitosamente"
+                
+                if barcodes_errors:
+                    barcodes_message += f", {len(barcodes_errors)} con errores"
+                
+                combined_result = {
+                    "success": True,
+                    "message": f"Productos: {products_result['message']}",
+                    "products_data": products_result.get("data"),
+                    "barcodes_success": barcodes_success,
+                    "barcodes_message": barcodes_message,
+                    "barcodes_processed": len(barcodes_results),
+                    "barcodes_errors_count": len(barcodes_errors)
+                }
+                
+                if barcodes_results:
+                    combined_result["barcodes_data"] = barcodes_results
+                
+                if barcodes_errors:
+                    combined_result["barcodes_errors"] = barcodes_errors
+                
+                combined_result["message"] += f" | {barcodes_message}"
+                
+                return combined_result
+                
+            except Exception as e:
+                logger.error(f"Error sincronizando códigos de barras: {e}")
+                # Si falla los códigos de barras, al menos devolver el éxito de productos
+                products_result["barcodes_error"] = f"Error en códigos de barras: {e}"
+                return products_result
+        
+        return products_result
     except Exception as e:
         logger.exception("Error en sincronización")
         return {"success": False, "message": f"Error en sincronización: {e}"}
