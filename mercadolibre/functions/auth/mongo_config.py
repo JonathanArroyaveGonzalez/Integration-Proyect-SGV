@@ -25,7 +25,7 @@ def get_meli_config():
         db = client[apidbmongo]
 
         # Get the collection
-        collection = db['meli_test']
+        collection = db["meli_test"]
 
         # Find the configuration document
         config_doc = collection.find_one()
@@ -33,8 +33,8 @@ def get_meli_config():
         # Close the connection
         client.close()
 
-        if config_doc and 'meli_config' in config_doc:
-            return config_doc['meli_config']
+        if config_doc and "meli_config" in config_doc:
+            return config_doc["meli_config"]
         else:
             raise Exception("MercadoLibre configuration not found")
 
@@ -59,7 +59,7 @@ def update_meli_tokens(access_token, refresh_token):
         db = client[apidbmongo]
 
         # Get the collection
-        collection = db['meli_test']
+        collection = db["meli_test"]
 
         # Update the tokens in the meli_config
         result = collection.update_one(
@@ -67,9 +67,9 @@ def update_meli_tokens(access_token, refresh_token):
             {
                 "$set": {
                     "meli_config.access_token": access_token,
-                    "meli_config.refresh_token": refresh_token
+                    "meli_config.refresh_token": refresh_token,
                 }
-            }
+            },
         )
 
         # Close the connection
