@@ -92,7 +92,7 @@ class ProductMapper:
 
         # EAN / SKU / Referencia
         ean = attributes.get("GTIN") or attributes.get("SELLER_SKU")
-        referencia = attributes.get("SELLER_SKU") or ean or ""
+        referencia = attributes.get("id") 
 
         # Peso en gramos (si existe)
         peso_attr = next((a for a in meli_item.get("attributes", []) if a["id"] == "UNIT_WEIGHT"), None)
@@ -104,7 +104,7 @@ class ProductMapper:
         return cls(
             productoean=ean or "",
             descripcion=meli_item.get("title", ""),
-            referencia=referencia,
+            referencia=meli_item.get("id", "SELLER_SKU"),
             inventariable=1,
             um1="UND",
             bodega="BOD01",
@@ -114,7 +114,7 @@ class ProductMapper:
             costo=None,
             presentacion=attributes.get("PACKAGING_TYPE"),
             descripcioningles=None,
-            item=meli_item.get("id"),
+            item=meli_item.get("title"),
             grupo=meli_item.get("category_id"),
             subgrupo=attributes.get("LINE"),
             extension1=attributes.get("MODEL"),

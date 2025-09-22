@@ -2,8 +2,11 @@
 Utility functions for MercadoLibre API authentication
 """
 
+import logging
 from mercadolibre.functions.Auth.mongo_config import get_meli_config
 from mercadolibre.functions.Auth.refresh_token import refresh_meli_tokens
+
+logger = logging.getLogger(__name__)
 
 
 def get_valid_access_token():
@@ -22,12 +25,22 @@ def get_valid_access_token():
         access_token = config.get('access_token')
         
         if not access_token:
-            raise Exception("No access token found in configuration")
+            # Try to refresh tokens if no access token is found
+            logger.info("No access token found, attempting to refresh...")
+            refresh_result = refresh_meli_tokens()
+            
+            if refresh_result.get('success'):
+                return refresh_result.get('access_token')
+            else:
+                raise Exception("No access token found and refresh failed")
             
         return access_token
     
     except Exception as e:
-        raise Exception(f"Error getting valid access token: {str(e)}")
+        # Add more detailed error logging
+        error_msg = f"Error getting valid access token: {str(e)}"
+        logger.error(error_msg)
+        raise Exception(error_msg)
 
 
 def get_auth_headers():
@@ -53,57 +66,73 @@ def get_auth_headers():
         raise Exception(f"Error getting auth headers: {str(e)}")
 
 
-def make_authenticated_request(method, url, **kwargs):
+def make_authenticated_request(method, url, max_retries=1, **kwargs):
     """
-    Make an authenticated request to MercadoLibre API
+    Make an authenticated request to MercadoLibre API with automatic token refresh
     
     Args:
         method (str): HTTP method (GET, POST, PUT, DELETE)
         url (str): API endpoint URL
+        max_retries (int): Maximum number of retry attempts for token refresh
         **kwargs: Additional arguments for requests
         
     Returns:
         requests.Response: Response object
         
     Raises:
-        Exception: If request fails
+        Exception: If request fails after all retries
     """
     import requests
     
-    try:
-        # Get authentication headers
-        headers = get_auth_headers()
-        
-        # Merge with any additional headers
-        if 'headers' in kwargs:
-            headers.update(kwargs['headers'])
-        
-        kwargs['headers'] = headers
-        
-        # Make the request
-        response = requests.request(method, url, **kwargs)
-        
-        # Check if token might be expired (401 Unauthorized)
-        if response.status_code == 401:
-            # Try to refresh the token once
-            try:
-                refresh_result = refresh_meli_tokens()
-                
-                if refresh_result.get('success'):
-                    # Update headers with new token
-                    headers = get_auth_headers()
-                    kwargs['headers'] = headers
-                    
-                    # Retry the request
-                    response = requests.request(method, url, **kwargs)
-                    
-            except Exception as refresh_error:
-                raise Exception(f"Token refresh failed: {str(refresh_error)}")
-        
-        return response
+    last_exception = None
     
-    except Exception as e:
-        raise Exception(f"Error making authenticated request: {str(e)}")
+    for attempt in range(max_retries + 1):
+        try:
+            # Get authentication headers
+            headers = get_auth_headers()
+            
+            # Merge with any additional headers
+            if 'headers' in kwargs:
+                headers.update(kwargs['headers'])
+            
+            kwargs['headers'] = headers
+            
+            # Make the request
+            response = requests.request(method, url, **kwargs)
+            
+            # Check if token might be expired (401 Unauthorized)
+            if response.status_code == 401 and attempt < max_retries:
+                logger.warning(f"Received 401 Unauthorized, attempting token refresh (attempt {attempt + 1}/{max_retries})")
+                
+                # Try to refresh the token
+                try:
+                    refresh_result = refresh_meli_tokens()
+                    
+                    if refresh_result.get('success'):
+                        logger.info("Token refreshed successfully, retrying request...")
+                        continue  # Retry the loop with new token
+                    else:
+                        raise Exception(f"Token refresh unsuccessful: {refresh_result}")
+                        
+                except Exception as refresh_error:
+                    logger.error(f"Token refresh failed: {str(refresh_error)}")
+                    if attempt == max_retries - 1:  # Last attempt
+                        raise Exception(f"Token refresh failed: {str(refresh_error)}")
+                    continue
+            
+            # If we get here, the request was made (successfully or not)
+            return response
+            
+        except Exception as e:
+            last_exception = e
+            logger.error(f"Request attempt {attempt + 1} failed: {str(e)}")
+            
+            # If this is the last attempt, raise the exception
+            if attempt == max_retries:
+                break
+    
+    # If we get here, all attempts failed
+    raise Exception(f"Error making authenticated request after {max_retries + 1} attempts: {str(last_exception)}")
 
 
 def get_meli_api_base_url():
@@ -116,5 +145,6 @@ def get_meli_api_base_url():
     try:
         config = get_meli_config()
         return config.get('api_base_url', 'https://api.mercadolibre.com/')
-    except Exception:
+    except Exception as e:
+        logger.warning(f"Could not get API base URL from config, using default: {str(e)}")
         return 'https://api.mercadolibre.com/'

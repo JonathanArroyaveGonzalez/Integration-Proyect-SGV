@@ -67,13 +67,13 @@ class MongoDBService:
     
     def get_client(self) -> MongoClient:
         """Get the MongoDB client."""
-        if not self.client:
+        if self.client is None:
             self._connect()
         return self.client
     
     def get_database(self) -> Database:
         """Get the current database."""
-        if not self.db:
+        if self.db is None:
             self._connect()
         return self.db
     
@@ -321,7 +321,7 @@ class MongoDBService:
     
     def close_connection(self):
         """Close the MongoDB connection."""
-        if self.client:
+        if self.client is not None:
             self.client.close()
             self.client = None
             self.db = None
