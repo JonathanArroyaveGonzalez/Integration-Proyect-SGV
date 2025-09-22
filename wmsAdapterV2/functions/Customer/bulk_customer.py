@@ -56,7 +56,7 @@ def format_clt_object(rd, clt_keys, key_clt, valid_customers, errors, time_recor
             key: value for key, value in rd.items() if key in clt_fields
         }
 
-        filtered_customer["fecharegistro"] = time_record
+        filtered_customer["fecharegistro"] = str(time_record)
 
         filtered_customer["nit"] = (
             filtered_customer.get("nit") or filtered_customer["item"]
