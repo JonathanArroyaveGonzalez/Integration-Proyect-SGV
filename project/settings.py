@@ -153,3 +153,6 @@ STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 CORS_ORIGIN_ALLOW_ALL = True
+
+# WMS Configuration
+WMS_BASE_URL = os.getenv("WMS_BASE_URL", "http://localhost:8000")
