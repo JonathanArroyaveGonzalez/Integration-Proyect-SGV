@@ -14,7 +14,6 @@ def get_wms_base_url():
     """
     Obtiene la URL base del WMS desde configuración
     """
-
     # Buscar en settings de Django
     try:
         wms_url = getattr(settings, "WMS_BASE_URL", None)

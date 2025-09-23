@@ -1,7 +1,7 @@
 from django.urls import re_path, path
 
 from mercadolibre.views.Auth import auth
-from mercadolibre.views.Customer import create_customer
+from mercadolibre.views.Customer import create_customer, update_customer
 from mercadolibre.views.Product import art
 from mercadolibre.views.sync_products import (
     sync_products_view,
@@ -26,6 +26,7 @@ mercadolibre_endpoints = [
     ),
     # Endpoints de clientes
     path("customer/sync/", create_customer, name="sync_customers"),
+    path("customer/update/", update_customer, name="update_customers"),
     # Endpoint para ver usuario de MercadoLibre
     # path("customer/view/", view_ml_user, name="view_ml_user"),
 ]
