@@ -19,9 +19,12 @@ from django.urls import path, re_path, include
 
 from wmsAdapterV2.urls import wms_endpoints_v2
 from wmsBase.urls import wms_base_endpoints
+from mercadolibre.urls import mercadolibre_endpoints
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     re_path(r'^wms/adapter/v2/', include(wms_endpoints_v2)),
     re_path(r'^wms/base/v2/', include(wms_base_endpoints)),
+    re_path(r'^wms/ml/v1/', include(mercadolibre_endpoints)),
 ]

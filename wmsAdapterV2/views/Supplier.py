@@ -47,10 +47,7 @@ def prv(request):
             try:
                 # Check the request data
                 request_data = json.loads(request.body)
-                print(len(request_data))
-                print(request_data)
             except Exception as e:
-                print(str(e))
                 return JsonResponse(
                     {"error": "Error loading the body. Please check and try again"},
                     safe=False,
@@ -71,11 +68,8 @@ def prv(request):
 
                 # If there is an error
                 except Exception as e:
-                    print(str(e))
                     return JsonResponse({"error": str(e)}, safe=False, status=500)
 
-                print(created)
-                print(errors)
                 # Return the response
                 return created_response(created, errors, "create")
 
@@ -94,14 +88,11 @@ def prv(request):
                     # Append the error
                     errors.append({"index": "0", "error": str(e)})
 
-                print(created)
-                print(errors)
                 # Return the response
                 return created_response(created, errors, "create")
 
             # If the request data is not a list or a dict
             else:
-                print(str(e))
                 return JsonResponse(
                     {"error": "The request data must be a list or a dict"},
                     safe=False,
@@ -119,7 +110,6 @@ def prv(request):
             # Check the request data
             request_data = json.loads(request.body)
         except Exception as e:
-            print(e)
             return JsonResponse(
                 {"error": "Error loading the body. Please check and try again"},
                 safe=False,

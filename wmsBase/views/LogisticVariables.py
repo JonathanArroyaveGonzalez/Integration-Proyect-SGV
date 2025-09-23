@@ -77,7 +77,6 @@ def logistic_variables(request):
         # Check the request data
             request_data = json.loads(request.body)
         except Exception as e:
-            print(e)
             return JsonResponse({'error': 'Error loading the body. Please check and try again'}, safe=False, status=422)
         
         # Initialize created and errors
