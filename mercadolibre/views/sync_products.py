@@ -94,7 +94,7 @@ def sync_specific_products_view(request):
                 status=400,
             )
 
-        from mercadolibre.functions.products.sync import (
+        from mercadolibre.functions.Products.sync import (
             get_product_details,
             map_products_to_wms_format,
             send_products_to_wms,
