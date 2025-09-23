@@ -3,7 +3,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 import json
 
-from mercadolibre.functions.products.sync import sync_products_to_wms
+from mercadolibre.functions.Products.sync import sync_products_to_wms
 
 
 @csrf_exempt

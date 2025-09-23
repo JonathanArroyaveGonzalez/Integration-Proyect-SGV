@@ -51,8 +51,4 @@ def get_time_by_timezone(db_name, delta_type=None, delta_value=None):
         time_record = time_record.strftime("%Y-%m-%d %H:%M:%S")
     except:
         pass
-<<<<<<< HEAD
     return time_record
-=======
-    return time_record
->>>>>>> d8a9700292ac06f9dc5397dd451ec27b8963ffbe

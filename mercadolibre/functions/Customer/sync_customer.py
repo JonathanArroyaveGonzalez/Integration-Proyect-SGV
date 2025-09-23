@@ -5,7 +5,7 @@ from mercadolibre.utils.api_client import (
     get_meli_api_base_url,
     make_authenticated_request,
 )
-from mercadolibre.utils.mappers import customer, data_mapper
+from mercadolibre.utils.mapper.data_mapper import  CustomerMapper
 import settings
 
 logger = logging.getLogger(__name__)
@@ -61,7 +61,7 @@ def create_customer_in_wms(ml_customer_id: str, auth_headers=None) -> dict:
             return {"created": [], "errors": ["Cliente no encontrado en MercadoLibre"]}
 
         # Mapear datos
-        mapped_data = data_mapper.CustomerMapper.from_meli_customer(ml_data)
+        mapped_data = CustomerMapper.from_meli_customer(ml_data)
         if not mapped_data:
             return {
                 "created": [],
@@ -130,7 +130,7 @@ def update_customer_in_wms(ml_customer_id: str, auth_headers=None) -> dict:
             return {"updated": [], "errors": ["Cliente no encontrado en MercadoLibre"]}
 
         # Mapear datos
-        mapped_data = data_mapper.CustomerMapper.from_meli_customer(ml_data)
+        mapped_data = CustomerMapper.from_meli_customer(ml_data)
         print(mapped_data)
         if not mapped_data:
             print("ERROR")

@@ -3,8 +3,8 @@
 from django.http.response import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
-from mercadolibre.functions.auth.mongo_config import get_meli_config
-from mercadolibre.functions.auth.refresh_token import refresh_meli_tokens
+from mercadolibre.functions.Auth.mongo_config import get_meli_config
+from mercadolibre.functions.Auth.refresh_token import refresh_meli_tokens
 
 
 @csrf_exempt
