@@ -15,9 +15,13 @@ from mercadolibre.views.sync_products import (
 
 
 mercadolibre_endpoints = [
+    # Autenticación
     re_path(r"^auth/refresh$", auth),
+    
+    # Productos - CRUD básico
     re_path(r"^products$", art),
-    # Endpoints de sincronización de productos
+    
+    # Productos - Sincronización
     path("products/sync/", sync_products_view, name="sync_products"),
     path("products/sync/status/", sync_status_view, name="sync_status"),
     path(
@@ -25,28 +29,21 @@ mercadolibre_endpoints = [
         sync_specific_products_view,
         name="sync_specific_products",
     ),
-    # Endpoints de clientes de mercado libre
-    path("customer/sync/", create_customer, name="sync_customers"),
-    path("customer/update/", update_customer, name="update_customers"),
-    # Endpoint para ver usuario de MercadoLibre
-    # path("customer/view/", view_ml_user, name="view_ml_user"),
-    re_path(r"^auth/refresh$", auth),
-    re_path(r"^products$", art),
-    # Endpoints de sincronización
-    path("products/sync/", sync_products_view, name="sync_products"),
-    path("products/sync/status/", sync_status_view, name="sync_status"),
-    path(
-        "products/sync/specific/",
-        sync_specific_products_view,
-        name="sync_specific_products",
-    ),
-    # Endpoints de actualización de productos
+    
+    # Productos - Actualización
     re_path(
         r"^products/update/(?P<product_id>[^/]+)/?$",
         update_product,
         name="update_product",
     ),
     path("products/update/", update_product_post, name="update_product_post"),
+    
+    # Clientes
+    path("customer/sync/", create_customer, name="sync_customers"),
+    path("customer/update/", update_customer, name="update_customers"),
+    
+    # Endpoints comentados para referencia futura
+    # path("customer/view/", view_ml_user, name="view_ml_user"),
     # re_path(r'^Codbarras$', codbarras),
     # re_path(r'^clt$', clt),
 ]

@@ -1,13 +1,20 @@
 """
-View for updating products from MercadoLibre to WMS
+Vista para actualización de productos individuales desde MercadoLibre hacia WMS
 """
 
 import json
 import logging
-from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
+
 from mercadolibre.functions.Products.update import update_product_from_meli_to_wms
+from mercadolibre.utils.response_helpers import (
+    create_success_response,
+    create_error_response,
+    handle_json_decode_error,
+    handle_internal_server_error
+)
+from mercadolibre.utils.auth_helpers import extract_auth_headers
 
 logger = logging.getLogger(__name__)
 
@@ -28,45 +35,25 @@ def update_product(request, product_id):
         logger.info(f"Recibida solicitud de actualización para producto: {product_id}")
         
         # Validar que se proporcione un product_id
-        if not product_id:
-            return JsonResponse({
-                "success": False,
-                "error": "Product ID is required",
-                "message": "Debe proporcionar un ID de producto válido"
-            }, status=400)
+        if not product_id or not product_id.strip():
+            return create_error_response(
+                message="ID de producto requerido",
+                errors="Debe proporcionar un ID de producto válido",
+                status=400
+            )
         
-        # Obtener headers de autenticación del request
-        auth_headers = {}
-        if 'Authorization' in request.headers:
-            auth_headers['Authorization'] = request.headers['Authorization']
+        # Extraer headers de autenticación usando utilidad
+        auth_headers = extract_auth_headers(request)
         
         # Ejecutar la actualización
         result = update_product_from_meli_to_wms(product_id, auth_headers)
         
-        # Determinar el código de estado de respuesta
-        status_code = 200 if result["success"] else 500
-        if not result["success"] and "no se pudo obtener" in result["message"].lower():
-            status_code = 404
-        elif not result["success"] and ("error mapeando" in result["message"].lower() or 
-                                       "product id is required" in result["message"].lower()):
-            status_code = 400
-        
-        return JsonResponse(result, status=status_code)
-        
-    except json.JSONDecodeError:
-        return JsonResponse({
-            "success": False,
-            "error": "Invalid JSON",
-            "message": "El cuerpo de la petición debe ser JSON válido"
-        }, status=400)
+        # Procesar resultado y determinar respuesta
+        return _process_update_result(result)
         
     except Exception as e:
         logger.exception(f"Error inesperado actualizando producto {product_id}")
-        return JsonResponse({
-            "success": False,
-            "error": "Internal server error",
-            "message": f"Error interno del servidor: {str(e)}"
-        }, status=500)
+        return handle_internal_server_error(e, f"actualización de producto {product_id}")
 
 @csrf_exempt
 @require_http_methods(["POST"])
@@ -81,47 +68,70 @@ def update_product_post(request):
         JsonResponse: Resultado de la operación de actualización
     """
     try:
-        # Parsear el body del request
-        request_data = json.loads(request.body)
-        product_id = request_data.get('product_id')
+        # Validar y parsear JSON del request
+        try:
+            request_data = json.loads(request.body)
+        except json.JSONDecodeError:
+            return handle_json_decode_error()
         
-        if not product_id:
-            return JsonResponse({
-                "success": False,
-                "error": "Product ID is required",
-                "message": "Debe proporcionar un product_id en el cuerpo de la petición"
-            }, status=400)
+        # Validar product_id
+        product_id = request_data.get('product_id')
+        if not product_id or not str(product_id).strip():
+            return create_error_response(
+                message="ID de producto requerido",
+                errors="Debe proporcionar un product_id válido en el cuerpo de la petición",
+                status=400
+            )
         
         logger.info(f"Recibida solicitud POST de actualización para producto: {product_id}")
         
-        # Obtener headers de autenticación del request
-        auth_headers = {}
-        if 'Authorization' in request.headers:
-            auth_headers['Authorization'] = request.headers['Authorization']
+        # Extraer headers de autenticación usando utilidad
+        auth_headers = extract_auth_headers(request)
         
         # Ejecutar la actualización
         result = update_product_from_meli_to_wms(product_id, auth_headers)
         
-        # Determinar el código de estado de respuesta
-        status_code = 200 if result["success"] else 500
-        if not result["success"] and "no se pudo obtener" in result["message"].lower():
-            status_code = 404
-        elif not result["success"] and "error mapeando" in result["message"].lower():
-            status_code = 400
-        
-        return JsonResponse(result, status=status_code)
-        
-    except json.JSONDecodeError:
-        return JsonResponse({
-            "success": False,
-            "error": "Invalid JSON",
-            "message": "El cuerpo de la petición debe ser JSON válido"
-        }, status=400)
+        # Procesar resultado y determinar respuesta
+        return _process_update_result(result)
         
     except Exception as e:
         logger.exception("Error inesperado en endpoint de actualización POST")
-        return JsonResponse({
-            "success": False,
-            "error": "Internal server error",
-            "message": f"Error interno del servidor: {str(e)}"
-        }, status=500)
+        return handle_internal_server_error(e, "actualización de producto via POST")
+
+
+def _process_update_result(result):
+    """
+    Procesa el resultado de la actualización y determina la respuesta apropiada
+    
+    Args:
+        result (dict): Resultado de la función de actualización
+        
+    Returns:
+        JsonResponse: Respuesta HTTP apropiada
+    """
+    if result["success"]:
+        return create_success_response(
+            data=result.get("data", {}),
+            message=result["message"],
+            status=200
+        )
+    
+    # Determinar código de error basado en el mensaje
+    error_message = result["message"].lower()
+    
+    if "no se pudo obtener" in error_message:
+        status_code = 404
+        error_code = "PRODUCT_NOT_FOUND"
+    elif any(keyword in error_message for keyword in ["error mapeando", "product id is required", "invalid"]):
+        status_code = 400
+        error_code = "INVALID_REQUEST"
+    else:
+        status_code = 500
+        error_code = "INTERNAL_ERROR"
+    
+    return create_error_response(
+        message=result["message"],
+        errors=result.get("errors"),
+        status=status_code,
+        error_code=error_code
+    )
