@@ -7,6 +7,7 @@ from .extract_id import extract_product_ids
 
 logger = logging.getLogger(__name__)
 BASE_URL = get_meli_api_base_url()
+BASE_URL_WMS = getattr(settings, 'WMS_BASE_URL', "http://localhost:8000").rstrip('/')
 
 def get_wms_base_url():
     """
