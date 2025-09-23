@@ -13,7 +13,7 @@ def get_wms_base_url():
 
 def send_barcode_to_wms(barcode_data, auth_headers=None):
     """
-    Envía un código de barras al WMS usando el endpoint de tRelacionCodbarras
+    Envía un código de barras al WMS con optimizaciones de velocidad
     
     Args:
         barcode_data (dict): Datos del código de barras en formato BarCodeMapper
@@ -29,14 +29,16 @@ def send_barcode_to_wms(barcode_data, auth_headers=None):
         wms_url = f"{get_wms_base_url()}/wms/base/v2/tRelacionCodbarras"
         headers = {
             'Content-Type': 'application/json',
-            'Accept': 'application/json'
+            'Accept': 'application/json',
+            'Connection': 'keep-alive'  # Optimización de conexión
         }
         
         # Agregar headers de autenticación si están disponibles
         if auth_headers and 'Authorization' in auth_headers:
             headers['Authorization'] = auth_headers['Authorization']
 
-        response = requests.post(wms_url, json=barcode_data, headers=headers)
+        # Usar timeout optimizado
+        response = requests.post(wms_url, json=barcode_data, headers=headers, timeout=(3, 5))
         
         if response.status_code in (200, 201):
             return {
@@ -94,6 +96,59 @@ def send_barcodes_to_wms(barcodes_data, auth_headers=None):
 
     except requests.exceptions.RequestException as e:
         return {"success": False, "message": f"Error enviando códigos de barras al WMS: {e}"}
+
+def create_barcode_from_meli_item_direct(meli_item, auth_headers=None):
+    """
+    Crea un código de barras directamente sin verificaciones previas.
+    Optimizado para productos nuevos donde sabemos que el código no existe.
+    
+    Args:
+        meli_item (dict): Datos del producto de MercadoLibre
+        auth_headers (dict): Headers de autenticación
+        
+    Returns:
+        dict: Resultado de la operación
+    """
+    try:
+        # Crear BarCodeMapper directamente
+        barcode_mapper = BarCodeMapper.from_meli_item(meli_item)
+        
+        if not barcode_mapper:
+            return {
+                "success": False, 
+                "message": f"No se pudo procesar el código de barras para el item {meli_item.get('id', 'N/A')} - EAN no válido"
+            }
+        
+        ean = barcode_mapper.idinternoean
+        logger.info(f"Creando código de barras directamente para EAN {ean}...")
+        
+        # Enviar al WMS directamente
+        result = send_barcode_to_wms(barcode_mapper.to_dict(), auth_headers)
+        
+        if result["success"]:
+            logger.info(f"Código de barras creado exitosamente para EAN {ean}")
+            return {
+                "success": True,
+                "message": f"Código de barras {ean} creado exitosamente",
+                "data": result.get("data", {}),
+                "strategy": "direct_create"
+            }
+        else:
+            logger.error(f"Error creando código de barras para EAN {ean}: {result['message']}")
+            return {
+                "success": False,
+                "message": f"Error creando código de barras {ean}: {result['message']}",
+                "strategy": "direct_create_failed"
+            }
+        
+    except Exception as e:
+        logger.exception(f"Excepción creando código de barras para item {meli_item.get('id', 'N/A')}")
+        return {
+            "success": False, 
+            "message": f"Error en creación directa: {e}",
+            "strategy": "direct_create_exception"
+        }
+
 
 def create_barcode_from_meli_item(meli_item, auth_headers=None):
     """

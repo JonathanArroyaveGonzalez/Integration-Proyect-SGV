@@ -2,6 +2,7 @@ import logging
 import requests
 from django.conf import settings
 from mercadolibre.utils.mapper.data_mapper import BarCodeMapper
+from .check import check_barcode_exists
 
 logger = logging.getLogger(__name__)
 
@@ -144,11 +145,81 @@ def get_barcode_from_wms(ean, auth_headers=None):
     except requests.exceptions.RequestException as e:
         return {"success": False, "message": f"Error obteniendo código de barras del WMS: {e}"}
 
-def sync_or_update_barcode_from_meli_item(meli_item, auth_headers=None):
+def sync_or_update_barcode_from_meli_item_optimized(meli_item, auth_headers=None, assume_new=False):
     """
-    Sincroniza o actualiza un código de barras: 
-    - Si existe en WMS, lo actualiza
-    - Si no existe, lo crea
+    Sincroniza o actualiza un código de barras de manera optimizada:
+    - Si assume_new=True, crea directamente sin verificaciones (productos nuevos)
+    - Si assume_new=False, intenta verificar existencia primero (optimización)
+    - Si la verificación falla o es inconsistente, usa directamente método legacy (rápido)
+    
+    Args:
+        meli_item (dict): Datos del producto de MercadoLibre
+        auth_headers (dict): Headers de autenticación
+        assume_new (bool): Si True, asume que es un producto nuevo y crea directamente
+        
+    Returns:
+        dict: Resultado de la operación con información de estrategia usada
+    """
+    try:
+        # Crear BarCodeMapper para obtener el EAN
+        barcode_mapper = BarCodeMapper.from_meli_item(meli_item)
+        
+        if not barcode_mapper:
+            return {
+                "success": False, 
+                "message": f"No se pudo procesar el código de barras para el item {meli_item.get('id', 'N/A')} - EAN no válido",
+                "strategy": "validation_failed"
+            }
+        
+        ean = barcode_mapper.idinternoean
+        
+        # OPTIMIZACIÓN: Si asumimos que es nuevo, crear directamente
+        if assume_new:
+            logger.info(f"Producto nuevo detectado - creando código de barras directamente para EAN {ean}...")
+            from .create import create_barcode_from_meli_item_direct
+            result = create_barcode_from_meli_item_direct(meli_item, auth_headers)
+            return result
+        
+        # OPTIMIZACIÓN: Un solo intento de verificación rápida
+        logger.info(f"Verificando existencia de código de barras para EAN {ean}...")
+        existence_check = check_barcode_exists(ean, auth_headers)
+        
+        # Si la verificación falla o retorna datos inconsistentes, usar legacy inmediatamente
+        if not existence_check["success"] or existence_check.get("validation_status") in ["empty_data", "invalid_structure"]:
+            if not existence_check["success"]:
+                logger.info(f"Verificación falló para EAN {ean}, usando método legacy directamente.")
+            else:
+                logger.info(f"Datos inconsistentes del WMS detectados para EAN {ean}, usando método legacy directamente.")
+            
+            result = sync_or_update_barcode_from_meli_item_legacy(meli_item, auth_headers)
+            result["strategy"] = "legacy_fallback_fast"
+            return result
+        
+        if existence_check["exists"]:
+            # EXISTE: Actualizar directamente
+            logger.info(f"Código de barras existe para EAN {ean}, actualizando directamente...")
+            result = update_barcode_from_meli_item(meli_item, auth_headers)
+            result["strategy"] = "optimized_update"
+            return result
+        else:
+            # NO EXISTE: Crear directamente
+            logger.info(f"Código de barras no existe para EAN {ean}, creando directamente...")
+            from .create import create_barcode_from_meli_item_direct
+            result = create_barcode_from_meli_item_direct(meli_item, auth_headers)
+            return result
+        
+    except Exception as e:
+        logger.exception(f"Error en sincronización optimizada para item {meli_item.get('id', 'N/A')}")
+        logger.info(f"Fallback a método legacy debido a excepción: {str(e)}")
+        result = sync_or_update_barcode_from_meli_item_legacy(meli_item, auth_headers)
+        result["strategy"] = "legacy_fallback_exception"
+        return result
+
+
+def sync_or_update_barcode_from_meli_item_legacy(meli_item, auth_headers=None):
+    """
+    Método legacy: Sincroniza o actualiza un código de barras usando el patrón anterior
+    (Mantenido como fallback por compatibilidad)
     
     Args:
         meli_item (dict): Datos del producto de MercadoLibre
@@ -169,26 +240,25 @@ def sync_or_update_barcode_from_meli_item(meli_item, auth_headers=None):
         
         ean = barcode_mapper.idinternoean
         
-        # Primero intentar actualizar
-        logger.info(f"Intentando actualizar código de barras para EAN {ean}...")
+        # Primero intentar actualizar (método anterior)
+        logger.info(f"[LEGACY] Intentando actualizar código de barras para EAN {ean}...")
         update_result = update_barcode_from_meli_item(meli_item, auth_headers)
         
         if update_result["success"]:
-            logger.info(f"Código de barras actualizado exitosamente para EAN {ean}")
+            logger.info(f"[LEGACY] Código de barras actualizado exitosamente para EAN {ean}")
             return update_result
         
         # Si la actualización falla, intentar crear
-        logger.info(f"Actualización falló, intentando crear código de barras para EAN {ean}...")
+        logger.info(f"[LEGACY] Actualización falló, intentando crear código de barras para EAN {ean}...")
         from .create import create_barcode_from_meli_item
         create_result = create_barcode_from_meli_item(meli_item, auth_headers)
         
         if create_result["success"]:
-            logger.info(f"Código de barras creado exitosamente para EAN {ean}")
+            logger.info(f"[LEGACY] Código de barras creado exitosamente para EAN {ean}")
             return create_result
         
         # Si ambos fallan, devolver el error más relevante
         if "already exists" in create_result.get("message", "").lower():
-            # Si dice que ya existe pero no se pudo actualizar, es un problema de concurrencia
             return {
                 "success": False,
                 "message": f"Código de barras {ean} existe pero no se pudo actualizar. Update: {update_result['message']}, Create: {create_result['message']}"
@@ -200,5 +270,13 @@ def sync_or_update_barcode_from_meli_item(meli_item, auth_headers=None):
         }
         
     except Exception as e:
-        logger.exception(f"Error en sincronización/actualización de código de barras para item {meli_item.get('id', 'N/A')}")
-        return {"success": False, "message": f"Error en sincronización de código de barras: {e}"}
+        logger.exception(f"Error en sincronización legacy de código de barras para item {meli_item.get('id', 'N/A')}")
+        return {"success": False, "message": f"Error en sincronización legacy: {e}"}
+
+
+# Alias para compatibilidad - usar la versión optimizada por defecto
+def sync_or_update_barcode_from_meli_item(meli_item, auth_headers=None, assume_new=False):
+    """
+    Punto de entrada principal - usa la versión optimizada por defecto
+    """
+    return sync_or_update_barcode_from_meli_item_optimized(meli_item, auth_headers, assume_new)

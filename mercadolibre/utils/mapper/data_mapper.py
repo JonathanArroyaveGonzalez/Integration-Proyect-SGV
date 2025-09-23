@@ -84,6 +84,12 @@ class ProductMapper:
     def to_dict(self) -> Dict[str, Any]:
         return {k: v for k, v in self.__dict__.items() if v is not None}
 
+    def to_wms_format(self) -> Dict[str, Any]:
+        """
+        Convierte el ProductMapper al formato requerido por el WMS
+        """
+        return self.to_dict()
+
     @classmethod
     def from_meli_item(cls, meli_item: Dict[str, Any]) -> "ProductMapper":
         """
