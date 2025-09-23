@@ -1,9 +1,15 @@
-from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 import json
 
 from mercadolibre.functions.Products.sync import sync_products_to_wms
+from mercadolibre.utils.response_helpers import (
+    create_success_response,
+    create_error_response,
+    handle_json_decode_error,
+    handle_internal_server_error
+)
+from mercadolibre.utils.auth_helpers import extract_auth_headers
 
 
 @csrf_exempt
@@ -16,35 +22,26 @@ def sync_products_view(request):
     Headers: Authorization: Bearer <token>
     """
     try:
-        # Obtener headers de autorización del request
-        auth_headers = {}
-        if "HTTP_AUTHORIZATION" in request.META:
-            auth_headers["Authorization"] = request.META["HTTP_AUTHORIZATION"]
-        elif "Authorization" in request.headers:
-            auth_headers["Authorization"] = request.headers["Authorization"]
+        # Extraer headers de autorización usando utilidad
+        auth_headers = extract_auth_headers(request)
 
         # Ejecutar sincronización pasando los headers
         result = sync_products_to_wms(auth_headers=auth_headers)
 
         if result["success"]:
-            return JsonResponse(
-                {
-                    "status": "success",
-                    "message": result["message"],
-                    "data": result.get("data", {}),
-                },
-                status=200,
+            return create_success_response(
+                data=result.get("data", {}),
+                message=result["message"],
+                status=200
             )
         else:
-            return JsonResponse(
-                {"status": "error", "message": result["message"]}, status=400
+            return create_error_response(
+                message=result["message"],
+                status=400
             )
 
     except Exception as e:
-        return JsonResponse(
-            {"status": "error", "message": f"Error interno del servidor: {str(e)}"},
-            status=500,
-        )
+        return handle_internal_server_error(e, "sincronización de productos")
 
 
 @csrf_exempt
@@ -55,15 +52,15 @@ def sync_status_view(request):
 
     GET /wms/ml/v1/products/sync/status/
     """
-    return JsonResponse(
-        {
-            "status": "ready",
-            "message": "Servicio de sincronización disponible",
-            "endpoints": {
-                "sync": "/wms/ml/v1/products/sync/",
-                "status": "/wms/ml/v1/products/sync/status/",
-            },
-        }
+    endpoints_data = {
+        "sync": "/wms/ml/v1/products/sync/",
+        "status": "/wms/ml/v1/products/sync/status/",
+    }
+    
+    return create_success_response(
+        data={"endpoints": endpoints_data},
+        message="Servicio de sincronización disponible",
+        extra_fields={"status": "ready"}
     )
 
 
@@ -78,22 +75,25 @@ def sync_specific_products_view(request):
     Body: {"product_ids": ["MLA123", "MLA456"]}
     """
     try:
-        # Obtener headers de autorización del request
-        auth_headers = {}
-        if "HTTP_AUTHORIZATION" in request.META:
-            auth_headers["Authorization"] = request.META["HTTP_AUTHORIZATION"]
-        elif "Authorization" in request.headers:
-            auth_headers["Authorization"] = request.headers["Authorization"]
+        # Extraer headers de autorización usando utilidad
+        auth_headers = extract_auth_headers(request)
 
-        data = json.loads(request.body)
+        # Validar y parsear JSON del request
+        try:
+            data = json.loads(request.body)
+        except json.JSONDecodeError:
+            return handle_json_decode_error()
+
+        # Validar que se proporcionaron product_ids
         product_ids = data.get("product_ids", [])
-
         if not product_ids:
-            return JsonResponse(
-                {"status": "error", "message": "Se requiere una lista de product_ids"},
-                status=400,
+            return create_error_response(
+                message="Se requiere una lista de product_ids",
+                errors="El campo 'product_ids' es obligatorio y debe contener al menos un ID",
+                status=400
             )
 
+        # Importar funciones necesarias
         from mercadolibre.functions.Products.sync import (
             get_product_details,
             map_products_to_wms_format,
@@ -104,12 +104,10 @@ def sync_specific_products_view(request):
         meli_items = get_product_details(product_ids)
 
         if not meli_items:
-            return JsonResponse(
-                {
-                    "status": "error",
-                    "message": "No se pudieron obtener detalles de los productos especificados",
-                },
-                status=400,
+            return create_error_response(
+                message="No se pudieron obtener detalles de los productos especificados",
+                errors=f"IDs proporcionados: {product_ids}",
+                status=400
             )
 
         # Mapear y enviar al WMS con headers de autorización
@@ -117,29 +115,16 @@ def sync_specific_products_view(request):
         result = send_products_to_wms(wms_products, auth_headers=auth_headers)
 
         if result["success"]:
-            return JsonResponse(
-                {
-                    "status": "success",
-                    "message": result["message"],
-                    "data": result.get("data", {}),
-                },
-                status=200,
+            return create_success_response(
+                data=result.get("data", {}),
+                message=result["message"],
+                status=200
             )
         else:
-            return JsonResponse(
-                {"status": "error", "message": result["message"]}, status=400
+            return create_error_response(
+                message=result["message"],
+                status=400
             )
 
-    except json.JSONDecodeError:
-        return JsonResponse(
-            {
-                "status": "error",
-                "message": "JSON inválido en el cuerpo de la solicitud",
-            },
-            status=400,
-        )
     except Exception as e:
-        return JsonResponse(
-            {"status": "error", "message": f"Error interno del servidor: {str(e)}"},
-            status=500,
-        )
+        return handle_internal_server_error(e, "sincronización de productos específicos")
