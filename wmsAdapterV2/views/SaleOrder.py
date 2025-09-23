@@ -47,12 +47,11 @@ def sale_order(request):
         try:
             # Check the request data
             request_data = json.loads(request.body)
-            print(f"request {db_name} {len(request_data)}")
-            if db_name == "mxrpp01":
-                print(request_data)
+            # Solo mostrar información básica de la request
+            if db_name == "couca01_test":
+                print(f"Request for {db_name}: {len(request_data)} items")
 
         except Exception as e:
-            print(str(e))
             return JsonResponse(
                 {"error": "Error loading the body. Please check and try again"},
                 safe=False,
@@ -71,14 +70,13 @@ def sale_order(request):
                 )
             )
 
-            print(f"epk {db_name} {len(created)}")
-            print(f"dpk {db_name} {len(created_detail)}")
-            print(f"error {db_name} {str(error)}")
+            # Solo mostrar información básica para seguimiento funcional
+            if db_name == "couca01_test":
+                print(f"Created orders for {db_name}: {len(created)} EPK, {len(created_detail)} DPK")
 
             return created_response_orders(created, created_detail, error)
         # If there is an error
         except Exception as e:
-            print(str(e))
             return JsonResponse({"error": str(e)}, safe=False, status=500)
 
     # Update an article
@@ -88,7 +86,6 @@ def sale_order(request):
             # Check the request data
             request_data = json.loads(request.body)
         except Exception as e:
-            print(e)
             return JsonResponse(
                 {"error": "Error loading the body. Please check and try again"},
                 safe=False,

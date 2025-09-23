@@ -100,7 +100,6 @@ def t_relacion_codbarras(request):
         # Check the request data
             request_data = json.loads(request.body)
         except Exception as e:
-            print(e)
             return JsonResponse({'error': 'Error loading the body. Please check and try again'}, safe=False, status=422)
         
         # Initialize created and errors
@@ -112,8 +111,6 @@ def t_relacion_codbarras(request):
         try:
             # Create the article
             created, errors = update_barcode(request, db_name=db_name, request_data=request_data)
-            print(created)
-            print(errors)
         # If there is an error
         except Exception as e:
             return JsonResponse({'error': str(e)}, safe=False, status=500)

@@ -46,10 +46,7 @@ def art(request):
         try:
             # Check the request data
             request_data = json.loads(request.body)
-            print(len(request_data))
-            print(request_data)
         except Exception as e:
-            print(str(e))
             return JsonResponse(
                 {"error": "Error loading the body. Please check and try again"},
                 safe=False,
@@ -67,12 +64,9 @@ def art(request):
                 None, db_name=db_name, request_data=request_data
             )
 
-            print(created)
-            print(errors)
             return created_response(created, errors, "create")
         # If there is an error
         except Exception as e:
-            print(str(e))
             return JsonResponse({"error": str(e)}, safe=False, status=500)
 
     # Update an article
@@ -82,7 +76,6 @@ def art(request):
             # Check the request data
             request_data = json.loads(request.body)
         except Exception as e:
-            print(e)
             return JsonResponse(
                 {"error": "Error loading the body. Please check and try again"},
                 safe=False,

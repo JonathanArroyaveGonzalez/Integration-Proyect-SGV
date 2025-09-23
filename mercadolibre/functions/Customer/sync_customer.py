@@ -6,6 +6,7 @@ from mercadolibre.utils.api_client import (
     make_authenticated_request,
 )
 from mercadolibre.utils.mappers import customer, data_mapper
+import settings
 
 logger = logging.getLogger(__name__)
 
@@ -33,12 +34,11 @@ def fetch_ml_user(user_id: str) -> dict | None:
         return None
 
 
-def get_wms_base_url() -> str:
+def get_wms_base_url():
     """
-    Obtiene la URL base del WMS desde configuración o variable de entorno
+    Obtiene la URL base del WMS desde configuración de Django o usa una por defecto
     """
-    wms_url = os.getenv("WMS_BASE_URL", "http://localhost:8000")
-    return wms_url.rstrip("/")
+    return getattr(settings, "WMS_BASE_URL", "http://localhost:8000").rstrip("/")
 
 
 def create_customer_in_wms(ml_customer_id: str, auth_headers=None) -> dict:
