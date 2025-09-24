@@ -7,7 +7,7 @@ import logging
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
-from mercadolibre.functions.Products.update import update_product_from_meli_to_wms
+from mercadolibre.functions.Product.update import update_product_from_meli_to_wms
 from mercadolibre.utils.response_helpers import (
     create_success_response,
     create_error_response,
