@@ -40,11 +40,11 @@ def sync_products_view(request):
         # Ejecutar sincronización con optimizaciones
         if use_parallel:
             # Usar versión paralela optimizada (por defecto)
-            from mercadolibre.functions.Products.sync import sync_products_to_wms_parallel
+            from mercadolibre.functions.Product.sync import sync_products_to_wms_parallel
             result = sync_products_to_wms_parallel(auth_headers=auth_headers, assume_new=assume_new)
         else:
             # Usar versión secuencial como fallback
-            from mercadolibre.functions.Products.sync import sync_products_to_wms
+            from mercadolibre.functions.Product.sync import sync_products_to_wms
             result = sync_products_to_wms(auth_headers=auth_headers)
 
         if result["success"]:
@@ -122,7 +122,7 @@ def sync_specific_products_view(request):
             )
 
         # Importar función optimizada paralela
-        from mercadolibre.functions.Products.sync import sync_specific_products_to_wms_parallel
+        from mercadolibre.functions.Product.sync import sync_specific_products_to_wms_parallel
 
         # Obtener parámetros opcionales
         assume_new = data.get("assume_new", True)
@@ -138,7 +138,7 @@ def sync_specific_products_view(request):
             )
         else:
             # Usar versión secuencial como fallback
-            from mercadolibre.functions.Products.sync import sync_specific_products_to_wms
+            from mercadolibre.functions.Product.sync import sync_specific_products_to_wms
             result = sync_specific_products_to_wms(
                 product_ids=product_ids, 
                 auth_headers=auth_headers, 
