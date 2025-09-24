@@ -5,7 +5,7 @@ from mercadolibre.utils.api_client import (
     get_meli_api_base_url,
     make_authenticated_request,
 )
-from mercadolibre.utils.mapper.data_mapper import  CustomerMapper
+from mercadolibre.utils.mapper.data_mapper import CustomerMapper
 import settings
 
 logger = logging.getLogger(__name__)
@@ -28,6 +28,7 @@ def fetch_ml_user(user_id: str) -> dict | None:
             return response.json()
         else:
             logger.error(f"Error ML {response.status_code}: {response.text}")
+
             return None
     except Exception as e:
         logger.error(f"Error obteniendo usuario {user_id} de ML: {str(e)}")
