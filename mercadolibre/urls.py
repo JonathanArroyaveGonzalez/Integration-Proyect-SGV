@@ -1,17 +1,24 @@
 from django.urls import re_path, path
 
 from mercadolibre.views.Auth import auth
-from mercadolibre.views.Customer import create_customer, update_customer
-from mercadolibre.views.Product import art
-from mercadolibre.views.UpdateProduct import update_product, update_product_post
-from mercadolibre.views.sync_products import (
+from mercadolibre.api.v1.customers import (
+    create as create_customer,
+    update as update_customer,
+)
+from mercadolibre.api.v1.products import (
+    products as art,
+    update_product,
+    update_product_post,
     sync_products_view,
     sync_status_view,
     sync_specific_products_view,
 )
 
 # from mercadolibre.views.Customer import clt
-# from mercadolibre.views.Barcode import codbarras
+from mercadolibre.api.v1.barcodes import (
+    get_barcode as get_barcode_view,
+    sync_from_meli_items as sync_barcodes_view,
+)
 
 
 mercadolibre_endpoints = [
@@ -42,8 +49,7 @@ mercadolibre_endpoints = [
     path("customer/sync/", create_customer, name="sync_customers"),
     path("customer/update/", update_customer, name="update_customers"),
     
-    # Endpoints comentados para referencia futura
-    # path("customer/view/", view_ml_user, name="view_ml_user"),
-    # re_path(r'^Codbarras$', codbarras),
-    # re_path(r'^clt$', clt),
+    # Barcodes (opcional)
+    re_path(r"^barcodes/(?P<ean>[^/]+)/?$", get_barcode_view, name="get_barcode"),
+    path("barcodes/sync_from_meli", sync_barcodes_view, name="sync_barcodes_from_meli"),
 ]
