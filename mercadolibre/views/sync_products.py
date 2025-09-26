@@ -6,7 +6,7 @@ from mercadolibre.utils.response_helpers import (
     create_success_response,
     create_error_response,
     handle_json_decode_error,
-    handle_internal_server_error
+    handle_internal_server_error,
 )
 from mercadolibre.utils.auth_helpers import extract_auth_headers
 
@@ -26,8 +26,8 @@ def sync_products_view(request):
 
         # Obtener parámetros opcionales del body si existe
         use_parallel = True  # Por defecto usar paralelización
-        assume_new = True   # Por defecto asumir productos nuevos
-        
+        assume_new = True  # Por defecto asumir productos nuevos
+
         try:
             if request.body:
                 data = json.loads(request.body)
@@ -40,11 +40,17 @@ def sync_products_view(request):
         # Ejecutar sincronización con optimizaciones
         if use_parallel:
             # Usar versión paralela optimizada (por defecto)
-            from mercadolibre.functions.Products.sync import sync_products_to_wms_parallel
-            result = sync_products_to_wms_parallel(auth_headers=auth_headers, assume_new=assume_new)
+            from mercadolibre.functions.Product.sync import (
+                sync_products_to_wms_parallel,
+            )
+
+            result = sync_products_to_wms_parallel(
+                auth_headers=auth_headers, assume_new=assume_new
+            )
         else:
             # Usar versión secuencial como fallback
-            from mercadolibre.functions.Products.sync import sync_products_to_wms
+            from mercadolibre.functions.Product.sync import sync_products_to_wms
+
             result = sync_products_to_wms(auth_headers=auth_headers)
 
         if result["success"]:
@@ -53,19 +59,14 @@ def sync_products_view(request):
             response_data["optimization_info"] = {
                 "parallel_execution": result.get("parallel_execution", False),
                 "assume_new": result.get("assume_new", False),
-                "sync_type": result.get("sync_type", "legacy")
+                "sync_type": result.get("sync_type", "legacy"),
             }
-            
+
             return create_success_response(
-                data=response_data,
-                message=result["message"],
-                status=200
+                data=response_data, message=result["message"], status=200
             )
         else:
-            return create_error_response(
-                message=result["message"],
-                status=400
-            )
+            return create_error_response(message=result["message"], status=400)
 
     except Exception as e:
         return handle_internal_server_error(e, "sincronización de productos")
@@ -83,11 +84,11 @@ def sync_status_view(request):
         "sync": "/wms/ml/v1/products/sync/",
         "status": "/wms/ml/v1/products/sync/status/",
     }
-    
+
     return create_success_response(
         data={"endpoints": endpoints_data},
         message="Servicio de sincronización disponible",
-        extra_fields={"status": "ready"}
+        extra_fields={"status": "ready"},
     )
 
 
@@ -118,31 +119,36 @@ def sync_specific_products_view(request):
             return create_error_response(
                 message="Se requiere una lista de product_ids",
                 errors="El campo 'product_ids' es obligatorio y debe contener al menos un ID",
-                status=400
+                status=400,
             )
 
         # Importar función optimizada paralela
-        from mercadolibre.functions.Products.sync import sync_specific_products_to_wms_parallel
+        from mercadolibre.functions.Product.sync import (
+            sync_specific_products_to_wms_parallel,
+        )
 
         # Obtener parámetros opcionales
         assume_new = data.get("assume_new", True)
         use_parallel = data.get("use_parallel", True)  # Por defecto usar paralelización
-        
+
         # Elegir función según configuración
         if use_parallel:
             # Usar versión paralela optimizada (por defecto)
             result = sync_specific_products_to_wms_parallel(
-                product_ids=product_ids, 
-                auth_headers=auth_headers, 
-                assume_new=assume_new
+                product_ids=product_ids,
+                auth_headers=auth_headers,
+                assume_new=assume_new,
             )
         else:
             # Usar versión secuencial como fallback
-            from mercadolibre.functions.Products.sync import sync_specific_products_to_wms
+            from mercadolibre.functions.Product.sync import (
+                sync_specific_products_to_wms,
+            )
+
             result = sync_specific_products_to_wms(
-                product_ids=product_ids, 
-                auth_headers=auth_headers, 
-                assume_new=assume_new
+                product_ids=product_ids,
+                auth_headers=auth_headers,
+                assume_new=assume_new,
             )
 
         if result["success"]:
@@ -154,26 +160,23 @@ def sync_specific_products_view(request):
                     "errors": result.get("barcodes_errors_count", 0),
                     "strategies_used": result.get("strategies_used", {}),
                     "success_details": result.get("barcodes_data", []),
-                    "error_details": result.get("barcodes_errors", [])
+                    "error_details": result.get("barcodes_errors", []),
                 },
                 "optimization": {
                     "assume_new": result.get("assume_new", False),
                     "optimization_used": result.get("optimization_used", False),
                     "parallel_execution": result.get("parallel_execution", False),
-                    "use_parallel": use_parallel
-                }
+                    "use_parallel": use_parallel,
+                },
             }
-            
+
             return create_success_response(
-                data=response_data,
-                message=result["message"],
-                status=200
+                data=response_data, message=result["message"], status=200
             )
         else:
-            return create_error_response(
-                message=result["message"],
-                status=400
-            )
+            return create_error_response(message=result["message"], status=400)
 
     except Exception as e:
-        return handle_internal_server_error(e, "sincronización de productos específicos")
+        return handle_internal_server_error(
+            e, "sincronización de productos específicos"
+        )

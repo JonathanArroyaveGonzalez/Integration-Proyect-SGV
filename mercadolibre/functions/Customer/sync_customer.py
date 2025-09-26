@@ -11,6 +11,9 @@ import settings
 logger = logging.getLogger(__name__)
 
 
+# TODO : I have to use the response_hepers to optimize errors and responses
+
+
 def fetch_ml_user(user_id: str) -> dict | None:
     """
     Obtiene datos de usuario desde MercadoLibre API.

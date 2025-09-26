@@ -1,8 +1,9 @@
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, Self
 from datetime import datetime
 import logging
 
 logger = logging.getLogger(__name__)
+
 
 class ProductMapper:
     def __init__(
@@ -97,15 +98,25 @@ class ProductMapper:
         Si algún atributo no está presente, se asigna None.
         """
         # Extraer atributos en un dict por ID
-        attributes = {attr["id"]: attr.get("value_name") for attr in meli_item.get("attributes", [])}
+        attributes = {
+            attr["id"]: attr.get("value_name")
+            for attr in meli_item.get("attributes", [])
+        }
 
         # EAN / SKU / Referencia
         ean = attributes.get("GTIN") or attributes.get("SELLER_SKU")
-        referencia = attributes.get("id") 
+        referencia = attributes.get("id")
 
         # Peso en gramos (si existe)
-        peso_attr = next((a for a in meli_item.get("attributes", []) if a["id"] == "UNIT_WEIGHT"), None)
-        peso = peso_attr["values"][0]["struct"]["number"] if peso_attr and peso_attr["values"][0]["struct"] else None
+        peso_attr = next(
+            (a for a in meli_item.get("attributes", []) if a["id"] == "UNIT_WEIGHT"),
+            None,
+        )
+        peso = (
+            peso_attr["values"][0]["struct"]["number"]
+            if peso_attr and peso_attr["values"][0]["struct"]
+            else None
+        )
 
         # Stock disponible
         stock = meli_item.get("available_quantity")
@@ -136,23 +147,24 @@ class ProductMapper:
             proveedor=str(meli_item.get("seller_id")),
             preciounitario=meli_item.get("price"),
             observacion=meli_item.get("permalink"),
-            alergenos=None
+            alergenos=None,
         )
 
     def __repr__(self):
         return f"ProductMapper({self.productoean}, {self.descripcion}, qty={self.qtyequivalente}, estado={self.estado})"
 
+
 class BarCodeMapper:
     def __init__(
-        self, 
-        idinternoean: str, 
-        codbarrasasignado: str, 
+        self,
+        idinternoean: str,
+        codbarrasasignado: str,
         cantidad: int = 1,
         qtynew: Optional[float] = None,
         fechacrea: Optional[str] = None,
         pesobruto: Optional[float] = None,
         qtytara: Optional[float] = None,
-        cantidad_tara: Optional[float] = None
+        cantidad_tara: Optional[float] = None,
     ):
         self.idinternoean = idinternoean
         self.codbarrasasignado = codbarrasasignado
@@ -172,7 +184,7 @@ class BarCodeMapper:
             "fechacrea": self.fechacrea,
             "pesobruto": self.pesobruto,
             "qtytara": self.qtytara,
-            "cantidad_tara": self.cantidad_tara
+            "cantidad_tara": self.cantidad_tara,
         }
 
     @classmethod
@@ -182,18 +194,25 @@ class BarCodeMapper:
         Si no se encuentra un EAN válido, retorna None.
         """
         from datetime import datetime
-        
-        attributes = {attr["id"]: attr.get("value_name") for attr in meli_item.get("attributes", [])}
+
+        attributes = {
+            attr["id"]: attr.get("value_name")
+            for attr in meli_item.get("attributes", [])
+        }
         ean = attributes.get("GTIN") or attributes.get("SELLER_SKU")
 
-        if ean :
+        if ean:
             # Formatear fecha de creación
             fecha_creacion = meli_item.get("date_created")
             if fecha_creacion:
                 # Convertir a formato ISO con milisegundos si es necesario
                 try:
-                    fecha_dt = datetime.fromisoformat(fecha_creacion.replace('Z', '+00:00'))
-                    fechacrea = fecha_dt.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3]  # Formato con 3 decimales
+                    fecha_dt = datetime.fromisoformat(
+                        fecha_creacion.replace("Z", "+00:00")
+                    )
+                    fechacrea = fecha_dt.strftime("%Y-%m-%dT%H:%M:%S.%f")[
+                        :-3
+                    ]  # Formato con 3 decimales
                 except (ValueError, AttributeError):
                     fechacrea = fecha_creacion
             else:
@@ -207,13 +226,14 @@ class BarCodeMapper:
                 fechacrea=fechacrea,
                 pesobruto=None,
                 qtytara=None,
-                cantidad_tara=None
+                cantidad_tara=None,
             )
         return None
 
     def __repr__(self):
         return f"BarCodeMapper(idinternoean={self.idinternoean}, codbarrasasignado={self.codbarrasasignado})"
-    
+
+
 class CustomerMapper:
     def __init__(
         self,
@@ -286,9 +306,7 @@ class CustomerMapper:
         self.compania = compania
 
     def to_dict(self) -> Dict[str, Any]:
-        """
-        Serializa el objeto a un diccionario filtrando None
-        """
+
         return {k: v for k, v in self.__dict__.items() if v is not None}
 
     @classmethod
@@ -343,3 +361,49 @@ class CustomerMapper:
 
     def __repr__(self):
         return f"CustomerMapper({self.nombrecliente}, nit={self.nit}, item={self.item})"
+
+
+class SupplierMapper:
+    def __init__(
+        self,
+        nit: Optional[str],
+        nombrecliente: Optional[str],
+        direccion: Optional[str],
+        isactivoproveedor: Optional[int],
+        condicionescompra: Optional[str],
+        codigoPais: Optional[str],
+        monedadefacturacion: Optional[str],
+        item: Optional[str],
+        activoCliente: Optional[int],
+        fecharegistro: Optional[str],
+        estadotransferencia: Optional[int],
+        sucursal: Optional[str],
+        email: Optional[str],
+        beneficiario: Optional[int],
+        item_sucursal: Optional[str],
+        codigoter: Optional[str],
+    ):
+        self.nit = nit
+        self.nombrecliente = nombrecliente
+        self.direccion = direccion
+        self.isactivoproveedor = isactivoproveedor
+        self.condicionescompra = condicionescompra
+        self.codigoPais = codigoPais
+        self.monedadefacturacion = monedadefacturacion
+        self.item = item
+        self.activoCliente = activoCliente
+        self.fecharegistro = fecharegistro
+        self.estadotransferencia = estadotransferencia
+        self.sucursal = sucursal
+        self.email = email
+        self.beneficiario = beneficiario
+        self.item_sucursal = item_sucursal
+        self.codigoter = codigoter
+
+    def to_dict(self) -> Dict[str, any]:
+        return {}
+
+    @staticmethod
+    def from_meli_supplier(cls, ml_supplier: Dict[str, any]) -> "SupplierMapper":
+        # cls referencia a la clase
+        return cls()
