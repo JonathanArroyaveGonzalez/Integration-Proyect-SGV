@@ -8,7 +8,7 @@ from .models import MeliConfig
 class MeliConfigRepository:
     """Repository for MercadoLibre configuration CRUD operations."""
     
-    COLLECTION_NAME = "meli_config"
+    COLLECTION_NAME = "meli_test"
     CONFIG_FIELD = "meli_config"
     
     def __init__(self):

@@ -1,103 +1,139 @@
-"""
-Vista para operaciones CRUD básicas de productos en MercadoLibre
-"""
+"""MercadoLibre synchronization views."""
 
-from django.views.decorators.csrf import csrf_exempt
 import json
+from django.http import JsonResponse
+from django.views import View
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
 
-from mercadolibre.utils.api_client import make_authenticated_request, get_meli_api_base_url
-from mercadolibre.utils.response_helpers import (
-    create_success_response,
-    create_error_response,
-    handle_json_decode_error,
-    handle_internal_server_error,
-    handle_request_validation
-)
+#from services.meli_wms_sync import get_sync_service
+from mercadolibre.functions.Product.sync import get_sync_service
+from mercadolibre.functions.Product.update import get_update_service
+from mercadolibre.utils.response_helpers import get_response_status_code
+
+import logging
+logger = logging.getLogger(__name__)
 
 
-@csrf_exempt
-def art(request):
+@method_decorator(csrf_exempt, name='dispatch')
+class MeliProductSyncView(View):
     """
-    Vista para operaciones CRUD básicas de productos en MercadoLibre
+    Unified view for MercadoLibre product synchronization.
     
-    GET: Lista productos del usuario
-    POST: Crea un nuevo producto
+    Endpoints:
+    - GET: Sync all products (creation mode)
+    - POST with product_ids: Sync specific products (creation or update mode)
+    - PUT with product_id: Update single product (update mode only)
+    """
     
-    @params:
-        request: request object de Django
-    """
-    # Validar métodos permitidos
-    allowed_methods = ["GET", "POST"]
-    method_validation = handle_request_validation(request, allowed_methods)
-    if method_validation:
-        return method_validation
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.sync_service = get_sync_service()
+        self.update_service = get_update_service()
     
-    try:
-        base_url = get_meli_api_base_url()
+    def get(self, request):
+        """
+        Sync all products from MercadoLibre to WMS (creation mode).
         
-        # GET: Listar productos del usuario
-        if request.method == "GET":
-            return _handle_get_products(base_url)
-        
-        # POST: Crear nuevo producto
-        elif request.method == "POST":
-            return _handle_create_product(request, base_url)
-            
-    except Exception as e:
-        return handle_internal_server_error(e, "operaciones de productos")
-
-
-def _handle_get_products(base_url):
-    """
-    Maneja la obtención de productos del usuario desde MercadoLibre
-    """
-    try:
-        url = f"{base_url}users/me/items/search"
-        response = make_authenticated_request('GET', url)
-        
-        if response.status_code == 200:
-            return create_success_response(
-                data=response.json(),
-                message="Productos obtenidos exitosamente"
-            )
-        else:
-            return create_error_response(
-                message="Error obteniendo productos de MercadoLibre",
-                errors=f"API error: {response.status_code} - {response.text}",
-                status=response.status_code
-            )
-            
-    except Exception as e:
-        return handle_internal_server_error(e, "obtención de productos")
-
-
-def _handle_create_product(request, base_url):
-    """
-    Maneja la creación de un nuevo producto en MercadoLibre
-    """
-    try:
-        # Validar y parsear JSON del request
+        Returns:
+            JSON response with sync results
+        """
         try:
-            request_data = json.loads(request.body)
-        except json.JSONDecodeError:
-            return handle_json_decode_error()
+            logger.info("Starting full product sync...")
+            result = self.sync_service.sync_all_products(request)
+            
+            # Use utility functions for response handling
+            status_code = get_response_status_code(result)
+            return JsonResponse(result, status=status_code)
+            
+        except Exception as e:
+            logger.exception("Error in full sync endpoint")
+            return JsonResponse({
+                'success': False,
+                'message': f'Unexpected error: {str(e)}'
+            }, status=500)
+    
+    def post(self, request):
+        """
+        Sync specific products from MercadoLibre to WMS.
         
-        # Crear producto en MercadoLibre
-        url = f"{base_url}items"
-        response = make_authenticated_request('POST', url, json=request_data)
-        
-        if response.status_code == 201:
-            return create_success_response(
-                data=response.json(),
-                message="Producto creado exitosamente",
-                status=201
-            )
-        else:
-            return create_error_response(
-                message="Error creando producto en MercadoLibre",
-                errors=f"API error: {response.status_code} - {response.text}",
-                status=response.status_code
+        Expected body:
+        {
+            "product_ids": ["MLM123", "MLM456", ...],
+            "force_update": true  // Optional, for forcing update mode
+        }
+        """
+        try:
+            data = json.loads(request.body)
+            product_ids = data.get('product_ids', [])
+            force_update = data.get('force_update', False)
+            
+            if not product_ids:
+                return JsonResponse({
+                    'success': False,
+                    'message': 'No product_ids provided'
+                }, status=400)
+            
+            logger.info(f"Starting sync for {len(product_ids)} products (force_update={force_update})...")
+            result = self.sync_service.sync_specific_products(
+                product_ids, 
+                request,
+                force_update=force_update
             )
             
-    except Exception as e:
-        return handle_internal_server_error(e, "creación de producto")
+            # Use utility functions for response handling
+            status_code = get_response_status_code(result)
+            return JsonResponse(result, status=status_code)
+            
+        except json.JSONDecodeError:
+            return JsonResponse({
+                'success': False,
+                'message': 'Invalid JSON in request body'
+            }, status=400)
+        except Exception as e:
+            logger.exception("Error in specific sync endpoint")
+            return JsonResponse({
+                'success': False,
+                'message': f'Unexpected error: {str(e)}'
+            }, status=500)
+    
+    def put(self, request):
+        """
+        Update a single product in WMS (update mode only).
+        
+        Expected body:
+        {
+            "product_id": "MLM123"
+        }
+        
+        Returns:
+            JSON response with update results
+        """
+        try:
+            data = json.loads(request.body)
+            product_id = data.get('product_id')
+            
+            if not product_id:
+                return JsonResponse({
+                    'success': False,
+                    'message': 'No product_id provided'
+                }, status=400)
+            
+            logger.info(f"Updating product {product_id}...")
+            result = self.update_service.update_single_product(product_id, request)
+            
+            # Use utility functions for response handling
+            status_code = get_response_status_code(result)
+            return JsonResponse(result, status=status_code)
+            
+        except json.JSONDecodeError:
+            return JsonResponse({
+                'success': False,
+                'message': 'Invalid JSON in request body'
+            }, status=400)
+        except Exception as e:
+            logger.exception("Error in update endpoint")
+            return JsonResponse({
+                'success': False,
+                'message': f'Unexpected error: {str(e)}'
+            }, status=500)

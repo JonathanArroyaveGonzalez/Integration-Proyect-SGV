@@ -218,5 +218,10 @@ LOGGING = {
             'level': 'INFO',
             'propagate': False,
         },
+        'services.internal_api_service': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
     },
 }
