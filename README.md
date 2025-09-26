@@ -71,11 +71,11 @@ flowchart TD
     E --> G
     F --> H[ProductUpdateService]
     
-    G --> I[MeliService.get()]
+    G --> I[MeliService get]
     H --> I
     I --> J[MercadoLibre API]
     J --> K[ProductMapper]
-    K --> L[InternalAPIService.post/put()]
+    K --> L[InternalAPIService post/put]
     L --> M[WMS API]
     M --> N[Respuesta estructurada]
 ```
@@ -92,11 +92,11 @@ flowchart TD
     D --> F[CustomerSyncService]
     E --> G[CustomerUpdateService]
     
-    F --> H[MeliService.get()]
+    F --> H[MeliService get]
     G --> H
     H --> I[MercadoLibre API]
     I --> J[CustomerMapper]
-    J --> K[InternalAPIService.post/put()]
+    J --> K[InternalAPIService post/put]
     K --> L[WMS API]
     L --> M[Respuesta estructurada]
 ```
