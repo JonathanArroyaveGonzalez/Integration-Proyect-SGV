@@ -179,3 +179,84 @@ def handle_internal_server_error(error: Exception, context: str = "") -> JsonRes
         status=500,
         error_code="INTERNAL_SERVER_ERROR"
     )
+
+
+# === NEW: Response Compatibility Utilities ===
+
+def get_response_success(result: Dict[str, Any]) -> bool:
+    """
+    Extract success status from response, compatible with both old and new structures.
+    
+    Args:
+        result: Response dictionary from service
+        
+    Returns:
+        bool: Success status
+    """
+    return result.get('overall_success', result.get('success', False))
+
+
+def get_response_message(result: Dict[str, Any]) -> str:
+    """
+    Extract message from response, compatible with both old and new structures.
+    
+    Args:
+        result: Response dictionary from service
+        
+    Returns:
+        str: Response message
+    """
+    return result.get('summary', result.get('message', ''))
+
+
+def get_response_status_code(result: Dict[str, Any]) -> int:
+    """
+    Determine appropriate HTTP status code based on response.
+    
+    Args:
+        result: Response dictionary from service
+        
+    Returns:
+        int: HTTP status code
+    """
+    success = get_response_success(result)
+    
+    # For new response structure, check overall_status for more nuanced codes
+    if 'overall_status' in result:
+        status = result['overall_status']
+        if status == 'complete_success':
+            return 200
+        elif status == 'partial_success':
+            return 200  # Still successful overall
+        elif status == 'partial_failure':
+            return 400
+        elif status == 'complete_failure':
+            return 400
+        elif status == 'error':
+            return 500
+    
+    # Fallback to simple success/failure
+    return 200 if success else 400
+
+
+def extract_response_data(result: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Extract data payload from response, compatible with both structures.
+    
+    Args:
+        result: Response dictionary from service
+        
+    Returns:
+        dict: Data payload
+    """
+    # For new structure, return relevant operational data
+    if 'product_operation' in result or 'barcode_operation' in result:
+        return {
+            'product_operation': result.get('product_operation', {}),
+            'barcode_operation': result.get('barcode_operation', {}),
+            'changes_summary': result.get('changes_summary', {}),
+            'warnings': result.get('warnings', [])
+        }
+    
+    # For old structure, return the data field or the entire result
+    return result.get('data', result)
