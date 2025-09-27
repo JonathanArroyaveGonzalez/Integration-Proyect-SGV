@@ -7,7 +7,8 @@ from mercadolibre.views.product import MeliProductSyncView
 
 mercadolibre_endpoints = [
     # Autenticación
-    re_path(r"^auth/refresh$", auth),
+    #re_path(r"^auth/refresh$", auth),
+    path('auth/', auth, name='meli-auth-refresh'),
        
     # Clientes - Sincronización unificada
     path('customer/', MeliCustomerSyncView.as_view(), name='meli-customer-sync'),

@@ -36,13 +36,6 @@ class MiddlewareApiKey:
             return None
         elif endpoint[0] == "/health_check":
             return JsonResponse({"status": "ok"}, status=200)
-        elif endpoint[0].startswith("/wms/ml/v1/"):
-            # All MercadoLibre endpoints are exempt from API key validation
-            return None
-        elif endpoint[0] == "/auth/refresh":  # Legacy support
-            return None
-        elif endpoint[0] == "/products":  # Legacy support
-            return None
         else:
             try:
                 # print(dict(request.GET))
