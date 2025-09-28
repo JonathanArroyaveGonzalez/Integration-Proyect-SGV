@@ -1,140 +1,124 @@
 from typing import Optional, Dict, Any
+from dataclasses import dataclass, field
 from datetime import datetime
 import logging
 
 logger = logging.getLogger(__name__)
 
+
+
+@dataclass
 class ProductMapper:
-    def __init__(
-        self,
-        productoean: str,
-        descripcion: str,
-        referencia: str,
-        inventariable: int,
-        um1: str,
-        bodega: str,
-        factor: float,
-        estado: int,
-        qtyequivalente: Optional[float] = None,
-        presentacion: Optional[str] = None,
-        costo: Optional[float] = None,
-        referenciamdc: Optional[str] = None,
-        descripcioningles: Optional[str] = None,
-        item: Optional[str] = None,
-        u_inv: Optional[str] = None,
-        grupo: Optional[str] = None,
-        subgrupo: Optional[str] = None,
-        extension1: Optional[str] = None,
-        extension2: Optional[str] = None,
-        nuevoean: Optional[str] = None,
-        origencompra: Optional[str] = None,
-        tipo: Optional[str] = None,
-        f120_tipo_item: Optional[str] = None,
-        fecharegistro: Optional[str] = None,
-        peso: Optional[float] = None,
-        procedencia: Optional[str] = None,
-        estadotransferencia: Optional[int] = None,
-        volumen: Optional[float] = None,
-        proveedor: Optional[str] = None,
-        preciounitario: Optional[float] = None,
-        ingredientes: Optional[str] = None,
-        instrucciones_de_uso: Optional[str] = None,
-        u_inv_p: Optional[str] = None,
-        observacion: Optional[str] = None,
-        controla_status_calidad: Optional[int] = None,
-        alergenos: Optional[str] = None,
-    ):
-        self.productoean = productoean
-        # 🔒 Truncar siempre al asignar
-        self.descripcion = ProductMapper.truncate_description(descripcion)
-        self.referencia = referencia
-        self.inventariable = inventariable
-        self.um1 = um1
-        self.presentacion = presentacion
-        self.costo = costo
-        self.referenciamdc = referenciamdc
-        self.descripcioningles = descripcioningles
-        self.item = item
-        self.u_inv = u_inv
-        self.grupo = grupo
-        self.subgrupo = subgrupo
-        self.extension1 = extension1
-        self.extension2 = extension2
-        self.nuevoean = nuevoean
-        self.qtyequivalente = qtyequivalente
-        self.origencompra = origencompra
-        self.tipo = tipo
-        self.factor = factor
-        self.f120_tipo_item = f120_tipo_item
-        self.fecharegistro = fecharegistro
-        self.peso = peso
-        self.bodega = bodega
-        self.procedencia = procedencia
-        self.estadotransferencia = estadotransferencia
-        self.volumen = volumen
-        self.proveedor = proveedor
-        self.preciounitario = preciounitario
-        self.ingredientes = ingredientes
-        self.instrucciones_de_uso = instrucciones_de_uso
-        self.u_inv_p = u_inv_p
-        self.observacion = observacion
-        self.controla_status_calidad = controla_status_calidad
-        self.estado = estado
-        self.alergenos = alergenos
+    productoean: str
+    descripcion: str
+    referencia: str
+    inventariable: int
+    um1: str
+    bodega: str
+    factor: float
+    estado: int
+    qtyequivalente: Optional[float] = 1
+    presentacion: Optional[str] = None
+    costo: Optional[float] = 0.0
+    referenciamdc: Optional[str] = None
+    descripcioningles: Optional[str] = None
+    item: Optional[str] = None
+    u_inv: Optional[str] = None
+    grupo: Optional[str] = None
+    subgrupo: Optional[str] = None
+    extension1: Optional[str] = None
+    extension2: Optional[str] = None
+    nuevoean: Optional[str] = None
+    origencompra: Optional[str] = None
+    tipo: Optional[str] = None
+    f120_tipo_item: Optional[str] = None
+    fecharegistro: Optional[str] = None
+    peso: Optional[float] = None
+    procedencia: Optional[str] = None
+    estadotransferencia: Optional[int] = None
+    volumen: Optional[float] = 0.0
+    proveedor: Optional[str] = None
+    preciounitario: Optional[float] = None
+    ingredientes: Optional[str] = None
+    instrucciones_de_uso: Optional[str] = None
+    u_inv_p: Optional[str] = None
+    observacion: Optional[str] = None
+    controla_status_calidad: Optional[int] = None
+    alergenos: Optional[str] = None
+
+    def __post_init__(self):
+        # Truncamiento defensivo al crear el objeto
+        self.descripcion = self.truncate_description(self.descripcion)
 
     def to_dict(self) -> Dict[str, Any]:
-        return {k: v for k, v in self.__dict__.items() if v is not None}
+        """
+        Convierte el objeto en un diccionario, omitiendo claves con valores None o "".
+        """
+        return {
+            k: v for k, v in self.__dict__.items()
+            if v is not None and v != ""
+        }
 
     def to_wms_format(self) -> Dict[str, Any]:
         """
-        Convierte el ProductMapper al formato requerido por el WMS
+        Convierte a formato requerido por el WMS, con descripción truncada adicional.
         """
         data = self.to_dict()
-        # 🔒 Re-truncar antes de enviar (doble seguridad)
         if "descripcion" in data:
-            data["descripcion"] = ProductMapper.truncate_description(data["descripcion"])
+            data["descripcion"] = self.truncate_description(data["descripcion"])
         return data
 
     @staticmethod
-    def truncate_description(text: str, max_length: int = 250) -> str:
+    def truncate_description(text: Optional[str], max_length: int = 250) -> str:
         """
         Trunca inteligentemente una descripción sin cortar palabras.
         """
-        if not text or len(text) <= max_length:
+        if not text:
+            return ""
+        if len(text) <= max_length:
             return text
-
         truncated = text[:max_length]
         last_space = truncated.rfind(" ")
-
-        if last_space > max_length * 0.8:  # Evitar cortar palabra al final
+        if last_space > max_length * 0.8:
             return truncated[:last_space].strip() + "..."
         else:
             return truncated.strip() + "..."
 
     @classmethod
     def from_meli_item(cls, meli_item: Dict[str, Any]) -> "ProductMapper":
-        attributes = {attr["id"]: attr.get("value_name") for attr in meli_item.get("attributes", [])}
+        attributes = {
+            attr.get("id"): attr.get("value_name")
+            for attr in meli_item.get("attributes", [])
+        }
 
-        ean = attributes.get("GTIN") or attributes.get("SELLER_SKU")
-        referencia = attributes.get("id")
+        ean = attributes.get("GTIN") or attributes.get("SELLER_SKU") or ""
+        peso = None
 
-        peso_attr = next((a for a in meli_item.get("attributes", []) if a["id"] == "UNIT_WEIGHT"), None)
-        peso = peso_attr["values"][0]["struct"]["number"] if peso_attr and peso_attr["values"][0]["struct"] else None
+        peso_attr = next(
+            (a for a in meli_item.get("attributes", []) if a["id"] == "UNIT_WEIGHT"),
+            None,
+        )
+        if peso_attr:
+            values = peso_attr.get("values", [])
+            if values and isinstance(values[0], dict):
+                struct = values[0].get("struct")
+                if struct:
+                    peso = struct.get("number")
 
-        stock = meli_item.get("available_quantity")
+        # Descripción: usar descripción detallada si existe, o el título
+        description_data = meli_item.get("description_data", {})
+        plain_text = description_data.get("plain_text", "").strip()
+        title = meli_item.get("title", "").strip()
 
-        # Descripción detallada si existe, si no usar title
-        description_data = meli_item.get("description_data")
-        plain_text = description_data.get("plain_text") if description_data else None
-        raw_description = plain_text.strip() if plain_text else meli_item.get("title", "")
-
-        # 🔒 Truncar siempre
-        descripcion = ProductMapper.truncate_description(raw_description)
+        if plain_text and len(plain_text) < 50 and title:
+            raw_description = f"{title} - {plain_text}"
+        else:
+            raw_description = plain_text or title
 
         return cls(
-            productoean=ean or "",
-            descripcion=descripcion,
-            referencia=meli_item.get("id", "SELLER_SKU"),
+            productoean=ean,
+            descripcion=raw_description,
+            referencia=meli_item.get("id", ean),
             inventariable=1,
             um1="UND",
             bodega="01",
@@ -143,14 +127,13 @@ class ProductMapper:
             qtyequivalente=1,
             costo=0.0,
             presentacion=attributes.get("PACKAGING_TYPE"),
-            descripcioningles=None,
+            descripcioningles="",
             item=ean,
             referenciamdc=ean,
             grupo=meli_item.get("category_id"),
             subgrupo=attributes.get("LINE"),
             extension1=attributes.get("MODEL"),
             nuevoean=ean,
-            #tipo=attributes.get("COFFEE_TYPE"),
             tipo="Producto terminado",
             f120_tipo_item=None,
             fecharegistro=meli_item.get("date_created"),
@@ -164,7 +147,10 @@ class ProductMapper:
         )
 
     def __repr__(self):
-        return f"ProductMapper({self.productoean}, {self.descripcion}, qty={self.qtyequivalente}, estado={self.estado})"
+        return (
+            f"<ProductMapper ean={self.productoean} "
+            f"desc='{self.descripcion[:20]}...' estado={self.estado}>"
+        )
 
 class BarCodeMapper:
     def __init__(

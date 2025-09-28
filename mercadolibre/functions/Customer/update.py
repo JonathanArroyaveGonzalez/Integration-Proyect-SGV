@@ -89,14 +89,7 @@ class CustomerUpdateService:
     def _get_customer_from_meli(self, customer_id: str) -> Optional[Dict[str, Any]]:
         """Get customer data from MercadoLibre."""
         try:
-            response = self.meli.get(f'/users/{customer_id}')
-            
-            if response.status_code == 200:
-                return response.json()
-            else:
-                logger.error(f"Failed to get customer {customer_id}: {response.status_code}")
-                return None
-                
+            return self.meli.get_customer(customer_id)
         except Exception as e:
             logger.error(f"Error getting customer {customer_id}: {e}")
             return None
