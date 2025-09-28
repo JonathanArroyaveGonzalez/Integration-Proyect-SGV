@@ -154,22 +154,38 @@ class MeliWMSSyncService:
     
     def get_product_detail(self, product_id: str) -> Optional[Dict[str, Any]]:
         """
-        Get detailed information for a single product.
+        Get detailed information for a single product including description.
         
         Args:
             product_id: Product ID
             
         Returns:
-            Product details or None
+            Product details with description_data or None
         """
         try:
+            # Get basic product information
             response = self.meli.get(f'/items/{product_id}')
             
-            if response.status_code == 200:
-                return response.json()
-            else:
+            if response.status_code != 200:
                 logger.error(f"Failed to get product {product_id}: {response.status_code}")
                 return None
+            
+            product_data = response.json()
+            
+            # Try to get detailed description
+            try:
+                desc_response = self.meli.get(f'/items/{product_id}/description')
+                if desc_response.status_code == 200:
+                    description_data = desc_response.json()
+                    product_data['description_data'] = description_data
+                    logger.debug(f"Got detailed description for product {product_id}")
+                else:
+                    logger.warning(f"Could not get description for product {product_id}: {desc_response.status_code}")
+            except Exception as desc_error:
+                logger.warning(f"Error getting description for product {product_id}: {desc_error}")
+                # Continue without description - will use title as fallback
+            
+            return product_data
                 
         except Exception as e:
             logger.error(f"Error getting product detail: {e}")

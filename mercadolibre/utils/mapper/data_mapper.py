@@ -45,7 +45,8 @@ class ProductMapper:
         alergenos: Optional[str] = None,
     ):
         self.productoean = productoean
-        self.descripcion = descripcion
+        # 🔒 Truncar siempre al asignar
+        self.descripcion = ProductMapper.truncate_description(descripcion)
         self.referencia = referencia
         self.inventariable = inventariable
         self.um1 = um1
@@ -88,38 +89,57 @@ class ProductMapper:
         """
         Convierte el ProductMapper al formato requerido por el WMS
         """
-        return self.to_dict()
+        data = self.to_dict()
+        # 🔒 Re-truncar antes de enviar (doble seguridad)
+        if "descripcion" in data:
+            data["descripcion"] = ProductMapper.truncate_description(data["descripcion"])
+        return data
+
+    @staticmethod
+    def truncate_description(text: str, max_length: int = 250) -> str:
+        """
+        Trunca inteligentemente una descripción sin cortar palabras.
+        """
+        if not text or len(text) <= max_length:
+            return text
+
+        truncated = text[:max_length]
+        last_space = truncated.rfind(" ")
+
+        if last_space > max_length * 0.8:  # Evitar cortar palabra al final
+            return truncated[:last_space].strip() + "..."
+        else:
+            return truncated.strip() + "..."
 
     @classmethod
     def from_meli_item(cls, meli_item: Dict[str, Any]) -> "ProductMapper":
-        """
-        Construye un ProductMapper a partir de un item de Mercado Libre.
-        Si algún atributo no está presente, se asigna None.
-        """
-        # Extraer atributos en un dict por ID
         attributes = {attr["id"]: attr.get("value_name") for attr in meli_item.get("attributes", [])}
 
-        # EAN / SKU / Referencia
         ean = attributes.get("GTIN") or attributes.get("SELLER_SKU")
-        referencia = attributes.get("id") 
+        referencia = attributes.get("id")
 
-        # Peso en gramos (si existe)
         peso_attr = next((a for a in meli_item.get("attributes", []) if a["id"] == "UNIT_WEIGHT"), None)
         peso = peso_attr["values"][0]["struct"]["number"] if peso_attr and peso_attr["values"][0]["struct"] else None
 
-        # Stock disponible
         stock = meli_item.get("available_quantity")
+
+        # Descripción detallada si existe, si no usar title
+        description_data = meli_item.get("description_data")
+        plain_text = description_data.get("plain_text") if description_data else None
+        raw_description = plain_text.strip() if plain_text else meli_item.get("title", "")
+
+        # 🔒 Truncar siempre
+        descripcion = ProductMapper.truncate_description(raw_description)
 
         return cls(
             productoean=ean or "",
-            descripcion=meli_item.get("title", ""),
+            descripcion=descripcion,
             referencia=meli_item.get("id", "SELLER_SKU"),
             inventariable=1,
             um1="UND",
             bodega="01",
             factor=1,
             estado=1 if meli_item.get("status") == "active" else 0,
-            # qtyequivalente=float(stock) if stock is not None else None,
             qtyequivalente=1,
             costo=0.0,
             presentacion=attributes.get("PACKAGING_TYPE"),
@@ -130,18 +150,17 @@ class ProductMapper:
             subgrupo=attributes.get("LINE"),
             extension1=attributes.get("MODEL"),
             nuevoean=ean,
-            tipo=attributes.get("COFFEE_TYPE"),
+            #tipo=attributes.get("COFFEE_TYPE"),
+            tipo="Producto terminado",
             f120_tipo_item=None,
             fecharegistro=meli_item.get("date_created"),
             peso=peso,
             procedencia=meli_item.get("seller_address", {}).get("state", {}).get("name"),
             volumen=0,
-
-            #Debe ser el nombre de la cuenta se debe agregar una peticion mas para obtener el nombre de la cuenta
             proveedor=str(meli_item.get("seller_id")),
             preciounitario=meli_item.get("price"),
             observacion=meli_item.get("permalink"),
-            alergenos=None
+            alergenos=None,
         )
 
     def __repr__(self):
