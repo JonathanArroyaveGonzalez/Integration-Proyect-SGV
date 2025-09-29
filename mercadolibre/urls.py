@@ -3,6 +3,7 @@ from django.urls import re_path, path
 from mercadolibre.views.auth import auth
 from mercadolibre.views.customer import MeliCustomerSyncView
 from mercadolibre.views.product import MeliProductSyncView
+from mercadolibre.views.inventory import MeliInventoryView
 
 
 mercadolibre_endpoints = [
@@ -15,5 +16,8 @@ mercadolibre_endpoints = [
 
     # Productos - Sincronización unificada
     path('product/', MeliProductSyncView.as_view(), name='meli-sync'),
+
+    # Inventario - Gestión unificada
+    path('inventory/', MeliInventoryView.as_view(), name='meli-inventory'),
     
 ]

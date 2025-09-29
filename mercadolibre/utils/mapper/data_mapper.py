@@ -2,7 +2,6 @@ from typing import Optional, Dict, Any
 from dataclasses import dataclass
 from datetime import datetime
 import logging
-
 logger = logging.getLogger(__name__)
 
 
@@ -354,3 +353,128 @@ class CustomerMapper:
 
     def __repr__(self):
         return f"CustomerMapper({self.nombrecliente}, nit={self.nit}, item={self.item})"
+
+@dataclass
+class InventoryMapper:
+    """
+    Class representing the mapping of inventory data.
+
+    Attributes:
+        bod (str): Bodega donde se almacena el producto. Default = "01".
+        ubicacion (str): Ubicación específica dentro de la bodega. Default = "01".
+        productoean (str): Código EAN del producto.
+        descripcion (str): Descripción del producto.
+        fecharegistro (Optional[str]): Fecha de registro del producto.
+        codigoalmacen (Optional[str]): Código del almacén.
+        estadodetransferencia (Optional[int]): Estado de la transferencia.
+        referencia (Optional[str]): Referencia del producto.
+        valor (Optional[float]): Valor del producto. Default = 0.0.
+        tipo_inventario (Optional[str]): Tipo de inventario al que pertenece el producto.
+        etl (Optional[str]): Estado ETL del registro.
+        fecha_ultima_actualizacion (Optional[str]): Fecha de la última actualización.
+        fecha_prox_actualizacion (Optional[str]): Fecha de la próxima actualización.
+        saldopt (Optional[float]): Saldo del producto terminado. Default = 0.0.
+        cantbloqueadoerp (Optional[float]): Cantidad bloqueada en el ERP. Default = 0.0.
+        saldowms (Optional[float]): Saldo del producto en el WMS. Default = 0.0.
+    """
+
+    bod: str = "01"
+    ubicacion: str = "01"
+    productoean: str = ""       # default vacío
+    descripcion: str = ""       # default vacío
+    fecharegistro: Optional[str] = None
+    codigoalmacen: Optional[str] = "0"
+    estadodetransferencia: Optional[int] = 0
+    referencia: Optional[str] = None
+    valor: Optional[float] = 0.0
+    tipo_inventario: Optional[str] = "0"
+    etl: Optional[str] = None
+    fecha_ultima_actualizacion: Optional[str] = None
+    fecha_prox_actualizacion: Optional[str] = None
+
+    saldopt: Optional[float] = 0.0  # default definido
+    cantbloqueadoerp: Optional[float] = 0.0
+    saldowms: Optional[float] = 0.0
+
+    def to_dict(self) -> Dict[str, Any]:
+        """
+        Convierte el objeto en un diccionario, omitiendo claves con valores None o "".
+        """
+        return {
+            k: v for k, v in self.__dict__.items()
+            if v is not None and v != ""
+        }
+
+    def to_wms_format(self) -> Dict[str, Any]:
+        """
+        Convierte a formato requerido por el WMS.
+        """
+        data = self.to_dict()
+        # Aquí podrías aplicar reglas específicas para WMS, ej:
+        if "descripcion" in data:
+            data["descripcion"] = self.truncate_description(data["descripcion"])
+        return data
+
+    @staticmethod
+    def truncate_description(text: Optional[str], max_length: int = 250) -> str:
+        """
+        Trunca inteligentemente una descripción sin cortar palabras.
+        """
+        if not text:
+            return ""
+        if len(text) <= max_length:
+            return text
+        truncated = text[:max_length]
+        last_space = truncated.rfind(" ")
+        if last_space > max_length * 0.8:
+            return truncated[:last_space].strip() + "..."
+        else:
+            return truncated.strip() + "..."
+
+    @classmethod
+    def from_meli_item(cls, meli_item: Dict[str, Any]) -> "InventoryMapper":
+        attributes = {
+            attr.get("id"): attr.get("value_name")
+            for attr in meli_item.get("attributes", [])
+        }
+
+        ean = attributes.get("GTIN") or attributes.get("SELLER_SKU") or ""
+        id = meli_item.get("id", ean)
+        quantity = meli_item.get("available_quantity", 0)
+        date_created = datetime.now().isoformat(timespec="milliseconds")
+        last_updated = meli_item.get("last_updated")
+
+        # Descripción: usar descripción detallada si existe, o el título
+        description_data = meli_item.get("description_data", {})
+        plain_text = description_data.get("plain_text", "").strip()
+        title = meli_item.get("title", "").strip()
+
+        if plain_text and len(plain_text) < 50 and title:
+            raw_description = f"{title} - {plain_text}"
+        else:
+            raw_description = plain_text or title
+
+        return cls(
+            productoean= ean,
+            descripcion= raw_description,
+            fecharegistro= date_created,
+            codigoalmacen= "0",
+            estadodetransferencia= 0,
+            referencia= id,
+            valor= 0.0,
+            tipo_inventario= "0",
+            etl= None,
+            fecha_ultima_actualizacion= last_updated,
+            fecha_prox_actualizacion= None,
+
+            saldopt= float(quantity),
+            cantbloqueadoerp= 0.0,
+            saldowms= 0.0
+        )
+
+    def __repr__(self):
+        return (
+            f"<InventoryMapper ean={self.productoean} "
+            f"bod={self.bod} saldo_wms={self.saldowms}>"
+        )
+    
