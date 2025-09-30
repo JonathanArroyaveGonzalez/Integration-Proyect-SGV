@@ -1,0 +1,283 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="es" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mercadolibre.views package &mdash; documentación de Integration-Proyect-SGV - 1.0</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=4936afed"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/translations.js?v=f85f4cfb"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Índice" href="genindex.html" />
+    <link rel="search" title="Búsqueda" href="search.html" />
+    <link rel="prev" title="mercadolibre.utils.mapper package" href="mercadolibre.utils.mapper.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Integration-Proyect-SGV
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Buscar documentos" aria-label="Buscar documentos" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contenido:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="docs/mercadolibre.endpoints.html">Endpoints de Mercadolibre</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mercadolibre.utils.html">mercadolibre.utils package</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">mercadolibre.views package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-mercadolibre.views.Auth">mercadolibre.views.Auth module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#mercadolibre.views.Auth.auth"><code class="docutils literal notranslate"><span class="pre">auth()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#mercadolibre-views-barcode-module">mercadolibre.views.Barcode module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-mercadolibre.views.Customer">mercadolibre.views.Customer module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#mercadolibre.views.Customer.MeliCustomerSyncView"><code class="docutils literal notranslate"><span class="pre">MeliCustomerSyncView</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mercadolibre.views.Customer.MeliCustomerSyncView.dispatch"><code class="docutils literal notranslate"><span class="pre">MeliCustomerSyncView.dispatch()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mercadolibre.views.Customer.MeliCustomerSyncView.post"><code class="docutils literal notranslate"><span class="pre">MeliCustomerSyncView.post()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mercadolibre.views.Customer.MeliCustomerSyncView.put"><code class="docutils literal notranslate"><span class="pre">MeliCustomerSyncView.put()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-mercadolibre.views.Product">mercadolibre.views.Product module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#mercadolibre.views.Product.MeliProductSyncView"><code class="docutils literal notranslate"><span class="pre">MeliProductSyncView</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mercadolibre.views.Product.MeliProductSyncView.dispatch"><code class="docutils literal notranslate"><span class="pre">MeliProductSyncView.dispatch()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mercadolibre.views.Product.MeliProductSyncView.get"><code class="docutils literal notranslate"><span class="pre">MeliProductSyncView.get()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mercadolibre.views.Product.MeliProductSyncView.post"><code class="docutils literal notranslate"><span class="pre">MeliProductSyncView.post()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mercadolibre.views.Product.MeliProductSyncView.put"><code class="docutils literal notranslate"><span class="pre">MeliProductSyncView.put()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#mercadolibre-views-updateproduct-module">mercadolibre.views.UpdateProduct module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#mercadolibre-views-sync-products-module">mercadolibre.views.sync_products module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-mercadolibre.views">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Integration-Proyect-SGV</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">mercadolibre.views package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/mercadolibre.views.rst.txt" rel="nofollow"> Ver código fuente de la página</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="mercadolibre-views-package">
+<h1>mercadolibre.views package<a class="headerlink" href="#mercadolibre-views-package" title="Link to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+</section>
+<section id="module-mercadolibre.views.Auth">
+<span id="mercadolibre-views-auth-module"></span><h2>mercadolibre.views.Auth module<a class="headerlink" href="#module-mercadolibre.views.Auth" title="Link to this heading"></a></h2>
+<p>Dependencies</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="mercadolibre.views.Auth.auth">
+<span class="sig-prename descclassname"><span class="pre">mercadolibre.views.Auth.</span></span><span class="sig-name descname"><span class="pre">auth</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mercadolibre/views/Auth.html#auth"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#mercadolibre.views.Auth.auth" title="Link to this definition"></a></dt>
+<dd><p>This view is used to refresh MercadoLibre authentication tokens
+&#64;params:</p>
+<blockquote>
+<div><p>request: request object</p>
+</div></blockquote>
+</dd></dl>
+
+</section>
+<section id="mercadolibre-views-barcode-module">
+<h2>mercadolibre.views.Barcode module<a class="headerlink" href="#mercadolibre-views-barcode-module" title="Link to this heading"></a></h2>
+</section>
+<section id="module-mercadolibre.views.Customer">
+<span id="mercadolibre-views-customer-module"></span><h2>mercadolibre.views.Customer module<a class="headerlink" href="#module-mercadolibre.views.Customer" title="Link to this heading"></a></h2>
+<p>MercadoLibre customer synchronization views - Unified architecture.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="mercadolibre.views.Customer.MeliCustomerSyncView">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mercadolibre.views.Customer.</span></span><span class="sig-name descname"><span class="pre">MeliCustomerSyncView</span></span><a class="reference internal" href="_modules/mercadolibre/views/Customer.html#MeliCustomerSyncView"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#mercadolibre.views.Customer.MeliCustomerSyncView" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">View</span></code></p>
+<p>Unified view for customer synchronization operations.
+Only handles specific customer sync (POST) and updates (PUT).
+No full sync functionality - that’s only for products.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="mercadolibre.views.Customer.MeliCustomerSyncView.dispatch">
+<span class="sig-name descname"><span class="pre">dispatch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mercadolibre.views.Customer.MeliCustomerSyncView.dispatch" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mercadolibre.views.Customer.MeliCustomerSyncView.post">
+<span class="sig-name descname"><span class="pre">post</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mercadolibre/views/Customer.html#MeliCustomerSyncView.post"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#mercadolibre.views.Customer.MeliCustomerSyncView.post" title="Link to this definition"></a></dt>
+<dd><p>Sync specific customers by their MercadoLibre IDs.</p>
+<p>Expected JSON format:
+{</p>
+<blockquote>
+<div><p>«customer_ids»: [«123», «456»],  // Required: List of ML customer IDs
+«force_update»: false           // Optional: Force update existing customers</p>
+</div></blockquote>
+<p>}</p>
+<dl class="field-list simple">
+<dt class="field-odd">Devuelve<span class="colon">:</span></dt>
+<dd class="field-odd"><p>JSON response with sync results</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mercadolibre.views.Customer.MeliCustomerSyncView.put">
+<span class="sig-name descname"><span class="pre">put</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mercadolibre/views/Customer.html#MeliCustomerSyncView.put"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#mercadolibre.views.Customer.MeliCustomerSyncView.put" title="Link to this definition"></a></dt>
+<dd><p>Update a single customer from MercadoLibre to WMS.</p>
+<p>Expected JSON format:
+{</p>
+<blockquote>
+<div><p>«customer_id»: «123»  // Required: ML customer ID</p>
+</div></blockquote>
+<p>}</p>
+<dl class="field-list simple">
+<dt class="field-odd">Devuelve<span class="colon">:</span></dt>
+<dd class="field-odd"><p>JSON response with update results</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-mercadolibre.views.Product">
+<span id="mercadolibre-views-product-module"></span><h2>mercadolibre.views.Product module<a class="headerlink" href="#module-mercadolibre.views.Product" title="Link to this heading"></a></h2>
+<p>MercadoLibre synchronization views.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="mercadolibre.views.Product.MeliProductSyncView">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mercadolibre.views.Product.</span></span><span class="sig-name descname"><span class="pre">MeliProductSyncView</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mercadolibre/views/Product.html#MeliProductSyncView"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#mercadolibre.views.Product.MeliProductSyncView" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">View</span></code></p>
+<p>Unified view for MercadoLibre product synchronization.</p>
+<p>Endpoints:
+- GET: Sync all products (creation mode)
+- POST with product_ids: Sync specific products (creation or update mode)
+- PUT with product_id: Update single product (update mode only)</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="mercadolibre.views.Product.MeliProductSyncView.dispatch">
+<span class="sig-name descname"><span class="pre">dispatch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mercadolibre.views.Product.MeliProductSyncView.dispatch" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mercadolibre.views.Product.MeliProductSyncView.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mercadolibre/views/Product.html#MeliProductSyncView.get"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#mercadolibre.views.Product.MeliProductSyncView.get" title="Link to this definition"></a></dt>
+<dd><p>Sync all products from MercadoLibre to WMS (creation mode).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Devuelve<span class="colon">:</span></dt>
+<dd class="field-odd"><p>JSON response with sync results</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mercadolibre.views.Product.MeliProductSyncView.post">
+<span class="sig-name descname"><span class="pre">post</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mercadolibre/views/Product.html#MeliProductSyncView.post"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#mercadolibre.views.Product.MeliProductSyncView.post" title="Link to this definition"></a></dt>
+<dd><p>Sync specific products from MercadoLibre to WMS.</p>
+<p>Expected body:
+{</p>
+<blockquote>
+<div><p>«product_ids»: [«MLM123», «MLM456», …],
+«force_update»: true  // Optional, for forcing update mode</p>
+</div></blockquote>
+<p>}</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mercadolibre.views.Product.MeliProductSyncView.put">
+<span class="sig-name descname"><span class="pre">put</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mercadolibre/views/Product.html#MeliProductSyncView.put"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#mercadolibre.views.Product.MeliProductSyncView.put" title="Link to this definition"></a></dt>
+<dd><p>Update a single product in WMS (update mode only).</p>
+<p>Expected body:
+{</p>
+<blockquote>
+<div><p>«product_id»: «MLM123»</p>
+</div></blockquote>
+<p>}</p>
+<dl class="field-list simple">
+<dt class="field-odd">Devuelve<span class="colon">:</span></dt>
+<dd class="field-odd"><p>JSON response with update results</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="mercadolibre-views-updateproduct-module">
+<h2>mercadolibre.views.UpdateProduct module<a class="headerlink" href="#mercadolibre-views-updateproduct-module" title="Link to this heading"></a></h2>
+</section>
+<section id="mercadolibre-views-sync-products-module">
+<h2>mercadolibre.views.sync_products module<a class="headerlink" href="#mercadolibre-views-sync-products-module" title="Link to this heading"></a></h2>
+</section>
+<section id="module-mercadolibre.views">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-mercadolibre.views" title="Link to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Pie de página">
+        <a href="mercadolibre.utils.mapper.html" class="btn btn-neutral float-left" title="mercadolibre.utils.mapper package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Anterior</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Derechos de autor 2025, Daniel Giraldo, Luis Gonzales, Jonathan Arroyave.</p>
+  </div>
+
+  Compilado con <a href="https://www.sphinx-doc.org/">Sphinx</a> usando un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">tema</a>
+    proporcionado por <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

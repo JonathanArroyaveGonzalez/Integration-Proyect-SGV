@@ -1,0 +1,396 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="es" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mercadolibre.utils.response_helpers &mdash; documentación de Integration-Proyect-SGV - 1.0</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=4936afed"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../_static/translations.js?v=f85f4cfb"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Índice" href="../../../genindex.html" />
+    <link rel="search" title="Búsqueda" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Integration-Proyect-SGV
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Buscar documentos" aria-label="Buscar documentos" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contenido:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../docs/mercadolibre.endpoints.html">Endpoints de Mercadolibre</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../mercadolibre.utils.html">mercadolibre.utils package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../mercadolibre.views.html">mercadolibre.views package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Integration-Proyect-SGV</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Código de módulo</a></li>
+      <li class="breadcrumb-item active">mercadolibre.utils.response_helpers</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Código fuente para mercadolibre.utils.response_helpers</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Utilidades para estandarizar respuestas HTTP en la aplicación MercadoLibre</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">django.http</span><span class="w"> </span><span class="kn">import</span> <span class="n">JsonResponse</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">List</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="create_success_response">
+<a class="viewcode-back" href="../../../mercadolibre.utils.html#mercadolibre.utils.response_helpers.create_success_response">[documentos]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_success_response</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">message</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Operación exitosa&quot;</span><span class="p">,</span>
+    <span class="n">status</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">200</span><span class="p">,</span>
+    <span class="n">extra_fields</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">JsonResponse</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Crea una respuesta HTTP exitosa estandarizada</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        data: Datos a incluir en la respuesta</span>
+<span class="sd">        message: Mensaje de éxito</span>
+<span class="sd">        status: Código de estado HTTP (200, 201, etc.)</span>
+<span class="sd">        extra_fields: Campos adicionales para incluir en la respuesta</span>
+<span class="sd">        </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        JsonResponse: Respuesta HTTP estandarizada</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">response_data</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="n">message</span>
+    <span class="p">}</span>
+    
+    <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">response_data</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span>
+    
+    <span class="c1"># Agregar campos adicionales si se proporcionan</span>
+    <span class="k">if</span> <span class="n">extra_fields</span><span class="p">:</span>
+        <span class="n">response_data</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">extra_fields</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">JsonResponse</span><span class="p">(</span><span class="n">response_data</span><span class="p">,</span> <span class="n">status</span><span class="o">=</span><span class="n">status</span><span class="p">,</span> <span class="n">safe</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="create_error_response">
+<a class="viewcode-back" href="../../../mercadolibre.utils.html#mercadolibre.utils.response_helpers.create_error_response">[documentos]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_error_response</span><span class="p">(</span>
+    <span class="n">message</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">errors</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">status</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">400</span><span class="p">,</span>
+    <span class="n">error_code</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">JsonResponse</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Crea una respuesta HTTP de error estandarizada</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        message: Mensaje principal del error</span>
+<span class="sd">        errors: Detalles específicos del error</span>
+<span class="sd">        status: Código de estado HTTP (400, 500, etc.)</span>
+<span class="sd">        error_code: Código específico del error para debugging</span>
+<span class="sd">        </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        JsonResponse: Respuesta HTTP de error estandarizada</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">response_data</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;error&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="n">message</span>
+    <span class="p">}</span>
+    
+    <span class="k">if</span> <span class="n">errors</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">response_data</span><span class="p">[</span><span class="s2">&quot;errors&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">errors</span>
+    
+    <span class="k">if</span> <span class="n">error_code</span><span class="p">:</span>
+        <span class="n">response_data</span><span class="p">[</span><span class="s2">&quot;error_code&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">error_code</span>
+    
+    <span class="c1"># Log del error para debugging</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error response: </span><span class="si">{</span><span class="n">message</span><span class="si">}</span><span class="s2"> | Status: </span><span class="si">{</span><span class="n">status</span><span class="si">}</span><span class="s2"> | Details: </span><span class="si">{</span><span class="n">errors</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">JsonResponse</span><span class="p">(</span><span class="n">response_data</span><span class="p">,</span> <span class="n">status</span><span class="o">=</span><span class="n">status</span><span class="p">,</span> <span class="n">safe</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="create_partial_success_response">
+<a class="viewcode-back" href="../../../mercadolibre.utils.html#mercadolibre.utils.response_helpers.create_partial_success_response">[documentos]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_partial_success_response</span><span class="p">(</span>
+    <span class="n">created</span><span class="p">:</span> <span class="n">List</span><span class="p">,</span>
+    <span class="n">errors</span><span class="p">:</span> <span class="n">List</span><span class="p">,</span>
+    <span class="n">operation</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;operación&quot;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">JsonResponse</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Crea una respuesta para operaciones con éxitos parciales</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        created: Lista de elementos creados/actualizados exitosamente</span>
+<span class="sd">        errors: Lista de errores ocurridos</span>
+<span class="sd">        operation: Tipo de operación realizada</span>
+<span class="sd">        </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        JsonResponse: Respuesta HTTP con código apropiado</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Determinar código de estado</span>
+    <span class="k">if</span> <span class="n">created</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">errors</span><span class="p">:</span>
+        <span class="n">status</span> <span class="o">=</span> <span class="mi">200</span>  <span class="c1"># Solo éxitos</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">operation</span><span class="o">.</span><span class="n">capitalize</span><span class="p">()</span><span class="si">}</span><span class="s2"> completada exitosamente&quot;</span>
+    <span class="k">elif</span> <span class="n">created</span> <span class="ow">and</span> <span class="n">errors</span><span class="p">:</span>
+        <span class="n">status</span> <span class="o">=</span> <span class="mi">207</span>  <span class="c1"># Éxitos parciales (Multi-Status)</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">operation</span><span class="o">.</span><span class="n">capitalize</span><span class="p">()</span><span class="si">}</span><span class="s2"> completada parcialmente&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">status</span> <span class="o">=</span> <span class="mi">400</span>  <span class="c1"># Solo errores</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Error en </span><span class="si">{</span><span class="n">operation</span><span class="si">}</span><span class="s2">&quot;</span>
+    
+    <span class="n">response_data</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;partial_success&quot;</span> <span class="k">if</span> <span class="n">status</span> <span class="o">==</span> <span class="mi">207</span> <span class="k">else</span> <span class="p">(</span><span class="s2">&quot;success&quot;</span> <span class="k">if</span> <span class="n">status</span> <span class="o">==</span> <span class="mi">200</span> <span class="k">else</span> <span class="s2">&quot;error&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="n">message</span><span class="p">,</span>
+        <span class="s2">&quot;summary&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;total_processed&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">created</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">errors</span><span class="p">),</span>
+            <span class="s2">&quot;successful&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">created</span><span class="p">),</span>
+            <span class="s2">&quot;failed&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">errors</span><span class="p">)</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    
+    <span class="k">if</span> <span class="n">created</span><span class="p">:</span>
+        <span class="n">response_data</span><span class="p">[</span><span class="s2">&quot;created&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">created</span>
+    
+    <span class="k">if</span> <span class="n">errors</span><span class="p">:</span>
+        <span class="n">response_data</span><span class="p">[</span><span class="s2">&quot;errors&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">errors</span>
+    
+    <span class="k">return</span> <span class="n">JsonResponse</span><span class="p">(</span><span class="n">response_data</span><span class="p">,</span> <span class="n">status</span><span class="o">=</span><span class="n">status</span><span class="p">,</span> <span class="n">safe</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="handle_request_validation">
+<a class="viewcode-back" href="../../../mercadolibre.utils.html#mercadolibre.utils.response_helpers.handle_request_validation">[documentos]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">handle_request_validation</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">allowed_methods</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">JsonResponse</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Valida que el método HTTP sea permitido</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        request: Objeto request de Django</span>
+<span class="sd">        allowed_methods: Lista de métodos HTTP permitidos</span>
+<span class="sd">        </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        JsonResponse con error si el método no es válido, None si es válido</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">allowed_methods</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">create_error_response</span><span class="p">(</span>
+            <span class="n">message</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Método </span><span class="si">{</span><span class="n">request</span><span class="o">.</span><span class="n">method</span><span class="si">}</span><span class="s2"> no permitido&quot;</span><span class="p">,</span>
+            <span class="n">errors</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Métodos permitidos: </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">allowed_methods</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="n">status</span><span class="o">=</span><span class="mi">405</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="kc">None</span></div>
+
+
+
+<div class="viewcode-block" id="handle_json_decode_error">
+<a class="viewcode-back" href="../../../mercadolibre.utils.html#mercadolibre.utils.response_helpers.handle_json_decode_error">[documentos]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">handle_json_decode_error</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">JsonResponse</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Maneja errores de decodificación JSON de manera estandarizada</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        JsonResponse: Respuesta de error estandarizada para JSON inválido</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">create_error_response</span><span class="p">(</span>
+        <span class="n">message</span><span class="o">=</span><span class="s2">&quot;JSON inválido en el cuerpo de la solicitud&quot;</span><span class="p">,</span>
+        <span class="n">errors</span><span class="o">=</span><span class="s2">&quot;Por favor, proporcione datos JSON válidos&quot;</span><span class="p">,</span>
+        <span class="n">status</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span>
+        <span class="n">error_code</span><span class="o">=</span><span class="s2">&quot;INVALID_JSON&quot;</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="handle_internal_server_error">
+<a class="viewcode-back" href="../../../mercadolibre.utils.html#mercadolibre.utils.response_helpers.handle_internal_server_error">[documentos]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">handle_internal_server_error</span><span class="p">(</span><span class="n">error</span><span class="p">:</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">JsonResponse</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Maneja errores internos del servidor de manera estandarizada</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        error: Excepción capturada</span>
+<span class="sd">        context: Contexto adicional del error</span>
+<span class="sd">        </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        JsonResponse: Respuesta de error interno estandarizada</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">error_message</span> <span class="o">=</span> <span class="s2">&quot;Error interno del servidor&quot;</span>
+    <span class="k">if</span> <span class="n">context</span><span class="p">:</span>
+        <span class="n">error_message</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot; en </span><span class="si">{</span><span class="n">context</span><span class="si">}</span><span class="s2">&quot;</span>
+    
+    <span class="k">return</span> <span class="n">create_error_response</span><span class="p">(</span>
+        <span class="n">message</span><span class="o">=</span><span class="n">error_message</span><span class="p">,</span>
+        <span class="n">errors</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">error</span><span class="p">),</span>
+        <span class="n">status</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span>
+        <span class="n">error_code</span><span class="o">=</span><span class="s2">&quot;INTERNAL_SERVER_ERROR&quot;</span>
+    <span class="p">)</span></div>
+
+
+
+<span class="c1"># === NEW: Response Compatibility Utilities ===</span>
+
+<div class="viewcode-block" id="get_response_success">
+<a class="viewcode-back" href="../../../mercadolibre.utils.html#mercadolibre.utils.response_helpers.get_response_success">[documentos]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_response_success</span><span class="p">(</span><span class="n">result</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extract success status from response, compatible with both old and new structures.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        result: Response dictionary from service</span>
+<span class="sd">        </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        bool: Success status</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;overall_success&#39;</span><span class="p">,</span> <span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;success&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="get_response_message">
+<a class="viewcode-back" href="../../../mercadolibre.utils.html#mercadolibre.utils.response_helpers.get_response_message">[documentos]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_response_message</span><span class="p">(</span><span class="n">result</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extract message from response, compatible with both old and new structures.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        result: Response dictionary from service</span>
+<span class="sd">        </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        str: Response message</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;summary&#39;</span><span class="p">,</span> <span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;message&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="get_response_status_code">
+<a class="viewcode-back" href="../../../mercadolibre.utils.html#mercadolibre.utils.response_helpers.get_response_status_code">[documentos]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_response_status_code</span><span class="p">(</span><span class="n">result</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Determine appropriate HTTP status code based on response.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        result: Response dictionary from service</span>
+<span class="sd">        </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        int: HTTP status code</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">success</span> <span class="o">=</span> <span class="n">get_response_success</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+    
+    <span class="c1"># For new response structure, check overall_status for more nuanced codes</span>
+    <span class="k">if</span> <span class="s1">&#39;overall_status&#39;</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+        <span class="n">status</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;overall_status&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">status</span> <span class="o">==</span> <span class="s1">&#39;complete_success&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">200</span>
+        <span class="k">elif</span> <span class="n">status</span> <span class="o">==</span> <span class="s1">&#39;partial_success&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">200</span>  <span class="c1"># Still successful overall</span>
+        <span class="k">elif</span> <span class="n">status</span> <span class="o">==</span> <span class="s1">&#39;partial_failure&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">400</span>
+        <span class="k">elif</span> <span class="n">status</span> <span class="o">==</span> <span class="s1">&#39;complete_failure&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">400</span>
+        <span class="k">elif</span> <span class="n">status</span> <span class="o">==</span> <span class="s1">&#39;error&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">500</span>
+    
+    <span class="c1"># Fallback to simple success/failure</span>
+    <span class="k">return</span> <span class="mi">200</span> <span class="k">if</span> <span class="n">success</span> <span class="k">else</span> <span class="mi">400</span></div>
+
+
+
+<div class="viewcode-block" id="extract_response_data">
+<a class="viewcode-back" href="../../../mercadolibre.utils.html#mercadolibre.utils.response_helpers.extract_response_data">[documentos]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">extract_response_data</span><span class="p">(</span><span class="n">result</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extract data payload from response, compatible with both structures.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        result: Response dictionary from service</span>
+<span class="sd">        </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: Data payload</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># For new structure, return relevant operational data</span>
+    <span class="k">if</span> <span class="s1">&#39;product_operation&#39;</span> <span class="ow">in</span> <span class="n">result</span> <span class="ow">or</span> <span class="s1">&#39;barcode_operation&#39;</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;product_operation&#39;</span><span class="p">:</span> <span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;product_operation&#39;</span><span class="p">,</span> <span class="p">{}),</span>
+            <span class="s1">&#39;barcode_operation&#39;</span><span class="p">:</span> <span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;barcode_operation&#39;</span><span class="p">,</span> <span class="p">{}),</span>
+            <span class="s1">&#39;changes_summary&#39;</span><span class="p">:</span> <span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;changes_summary&#39;</span><span class="p">,</span> <span class="p">{}),</span>
+            <span class="s1">&#39;warnings&#39;</span><span class="p">:</span> <span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;warnings&#39;</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="p">}</span>
+    
+    <span class="c1"># For old structure, return the data field or the entire result</span>
+    <span class="k">return</span> <span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;data&#39;</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Derechos de autor 2025, Daniel Giraldo, Luis Gonzales, Jonathan Arroyave.</p>
+  </div>
+
+  Compilado con <a href="https://www.sphinx-doc.org/">Sphinx</a> usando un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">tema</a>
+    proporcionado por <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

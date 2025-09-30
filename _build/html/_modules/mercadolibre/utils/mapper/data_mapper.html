@@ -1,0 +1,632 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="es" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mercadolibre.utils.mapper.data_mapper &mdash; documentación de Integration-Proyect-SGV - 1.0</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=4936afed"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../../_static/translations.js?v=f85f4cfb"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Índice" href="../../../../genindex.html" />
+    <link rel="search" title="Búsqueda" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            Integration-Proyect-SGV
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Buscar documentos" aria-label="Buscar documentos" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contenido:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../docs/mercadolibre.endpoints.html">Endpoints de Mercadolibre</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../mercadolibre.utils.html">mercadolibre.utils package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../mercadolibre.views.html">mercadolibre.views package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">Integration-Proyect-SGV</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Código de módulo</a></li>
+      <li class="breadcrumb-item active">mercadolibre.utils.mapper.data_mapper</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Código fuente para mercadolibre.utils.mapper.data_mapper</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Any</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+
+<div class="viewcode-block" id="ProductMapper">
+<a class="viewcode-back" href="../../../../mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.ProductMapper">[documentos]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ProductMapper</span><span class="p">:</span>
+    <span class="n">productoean</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">descripcion</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">referencia</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">inventariable</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">um1</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">bodega</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">factor</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">estado</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">qtyequivalente</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">presentacion</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">costo</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">referenciamdc</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">descripcioningles</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">item</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">u_inv</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">grupo</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">subgrupo</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">extension1</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">extension2</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">nuevoean</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">origencompra</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">tipo</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">f120_tipo_item</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">fecharegistro</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">peso</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">procedencia</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">estadotransferencia</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">volumen</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">proveedor</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">preciounitario</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">ingredientes</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">instrucciones_de_uso</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">u_inv_p</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">observacion</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">controla_status_calidad</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">alergenos</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Truncamiento defensivo al crear el objeto</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">descripcion</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">truncate_description</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">descripcion</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ProductMapper.to_dict">
+<a class="viewcode-back" href="../../../../mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.ProductMapper.to_dict">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convierte el objeto en un diccionario, omitiendo claves con valores None o &quot;&quot;.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">v</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span>
+        <span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="ProductMapper.to_wms_format">
+<a class="viewcode-back" href="../../../../mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.ProductMapper.to_wms_format">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_wms_format</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convierte a formato requerido por el WMS, con descripción truncada adicional.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+        <span class="k">if</span> <span class="s2">&quot;descripcion&quot;</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+            <span class="n">data</span><span class="p">[</span><span class="s2">&quot;descripcion&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">truncate_description</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;descripcion&quot;</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">data</span></div>
+
+
+<div class="viewcode-block" id="ProductMapper.truncate_description">
+<a class="viewcode-back" href="../../../../mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.ProductMapper.truncate_description">[documentos]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">truncate_description</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">max_length</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">250</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Trunca inteligentemente una descripción sin cortar palabras.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">text</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">max_length</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">text</span>
+        <span class="n">truncated</span> <span class="o">=</span> <span class="n">text</span><span class="p">[:</span><span class="n">max_length</span><span class="p">]</span>
+        <span class="n">last_space</span> <span class="o">=</span> <span class="n">truncated</span><span class="o">.</span><span class="n">rfind</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">last_space</span> <span class="o">&gt;</span> <span class="n">max_length</span> <span class="o">*</span> <span class="mf">0.8</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">truncated</span><span class="p">[:</span><span class="n">last_space</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;...&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">truncated</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;...&quot;</span></div>
+
+
+<div class="viewcode-block" id="ProductMapper.from_meli_item">
+<a class="viewcode-back" href="../../../../mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.ProductMapper.from_meli_item">[documentos]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_meli_item</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">meli_item</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="s2">&quot;ProductMapper&quot;</span><span class="p">:</span>
+        <span class="n">attributes</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">attr</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">):</span> <span class="n">attr</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;value_name&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">meli_item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;attributes&quot;</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="p">}</span>
+
+        <span class="n">ean</span> <span class="o">=</span> <span class="n">attributes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;GTIN&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">attributes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;SELLER_SKU&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">peso</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="n">peso_attr</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span>
+            <span class="p">(</span><span class="n">a</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">meli_item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;attributes&quot;</span><span class="p">,</span> <span class="p">[])</span> <span class="k">if</span> <span class="n">a</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;UNIT_WEIGHT&quot;</span><span class="p">),</span>
+            <span class="kc">None</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">peso_attr</span><span class="p">:</span>
+            <span class="n">values</span> <span class="o">=</span> <span class="n">peso_attr</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;values&quot;</span><span class="p">,</span> <span class="p">[])</span>
+            <span class="k">if</span> <span class="n">values</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="n">struct</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;struct&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">struct</span><span class="p">:</span>
+                    <span class="n">peso</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;number&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Descripción: usar descripción detallada si existe, o el título</span>
+        <span class="n">description_data</span> <span class="o">=</span> <span class="n">meli_item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;description_data&quot;</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="n">plain_text</span> <span class="o">=</span> <span class="n">description_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;plain_text&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="n">title</span> <span class="o">=</span> <span class="n">meli_item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;title&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">plain_text</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">plain_text</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">50</span> <span class="ow">and</span> <span class="n">title</span><span class="p">:</span>
+            <span class="n">raw_description</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">title</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">plain_text</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">raw_description</span> <span class="o">=</span> <span class="n">plain_text</span> <span class="ow">or</span> <span class="n">title</span>
+
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
+            <span class="n">productoean</span><span class="o">=</span><span class="n">ean</span><span class="p">,</span>
+            <span class="n">descripcion</span><span class="o">=</span><span class="n">raw_description</span><span class="p">,</span>
+            <span class="n">referencia</span><span class="o">=</span><span class="n">meli_item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="n">ean</span><span class="p">),</span>
+            <span class="n">inventariable</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">um1</span><span class="o">=</span><span class="s2">&quot;UND&quot;</span><span class="p">,</span>
+            <span class="n">bodega</span><span class="o">=</span><span class="s2">&quot;01&quot;</span><span class="p">,</span>
+            <span class="n">factor</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">estado</span><span class="o">=</span><span class="mi">1</span> <span class="k">if</span> <span class="n">meli_item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;status&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;active&quot;</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="n">qtyequivalente</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">costo</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+            <span class="n">presentacion</span><span class="o">=</span><span class="n">attributes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;PACKAGING_TYPE&quot;</span><span class="p">),</span>
+            <span class="n">descripcioningles</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+            <span class="n">item</span><span class="o">=</span><span class="n">ean</span><span class="p">,</span>
+            <span class="n">referenciamdc</span><span class="o">=</span><span class="n">ean</span><span class="p">,</span>
+            <span class="n">grupo</span><span class="o">=</span><span class="n">meli_item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;category_id&quot;</span><span class="p">),</span>
+            <span class="n">subgrupo</span><span class="o">=</span><span class="n">attributes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;LINE&quot;</span><span class="p">),</span>
+            <span class="n">extension1</span><span class="o">=</span><span class="n">attributes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;MODEL&quot;</span><span class="p">),</span>
+            <span class="n">nuevoean</span><span class="o">=</span><span class="n">ean</span><span class="p">,</span>
+            <span class="n">tipo</span><span class="o">=</span><span class="s2">&quot;Producto terminado&quot;</span><span class="p">,</span>
+            <span class="n">f120_tipo_item</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">fecharegistro</span><span class="o">=</span><span class="n">meli_item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;date_created&quot;</span><span class="p">),</span>
+            <span class="n">peso</span><span class="o">=</span><span class="n">peso</span><span class="p">,</span>
+            <span class="n">procedencia</span><span class="o">=</span><span class="n">meli_item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;seller_address&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;state&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">),</span>
+            <span class="n">volumen</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">proveedor</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">meli_item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;seller_id&quot;</span><span class="p">)),</span>
+            <span class="n">preciounitario</span><span class="o">=</span><span class="n">meli_item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;price&quot;</span><span class="p">),</span>
+            <span class="n">observacion</span><span class="o">=</span><span class="n">meli_item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;permalink&quot;</span><span class="p">),</span>
+            <span class="n">alergenos</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;&lt;ProductMapper ean=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">productoean</span><span class="si">}</span><span class="s2"> &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;desc=&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">descripcion</span><span class="p">[:</span><span class="mi">20</span><span class="p">]</span><span class="si">}</span><span class="s2">...&#39; estado=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">estado</span><span class="si">}</span><span class="s2">&gt;&quot;</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="BarCodeMapper">
+<a class="viewcode-back" href="../../../../mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.BarCodeMapper">[documentos]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">BarCodeMapper</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> 
+        <span class="n">idinternoean</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> 
+        <span class="n">codbarrasasignado</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> 
+        <span class="n">cantidad</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">qtynew</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">fechacrea</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">pesobruto</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">qtytara</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">cantidad_tara</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">idinternoean</span> <span class="o">=</span> <span class="n">idinternoean</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">codbarrasasignado</span> <span class="o">=</span> <span class="n">codbarrasasignado</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cantidad</span> <span class="o">=</span> <span class="n">cantidad</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qtynew</span> <span class="o">=</span> <span class="n">qtynew</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fechacrea</span> <span class="o">=</span> <span class="n">fechacrea</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pesobruto</span> <span class="o">=</span> <span class="n">pesobruto</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qtytara</span> <span class="o">=</span> <span class="n">qtytara</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cantidad_tara</span> <span class="o">=</span> <span class="n">cantidad_tara</span>
+
+<div class="viewcode-block" id="BarCodeMapper.to_dict">
+<a class="viewcode-back" href="../../../../mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.BarCodeMapper.to_dict">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;idinternoean&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">idinternoean</span><span class="p">,</span>
+            <span class="s2">&quot;codbarrasasignado&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">codbarrasasignado</span><span class="p">,</span>
+            <span class="s2">&quot;cantidad&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">cantidad</span><span class="p">,</span>
+            <span class="s2">&quot;qtynew&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">qtynew</span><span class="p">,</span>
+            <span class="s2">&quot;fechacrea&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">fechacrea</span><span class="p">,</span>
+            <span class="s2">&quot;pesobruto&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">pesobruto</span><span class="p">,</span>
+            <span class="s2">&quot;qtytara&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">qtytara</span><span class="p">,</span>
+            <span class="s2">&quot;cantidad_tara&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">cantidad_tara</span>
+        <span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="BarCodeMapper.from_meli_item">
+<a class="viewcode-back" href="../../../../mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.BarCodeMapper.from_meli_item">[documentos]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_meli_item</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">meli_item</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="s2">&quot;BarCodeMapper&quot;</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Construye un BarCodeMapper a partir de un item de Mercado Libre.</span>
+<span class="sd">        Si no se encuentra un EAN válido, retorna None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
+        
+        <span class="n">attributes</span> <span class="o">=</span> <span class="p">{</span><span class="n">attr</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]:</span> <span class="n">attr</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;value_name&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">meli_item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;attributes&quot;</span><span class="p">,</span> <span class="p">[])}</span>
+        <span class="n">ean</span> <span class="o">=</span> <span class="n">attributes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;GTIN&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">attributes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;SELLER_SKU&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">ean</span> <span class="p">:</span>
+            <span class="c1"># Formatear fecha de creación</span>
+            <span class="n">fecha_creacion</span> <span class="o">=</span> <span class="n">meli_item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;date_created&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">fecha_creacion</span><span class="p">:</span>
+                <span class="c1"># Convertir a formato ISO con milisegundos si es necesario</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">fecha_dt</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">fromisoformat</span><span class="p">(</span><span class="n">fecha_creacion</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;Z&#39;</span><span class="p">,</span> <span class="s1">&#39;+00:00&#39;</span><span class="p">))</span>
+                    <span class="n">fechacrea</span> <span class="o">=</span> <span class="n">fecha_dt</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2">T%H:%M:%S.</span><span class="si">%f</span><span class="s2">&quot;</span><span class="p">)[:</span><span class="o">-</span><span class="mi">3</span><span class="p">]</span>  <span class="c1"># Formato con 3 decimales</span>
+                <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">AttributeError</span><span class="p">):</span>
+                    <span class="n">fechacrea</span> <span class="o">=</span> <span class="n">fecha_creacion</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">fechacrea</span> <span class="o">=</span> <span class="kc">None</span>
+
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
+                <span class="n">idinternoean</span><span class="o">=</span><span class="n">ean</span><span class="p">,</span>
+                <span class="n">codbarrasasignado</span><span class="o">=</span><span class="n">ean</span><span class="p">,</span>
+                <span class="c1">#cantidad=meli_item.get(&quot;available_quantity&quot;, 1),</span>
+                <span class="n">cantidad</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                <span class="n">qtynew</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">fechacrea</span><span class="o">=</span><span class="n">fechacrea</span><span class="p">,</span>
+                <span class="n">pesobruto</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">qtytara</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">cantidad_tara</span><span class="o">=</span><span class="kc">None</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;BarCodeMapper(idinternoean=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">idinternoean</span><span class="si">}</span><span class="s2">, codbarrasasignado=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">codbarrasasignado</span><span class="si">}</span><span class="s2">)&quot;</span></div>
+
+    
+<div class="viewcode-block" id="CustomerMapper">
+<a class="viewcode-back" href="../../../../mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.CustomerMapper">[documentos]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">CustomerMapper</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">nit</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">nombrecliente</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">direccion</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">isactivoproveedor</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">condicionescompra</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">codigopais</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">monedadefacturacion</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">item</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">activocliente</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">ciudaddestino</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">dptodestino</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">paisdestino</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">codciudaddestino</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">coddptodestino</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">codpaisdestino</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">fecharegistro</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">telefono</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">cuidad</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">cuidaddespacho</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">notas</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">contacto</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">email</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">paisdespacho</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">departamentodespacho</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">sucursaldespacho</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">idsucursal</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">isactivocliente</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">isactivoproveed</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">estadotransferencia</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">vendedor</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">zip_code</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">licencia</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">compania</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nit</span> <span class="o">=</span> <span class="n">nit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nombrecliente</span> <span class="o">=</span> <span class="n">nombrecliente</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">direccion</span> <span class="o">=</span> <span class="n">direccion</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">isactivoproveedor</span> <span class="o">=</span> <span class="n">isactivoproveedor</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">condicionescompra</span> <span class="o">=</span> <span class="n">condicionescompra</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">codigopais</span> <span class="o">=</span> <span class="n">codigopais</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">monedadefacturacion</span> <span class="o">=</span> <span class="n">monedadefacturacion</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">item</span> <span class="o">=</span> <span class="n">item</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">activocliente</span> <span class="o">=</span> <span class="n">activocliente</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ciudaddestino</span> <span class="o">=</span> <span class="n">ciudaddestino</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dptodestino</span> <span class="o">=</span> <span class="n">dptodestino</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">paisdestino</span> <span class="o">=</span> <span class="n">paisdestino</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">codciudaddestino</span> <span class="o">=</span> <span class="n">codciudaddestino</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">coddptodestino</span> <span class="o">=</span> <span class="n">coddptodestino</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">codpaisdestino</span> <span class="o">=</span> <span class="n">codpaisdestino</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fecharegistro</span> <span class="o">=</span> <span class="n">fecharegistro</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">telefono</span> <span class="o">=</span> <span class="n">telefono</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cuidad</span> <span class="o">=</span> <span class="n">cuidad</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cuidaddespacho</span> <span class="o">=</span> <span class="n">cuidaddespacho</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">notas</span> <span class="o">=</span> <span class="n">notas</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">contacto</span> <span class="o">=</span> <span class="n">contacto</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">email</span> <span class="o">=</span> <span class="n">email</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">paisdespacho</span> <span class="o">=</span> <span class="n">paisdespacho</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">departamentodespacho</span> <span class="o">=</span> <span class="n">departamentodespacho</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sucursaldespacho</span> <span class="o">=</span> <span class="n">sucursaldespacho</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">idsucursal</span> <span class="o">=</span> <span class="n">idsucursal</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">isactivocliente</span> <span class="o">=</span> <span class="n">isactivocliente</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">isactivoproveed</span> <span class="o">=</span> <span class="n">isactivoproveed</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">estadotransferencia</span> <span class="o">=</span> <span class="n">estadotransferencia</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vendedor</span> <span class="o">=</span> <span class="n">vendedor</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">zip_code</span> <span class="o">=</span> <span class="n">zip_code</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">licencia</span> <span class="o">=</span> <span class="n">licencia</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">compania</span> <span class="o">=</span> <span class="n">compania</span>
+
+<div class="viewcode-block" id="CustomerMapper.to_dict">
+<a class="viewcode-back" href="../../../../mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.CustomerMapper.to_dict">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Serializa el objeto a un diccionario filtrando None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="CustomerMapper.from_meli_customer">
+<a class="viewcode-back" href="../../../../mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.CustomerMapper.from_meli_customer">[documentos]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_meli_customer</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">ml_customer_data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="s2">&quot;CustomerMapper&quot;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Crea un CustomerMapper desde la respuesta de MercadoLibre.</span>
+<span class="sd">        Convierte fecha al formato YYYY-MM-DD HH:MM:SS para SQL Server.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">nit</span> <span class="o">=</span> <span class="n">ml_customer_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;identification&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;number&quot;</span><span class="p">)</span>
+            <span class="n">nombrecliente</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ml_customer_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;first_name&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">ml_customer_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;last_name&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="n">direccion</span> <span class="o">=</span> <span class="n">ml_customer_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;address&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;address&quot;</span><span class="p">)</span>
+            <span class="n">ciudad</span> <span class="o">=</span> <span class="n">ml_customer_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;address&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;city&quot;</span><span class="p">)</span>
+            <span class="n">codigopais</span> <span class="o">=</span> <span class="n">ml_customer_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;country_id&quot;</span><span class="p">)</span>
+            <span class="n">zip_code</span> <span class="o">=</span> <span class="n">ml_customer_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;address&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;zip_code&quot;</span><span class="p">)</span>
+            <span class="n">telefono</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">phone_obj</span> <span class="o">=</span> <span class="n">ml_customer_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;phone&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">phone_obj</span> <span class="ow">and</span> <span class="n">phone_obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;area_code&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">phone_obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;number&quot;</span><span class="p">):</span>
+                <span class="n">telefono</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">phone_obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;area_code&#39;</span><span class="p">)</span><span class="si">}{</span><span class="n">phone_obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;number&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">email</span> <span class="o">=</span> <span class="n">ml_customer_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;email&quot;</span><span class="p">)</span>
+            <span class="n">item</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">ml_customer_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">))</span>
+
+            <span class="c1"># === Conversión de fecha para SQL Server ===</span>
+            <span class="n">fecharegistro</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">fecha_raw</span> <span class="o">=</span> <span class="n">ml_customer_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;registration_date&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">fecha_raw</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">dt</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">fromisoformat</span><span class="p">(</span><span class="n">fecha_raw</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;Z&quot;</span><span class="p">,</span> <span class="s2">&quot;+00:00&quot;</span><span class="p">))</span>
+                    <span class="n">fecharegistro</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S&quot;</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No se pudo parsear fecha: </span><span class="si">{</span><span class="n">fecha_raw</span><span class="si">}</span><span class="s2">, error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
+                <span class="n">nit</span><span class="o">=</span><span class="n">nit</span><span class="p">,</span>
+                <span class="n">nombrecliente</span><span class="o">=</span><span class="n">nombrecliente</span>
+                <span class="ow">or</span> <span class="n">ml_customer_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;nickname&quot;</span><span class="p">),</span>  <span class="c1"># TODO : Quitar nickame</span>
+                <span class="n">direccion</span><span class="o">=</span><span class="n">direccion</span><span class="p">,</span>
+                <span class="n">fecharegistro</span><span class="o">=</span><span class="n">fecharegistro</span><span class="p">,</span>
+                <span class="n">codigopais</span><span class="o">=</span><span class="n">codigopais</span><span class="p">,</span>
+                <span class="n">telefono</span><span class="o">=</span><span class="n">telefono</span><span class="p">,</span>
+                <span class="n">cuidad</span><span class="o">=</span><span class="n">ciudad</span><span class="p">,</span>
+                <span class="n">contacto</span><span class="o">=</span><span class="n">nombrecliente</span><span class="p">,</span>
+                <span class="n">email</span><span class="o">=</span><span class="n">email</span><span class="p">,</span>
+                <span class="n">zip_code</span><span class="o">=</span><span class="n">zip_code</span><span class="p">,</span>
+                <span class="n">item</span><span class="o">=</span><span class="n">item</span><span class="p">,</span>
+                <span class="n">isactivocliente</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error mapeando customer: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;CustomerMapper(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">nombrecliente</span><span class="si">}</span><span class="s2">, nit=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">nit</span><span class="si">}</span><span class="s2">, item=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">item</span><span class="si">}</span><span class="s2">)&quot;</span></div>
+
+
+<div class="viewcode-block" id="InventoryMapper">
+<a class="viewcode-back" href="../../../../mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.InventoryMapper">[documentos]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">InventoryMapper</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class representing the mapping of inventory data.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        bod (str): Bodega donde se almacena el producto. Default = &quot;01&quot;.</span>
+<span class="sd">        ubicacion (str): Ubicación específica dentro de la bodega. Default = &quot;01&quot;.</span>
+<span class="sd">        productoean (str): Código EAN del producto.</span>
+<span class="sd">        descripcion (str): Descripción del producto.</span>
+<span class="sd">        fecharegistro (Optional[str]): Fecha de registro del producto.</span>
+<span class="sd">        codigoalmacen (Optional[str]): Código del almacén.</span>
+<span class="sd">        estadodetransferencia (Optional[int]): Estado de la transferencia.</span>
+<span class="sd">        referencia (Optional[str]): Referencia del producto.</span>
+<span class="sd">        valor (Optional[float]): Valor del producto. Default = 0.0.</span>
+<span class="sd">        tipo_inventario (Optional[str]): Tipo de inventario al que pertenece el producto.</span>
+<span class="sd">        etl (Optional[str]): Estado ETL del registro.</span>
+<span class="sd">        fecha_ultima_actualizacion (Optional[str]): Fecha de la última actualización.</span>
+<span class="sd">        fecha_prox_actualizacion (Optional[str]): Fecha de la próxima actualización.</span>
+<span class="sd">        saldopt (Optional[float]): Saldo del producto terminado. Default = 0.0.</span>
+<span class="sd">        cantbloqueadoerp (Optional[float]): Cantidad bloqueada en el ERP. Default = 0.0.</span>
+<span class="sd">        saldowms (Optional[float]): Saldo del producto en el WMS. Default = 0.0.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">bod</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;01&quot;</span>
+    <span class="n">ubicacion</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;01&quot;</span>
+    <span class="n">productoean</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>       <span class="c1"># default vacío</span>
+    <span class="n">descripcion</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>       <span class="c1"># default vacío</span>
+    <span class="n">fecharegistro</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">codigoalmacen</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;0&quot;</span>
+    <span class="n">estadodetransferencia</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">referencia</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">valor</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">tipo_inventario</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;0&quot;</span>
+    <span class="n">etl</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">fecha_ultima_actualizacion</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">fecha_prox_actualizacion</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="n">saldopt</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>  <span class="c1"># default definido</span>
+    <span class="n">cantbloqueadoerp</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">saldowms</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+<div class="viewcode-block" id="InventoryMapper.to_dict">
+<a class="viewcode-back" href="../../../../mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.InventoryMapper.to_dict">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convierte el objeto en un diccionario, omitiendo claves con valores None o &quot;&quot;.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">v</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span>
+        <span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="InventoryMapper.to_wms_format">
+<a class="viewcode-back" href="../../../../mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.InventoryMapper.to_wms_format">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_wms_format</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convierte a formato requerido por el WMS.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+        <span class="c1"># Aquí podrías aplicar reglas específicas para WMS, ej:</span>
+        <span class="k">if</span> <span class="s2">&quot;descripcion&quot;</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+            <span class="n">data</span><span class="p">[</span><span class="s2">&quot;descripcion&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">truncate_description</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;descripcion&quot;</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">data</span></div>
+
+
+<div class="viewcode-block" id="InventoryMapper.truncate_description">
+<a class="viewcode-back" href="../../../../mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.InventoryMapper.truncate_description">[documentos]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">truncate_description</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">max_length</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">250</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Trunca inteligentemente una descripción sin cortar palabras.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">text</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">max_length</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">text</span>
+        <span class="n">truncated</span> <span class="o">=</span> <span class="n">text</span><span class="p">[:</span><span class="n">max_length</span><span class="p">]</span>
+        <span class="n">last_space</span> <span class="o">=</span> <span class="n">truncated</span><span class="o">.</span><span class="n">rfind</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">last_space</span> <span class="o">&gt;</span> <span class="n">max_length</span> <span class="o">*</span> <span class="mf">0.8</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">truncated</span><span class="p">[:</span><span class="n">last_space</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;...&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">truncated</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;...&quot;</span></div>
+
+
+<div class="viewcode-block" id="InventoryMapper.from_meli_item">
+<a class="viewcode-back" href="../../../../mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.InventoryMapper.from_meli_item">[documentos]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_meli_item</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">meli_item</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="s2">&quot;InventoryMapper&quot;</span><span class="p">:</span>
+        <span class="n">attributes</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">attr</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">):</span> <span class="n">attr</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;value_name&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">meli_item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;attributes&quot;</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="p">}</span>
+
+        <span class="n">ean</span> <span class="o">=</span> <span class="n">attributes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;GTIN&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">attributes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;SELLER_SKU&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span>
+        <span class="nb">id</span> <span class="o">=</span> <span class="n">meli_item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="n">ean</span><span class="p">)</span>
+        <span class="n">quantity</span> <span class="o">=</span> <span class="n">meli_item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;available_quantity&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">date_created</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">isoformat</span><span class="p">(</span><span class="n">timespec</span><span class="o">=</span><span class="s2">&quot;milliseconds&quot;</span><span class="p">)</span>
+        <span class="n">last_updated</span> <span class="o">=</span> <span class="n">meli_item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;last_updated&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Descripción: usar descripción detallada si existe, o el título</span>
+        <span class="n">description_data</span> <span class="o">=</span> <span class="n">meli_item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;description_data&quot;</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="n">plain_text</span> <span class="o">=</span> <span class="n">description_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;plain_text&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="n">title</span> <span class="o">=</span> <span class="n">meli_item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;title&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">plain_text</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">plain_text</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">50</span> <span class="ow">and</span> <span class="n">title</span><span class="p">:</span>
+            <span class="n">raw_description</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">title</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">plain_text</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">raw_description</span> <span class="o">=</span> <span class="n">plain_text</span> <span class="ow">or</span> <span class="n">title</span>
+
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
+            <span class="n">productoean</span><span class="o">=</span> <span class="n">ean</span><span class="p">,</span>
+            <span class="n">descripcion</span><span class="o">=</span> <span class="n">raw_description</span><span class="p">,</span>
+            <span class="n">fecharegistro</span><span class="o">=</span> <span class="n">date_created</span><span class="p">,</span>
+            <span class="n">codigoalmacen</span><span class="o">=</span> <span class="s2">&quot;0&quot;</span><span class="p">,</span>
+            <span class="n">estadodetransferencia</span><span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="n">referencia</span><span class="o">=</span> <span class="nb">id</span><span class="p">,</span>
+            <span class="n">valor</span><span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+            <span class="n">tipo_inventario</span><span class="o">=</span> <span class="s2">&quot;0&quot;</span><span class="p">,</span>
+            <span class="n">etl</span><span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">fecha_ultima_actualizacion</span><span class="o">=</span> <span class="n">last_updated</span><span class="p">,</span>
+            <span class="n">fecha_prox_actualizacion</span><span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+
+            <span class="n">saldopt</span><span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">quantity</span><span class="p">),</span>
+            <span class="n">cantbloqueadoerp</span><span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+            <span class="n">saldowms</span><span class="o">=</span> <span class="mf">0.0</span>
+        <span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;&lt;InventoryMapper ean=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">productoean</span><span class="si">}</span><span class="s2"> &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;bod=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">bod</span><span class="si">}</span><span class="s2"> saldo_wms=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">saldowms</span><span class="si">}</span><span class="s2">&gt;&quot;</span>
+        <span class="p">)</span></div>
+
+    
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Derechos de autor 2025, Daniel Giraldo, Luis Gonzales, Jonathan Arroyave.</p>
+  </div>
+
+  Compilado con <a href="https://www.sphinx-doc.org/">Sphinx</a> usando un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">tema</a>
+    proporcionado por <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

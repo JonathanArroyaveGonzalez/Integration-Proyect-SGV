@@ -1,0 +1,296 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="es" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>wmsAdapterV2.views.Customer &mdash; documentación de Integration-Proyect-SGV - 1.0</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=4936afed"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../_static/translations.js?v=f85f4cfb"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Índice" href="../../../genindex.html" />
+    <link rel="search" title="Búsqueda" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Integration-Proyect-SGV
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Buscar documentos" aria-label="Buscar documentos" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contenido:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../docs/mercadolibre.endpoints.html">Endpoints de Mercadolibre</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../mercadolibre.utils.html">mercadolibre.utils package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../mercadolibre.views.html">mercadolibre.views package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Integration-Proyect-SGV</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Código de módulo</a></li>
+      <li class="breadcrumb-item active">wmsAdapterV2.views.Customer</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Código fuente para wmsAdapterV2.views.Customer</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Dependencies&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">django.http.response</span><span class="w"> </span><span class="kn">import</span> <span class="n">JsonResponse</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">django.views.decorators.csrf</span><span class="w"> </span><span class="kn">import</span> <span class="n">csrf_exempt</span>
+
+
+<span class="sd">&quot;&quot;&quot; Functions and models &quot;&quot;&quot;</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">wmsAdapterV2.functions.Customer.bulk_customer</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_list_customers</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">wmsAdapterV2.functions.Customer.read</span><span class="w"> </span><span class="kn">import</span> <span class="n">read_clt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">wmsAdapterV2.functions.Customer.create</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_clt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">wmsAdapterV2.functions.Customer.update</span><span class="w"> </span><span class="kn">import</span> <span class="n">update_clt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">wmsAdapterV2.utils.create_response</span><span class="w"> </span><span class="kn">import</span> <span class="n">created_response</span>
+
+
+<div class="viewcode-block" id="clt">
+<a class="viewcode-back" href="../../../docs/wmsAdapterV2.views.html#wmsAdapterV2.views.Customer.clt">[documentos]</a>
+<span class="nd">@csrf_exempt</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">clt</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This view is used to create, read, update and delete articles</span>
+<span class="sd">    @params:</span>
+<span class="sd">        request: request object</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Get the database name</span>
+        <span class="n">db_name</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">db_name</span>
+        <span class="c1"># print(db_name)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">JsonResponse</span><span class="p">({</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;Unauthorized&quot;</span><span class="p">},</span> <span class="n">safe</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">status</span><span class="o">=</span><span class="mi">401</span><span class="p">)</span>
+
+    <span class="c1"># Get products</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;GET&quot;</span><span class="p">:</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Get articles</span>
+            <span class="n">response</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">read_clt</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">db_name</span><span class="o">=</span><span class="n">db_name</span><span class="p">)</span>
+
+            <span class="c1"># Check the response</span>
+            <span class="k">return</span> <span class="n">JsonResponse</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="n">safe</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">status</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
+
+        <span class="c1"># If there is an error</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">JsonResponse</span><span class="p">({</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)},</span> <span class="n">safe</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">status</span><span class="o">=</span><span class="mi">500</span><span class="p">)</span>
+
+    <span class="c1"># Create a new article</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;POST&quot;</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># Check the request data</span>
+                <span class="n">request_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">body</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">request_data</span><span class="p">))</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">request_data</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+                <span class="k">return</span> <span class="n">JsonResponse</span><span class="p">(</span>
+                    <span class="p">{</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;Error loading the body. Please check and try again&quot;</span><span class="p">},</span>
+                    <span class="n">safe</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                    <span class="n">status</span><span class="o">=</span><span class="mi">422</span><span class="p">,</span>
+                <span class="p">)</span>
+
+            <span class="c1"># Initialize created and errors</span>
+            <span class="n">created</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">errors</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="c1"># Check if the request data is a list</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">request_data</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="c1"># Create the article</span>
+                    <span class="n">created</span><span class="p">,</span> <span class="n">errors</span> <span class="o">=</span> <span class="n">create_list_customers</span><span class="p">(</span>
+                        <span class="kc">None</span><span class="p">,</span> <span class="n">db_name</span><span class="o">=</span><span class="n">db_name</span><span class="p">,</span> <span class="n">request_data</span><span class="o">=</span><span class="n">request_data</span>
+                    <span class="p">)</span>
+
+                <span class="c1"># If there is an error</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">JsonResponse</span><span class="p">({</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)},</span> <span class="n">safe</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">status</span><span class="o">=</span><span class="mi">500</span><span class="p">)</span>
+
+                <span class="c1"># Return the response</span>
+                <span class="k">return</span> <span class="n">created_response</span><span class="p">(</span><span class="n">created</span><span class="p">,</span> <span class="n">errors</span><span class="p">,</span> <span class="s2">&quot;create&quot;</span><span class="p">)</span>
+
+            <span class="c1"># If the request data is not a list</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">request_data</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="c1"># Create the article</span>
+                    <span class="n">response</span> <span class="o">=</span> <span class="n">create_clt</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">db_name</span><span class="o">=</span><span class="n">db_name</span><span class="p">)</span>
+
+                    <span class="c1"># Append the response</span>
+                    <span class="n">created</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+
+                <span class="c1"># If there is an error</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+
+                    <span class="c1"># Append the error</span>
+                    <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;index&quot;</span><span class="p">:</span> <span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)})</span>
+
+                <span class="c1"># Return the response</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">created</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">errors</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">created_response</span><span class="p">(</span><span class="n">created</span><span class="p">,</span> <span class="n">errors</span><span class="p">,</span> <span class="s2">&quot;create&quot;</span><span class="p">)</span>
+
+            <span class="c1"># If the request data is not a list or a dict</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">JsonResponse</span><span class="p">(</span>
+                    <span class="p">{</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;The request data must be a list or a dict&quot;</span><span class="p">},</span>
+                    <span class="n">safe</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                    <span class="n">status</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span>
+                <span class="p">)</span>
+
+        <span class="c1"># If there is an error</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+            <span class="k">return</span> <span class="n">JsonResponse</span><span class="p">({</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)},</span> <span class="n">safe</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">status</span><span class="o">=</span><span class="mi">500</span><span class="p">)</span>
+
+    <span class="c1"># Update an article</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;PUT&quot;</span><span class="p">:</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Check the request data</span>
+            <span class="n">request_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">body</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">JsonResponse</span><span class="p">(</span>
+                <span class="p">{</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;Error loading the body. Please check and try again&quot;</span><span class="p">},</span>
+                <span class="n">safe</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">status</span><span class="o">=</span><span class="mi">422</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Initialize created and errors</span>
+        <span class="n">created</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">errors</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># Check if the request data is a list</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Create the article</span>
+            <span class="n">created</span><span class="p">,</span> <span class="n">errors</span> <span class="o">=</span> <span class="n">update_clt</span><span class="p">(</span>
+                <span class="n">request</span><span class="p">,</span> <span class="n">db_name</span><span class="o">=</span><span class="n">db_name</span><span class="p">,</span> <span class="n">request_data</span><span class="o">=</span><span class="n">request_data</span>
+            <span class="p">)</span>
+
+        <span class="c1"># If there is an error</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">JsonResponse</span><span class="p">({</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)},</span> <span class="n">safe</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">status</span><span class="o">=</span><span class="mi">500</span><span class="p">)</span>
+
+        <span class="c1"># Return the response</span>
+        <span class="k">return</span> <span class="n">created_response</span><span class="p">(</span><span class="n">created</span><span class="p">,</span> <span class="n">errors</span><span class="p">,</span> <span class="s2">&quot;update&quot;</span><span class="p">)</span></div>
+
+
+
+<span class="c1">#  # Get storage by location</span>
+<span class="c1">#     if request.method == &#39;DELETE&#39;:</span>
+
+<span class="c1">#         try:</span>
+<span class="c1">#             # Delete the articles</span>
+<span class="c1">#             response = delete_articles(request, db_name=db_name)</span>
+<span class="c1">#             if response == &#39;Deleted successfully&#39;:</span>
+<span class="c1">#                 return JsonResponse({&#39;success&#39;: &#39;Deleted successfully&#39;}, safe=False, status=200)</span>
+<span class="c1">#             else:</span>
+<span class="c1">#                 return JsonResponse({&#39;error&#39;: response}, safe=False, status=400)</span>
+<span class="c1">#         except Exception as e:</span>
+<span class="c1">#             return JsonResponse({&#39;error&#39;: str(e)}, safe=False, status=500)</span>
+
+
+<span class="c1"># def created_response(created:list, errors:list):</span>
+<span class="c1">#     &#39;&#39;&#39;</span>
+<span class="c1">#     This function return the response for the created articles</span>
+<span class="c1">#     @params:</span>
+<span class="c1">#         created: list of created articles</span>
+<span class="c1">#         errors: list of errors</span>
+<span class="c1">#     &#39;&#39;&#39;</span>
+<span class="c1">#     try:</span>
+<span class="c1">#         # Initialize response</span>
+<span class="c1">#         response = {}</span>
+
+<span class="c1">#         # Check if there are created articles</span>
+<span class="c1">#         if len(created) &gt; 0 and len(errors) == 0:</span>
+<span class="c1">#             response =  JsonResponse(</span>
+<span class="c1">#                     {&#39;created&#39;: created, &#39;errors&#39;: errors}, safe=False, status=201)</span>
+
+<span class="c1">#         # Check if there are created articles and errors</span>
+<span class="c1">#         if len(created) &gt; 0 and len(errors) &gt; 0:</span>
+<span class="c1">#             response = JsonResponse(</span>
+<span class="c1">#                     {&#39;created&#39;: created, &#39;errors&#39;: errors}, safe=False, status=207)</span>
+
+<span class="c1">#         # Check if there are created articles</span>
+<span class="c1">#         if len(created) == 0 and len(errors) &gt; 0:</span>
+<span class="c1">#             response = JsonResponse({&#39;created&#39;: created, &#39;errors&#39;: errors}, safe=False, status=400)</span>
+
+<span class="c1">#         # Return the response</span>
+<span class="c1">#         return response</span>
+<span class="c1">#     except Exception as e:</span>
+<span class="c1">#         return JsonResponse({&#39;error&#39;: str(e)}, safe=False, status=500)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Derechos de autor 2025, Daniel Giraldo, Luis Gonzales, Jonathan Arroyave.</p>
+  </div>
+
+  Compilado con <a href="https://www.sphinx-doc.org/">Sphinx</a> usando un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">tema</a>
+    proporcionado por <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

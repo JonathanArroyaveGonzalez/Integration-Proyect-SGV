@@ -1,0 +1,200 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="es" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>project.middleware &mdash; documentación de Integration-Proyect-SGV - 1.0</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=4936afed"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/translations.js?v=f85f4cfb"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Índice" href="../../genindex.html" />
+    <link rel="search" title="Búsqueda" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Integration-Proyect-SGV
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Buscar documentos" aria-label="Buscar documentos" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contenido:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../docs/mercadolibre.endpoints.html">Endpoints de Mercadolibre</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mercadolibre.utils.html">mercadolibre.utils package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mercadolibre.views.html">mercadolibre.views package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Integration-Proyect-SGV</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Código de módulo</a></li>
+      <li class="breadcrumb-item active">project.middleware</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Código fuente para project.middleware</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Functions&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+
+<span class="c1"># from settings import get_apikeys</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">django.conf</span><span class="w"> </span><span class="kn">import</span> <span class="n">settings</span>
+
+<span class="sd">&quot;&quot;&quot; Dependencies &quot;&quot;&quot;</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">django.http.response</span><span class="w"> </span><span class="kn">import</span> <span class="n">JsonResponse</span>
+
+
+<div class="viewcode-block" id="MiddlewareApiKey">
+<a class="viewcode-back" href="../../docs/project.html#project.middleware.MiddlewareApiKey">[documentos]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">MiddlewareApiKey</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This middleware is used to validate the apikey</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">get_response</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_response</span> <span class="o">=</span> <span class="n">get_response</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_response</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">response</span>
+
+<div class="viewcode-block" id="MiddlewareApiKey.process_view">
+<a class="viewcode-back" href="../../docs/project.html#project.middleware.MiddlewareApiKey.process_view">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">process_view</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">view_func</span><span class="p">,</span> <span class="n">view_args</span><span class="p">,</span> <span class="n">view_kwargs</span><span class="p">):</span>
+
+        <span class="c1"># Get endpoint</span>
+        <span class="n">endpoint</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">get_full_path</span><span class="p">()</span>
+
+        <span class="c1"># print(endpoint)</span>
+
+        <span class="c1"># Split endpoint</span>
+        <span class="n">endpoint</span> <span class="o">=</span> <span class="n">endpoint</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;?&quot;</span><span class="p">)</span>
+
+        <span class="c1"># This endpoint doesn&#39;t need apikey validation</span>
+        <span class="k">if</span> <span class="n">endpoint</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;/create-apikey&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">elif</span> <span class="n">endpoint</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;/health_check&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">JsonResponse</span><span class="p">({</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;ok&quot;</span><span class="p">},</span> <span class="n">status</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># print(dict(request.GET))</span>
+                <span class="c1"># print(request.body)</span>
+
+                <span class="c1"># Get apikeys from mongo</span>
+                <span class="n">apikeys</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">API_KEYS</span>
+                <span class="c1"># apikeys = get_apikeys()</span>
+
+                <span class="c1"># Get apikey from request</span>
+                <span class="n">ak</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s2">&quot;Authorization&quot;</span><span class="p">]</span>
+                <span class="c1"># print(ak)</span>
+
+                <span class="c1"># Validate apikey</span>
+                <span class="n">db_name</span> <span class="o">=</span> <span class="n">apikeys</span><span class="p">[</span><span class="n">ak</span><span class="p">]</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">db_name</span><span class="p">)</span>
+
+                <span class="c1"># add db_name to request</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="c1"># This validates the endpoint to get the database name. It is base if the endpoint is wms/base/...</span>
+
+                    <span class="c1"># This regex would return a list with the endpoint, in this case [&#39;base&#39;]</span>
+                    <span class="n">validate_endpoint</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;wms\/(.*?)\/&quot;</span><span class="p">,</span> <span class="n">endpoint</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+                    <span class="c1"># Check if the list is not empty</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">validate_endpoint</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+
+                        <span class="c1"># The regex would be used like this:</span>
+                        <span class="k">if</span> <span class="n">validate_endpoint</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;base&quot;</span><span class="p">:</span>
+
+                            <span class="c1"># The database name would be db_name + &#39;_base&#39;</span>
+                            <span class="n">request</span><span class="o">.</span><span class="n">db_name</span> <span class="o">=</span> <span class="n">db_name</span> <span class="o">+</span> <span class="s2">&quot;_base&quot;</span>
+                        <span class="k">else</span><span class="p">:</span>
+
+                            <span class="c1"># The database name would be db_name which is the adapter database</span>
+                            <span class="n">request</span><span class="o">.</span><span class="n">db_name</span> <span class="o">=</span> <span class="n">db_name</span>
+
+                    <span class="c1"># If the list is empty, the endpoint is wms/...</span>
+                    <span class="k">else</span><span class="p">:</span>
+
+                        <span class="c1"># The database name would be db_name which is the adapter database</span>
+                        <span class="n">request</span><span class="o">.</span><span class="n">db_name</span> <span class="o">=</span> <span class="n">db_name</span>
+
+                <span class="c1"># If something goes wrong, the database name would be db_name which is the adapter database</span>
+                <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                    <span class="n">request</span><span class="o">.</span><span class="n">db_name</span> <span class="o">=</span> <span class="n">db_name</span>
+
+            <span class="c1"># If the apikey is not valid, return an auth error</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">JsonResponse</span><span class="p">({</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;Unauthorized&quot;</span><span class="p">},</span> <span class="n">safe</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">status</span><span class="o">=</span><span class="mi">401</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="kc">None</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Derechos de autor 2025, Daniel Giraldo, Luis Gonzales, Jonathan Arroyave.</p>
+  </div>
+
+  Compilado con <a href="https://www.sphinx-doc.org/">Sphinx</a> usando un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">tema</a>
+    proporcionado por <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

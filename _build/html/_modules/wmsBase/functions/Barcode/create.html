@@ -1,0 +1,219 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="es" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>wmsBase.functions.Barcode.create &mdash; documentación de Integration-Proyect-SGV - 1.0</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=4936afed"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../../_static/translations.js?v=f85f4cfb"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Índice" href="../../../../genindex.html" />
+    <link rel="search" title="Búsqueda" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            Integration-Proyect-SGV
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Buscar documentos" aria-label="Buscar documentos" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contenido:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../docs/mercadolibre.endpoints.html">Endpoints de Mercadolibre</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../mercadolibre.utils.html">mercadolibre.utils package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../mercadolibre.views.html">mercadolibre.views package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">Integration-Proyect-SGV</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Código de módulo</a></li>
+      <li class="breadcrumb-item active">wmsBase.functions.Barcode.create</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Código fuente para wmsBase.functions.Barcode.create</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot; Dependencies &quot;&quot;&quot;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">django.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">timezone</span>
+
+<span class="sd">&quot;&quot;&quot; Models and functions &quot;&quot;&quot;</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">wmsBase.models.TRelacionCodbarras</span><span class="w"> </span><span class="kn">import</span> <span class="n">TRelacionCodbarras</span>
+
+<div class="viewcode-block" id="create_t_relacion_codbarras">
+<a class="viewcode-back" href="../../../../docs/wmsBase.functions.Barcode.html#wmsBase.functions.Barcode.create.create_t_relacion_codbarras">[documentos]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_t_relacion_codbarras</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">db_name</span><span class="p">,</span> <span class="n">request_data</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39; </span>
+<span class="sd">            This function create a new article in the database</span>
+<span class="sd">            @params:</span>
+<span class="sd">                request: request object</span>
+<span class="sd">                db_name: name of the database</span>
+<span class="sd">                request_data: data to create the article</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="c1"># Check if request_data is previously defined</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">request_data</span><span class="p">):</span>
+            <span class="c1"># Convert request_data to dict</span>
+            <span class="n">request_data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">request_data</span><span class="p">)</span>
+
+        <span class="k">elif</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">body</span><span class="p">):</span>
+            <span class="c1"># Convert request.body to dict</span>
+            <span class="n">request_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">body</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No data to create&#39;</span><span class="p">)</span>
+
+        <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">TRelacionCodbarras</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">get_fields</span><span class="p">()]</span>
+
+        <span class="c1"># Check the fields </span>
+        <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">request_data</span><span class="p">:</span> 
+            <span class="k">if</span> <span class="n">r</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">:</span> 
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Field </span><span class="si">{}</span><span class="s2"> not found&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">r</span><span class="p">))</span>
+
+        <span class="c1"># Get the final fields</span>
+        <span class="n">final_fields</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># Iterate over the fields</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">:</span>
+
+         <span class="c1"># Check if the field is in the request_data. This is for required fields</span>
+            <span class="c1"># if fechacrea is in request_data</span>
+            <span class="k">if</span> <span class="n">f</span> <span class="o">==</span> <span class="s2">&quot;fechacrea&quot;</span><span class="p">:</span>
+                <span class="n">final_fields</span><span class="p">[</span><span class="n">f</span><span class="p">]</span> <span class="o">=</span> <span class="n">timezone</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+
+            <span class="c1"># if codbarrasasignado is in request_data</span>
+            <span class="k">elif</span> <span class="n">f</span> <span class="o">==</span> <span class="s2">&quot;codbarrasasignado&quot;</span><span class="p">:</span>
+                <span class="n">codbarrasasignado</span> <span class="o">=</span> <span class="n">request_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+                <span class="n">final_fields</span><span class="p">[</span><span class="n">f</span><span class="p">]</span> <span class="o">=</span> <span class="n">codbarrasasignado</span>
+                <span class="k">if</span> <span class="n">codbarrasasignado</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">response_required</span><span class="p">(</span><span class="n">f</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">final_fields</span><span class="p">[</span><span class="n">f</span><span class="p">]</span> <span class="o">=</span> <span class="n">request_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            
+            <span class="c1"># if idinternoean is in request_data</span>
+            <span class="k">elif</span> <span class="n">f</span> <span class="o">==</span> <span class="s2">&quot;idinternoean&quot;</span><span class="p">:</span>
+                <span class="n">idinternoean</span> <span class="o">=</span> <span class="n">request_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+                <span class="n">final_fields</span><span class="p">[</span><span class="n">f</span><span class="p">]</span> <span class="o">=</span> <span class="n">idinternoean</span>
+                <span class="k">if</span> <span class="n">idinternoean</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">response_required</span><span class="p">(</span><span class="n">f</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">final_fields</span><span class="p">[</span><span class="n">f</span><span class="p">]</span> <span class="o">=</span> <span class="n">request_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+            <span class="c1"># if cantidad is in request_data</span>
+            <span class="k">elif</span> <span class="n">f</span> <span class="o">==</span> <span class="s2">&quot;cantidad&quot;</span><span class="p">:</span>
+                <span class="n">cantidad</span> <span class="o">=</span> <span class="n">request_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+                <span class="n">final_fields</span><span class="p">[</span><span class="n">f</span><span class="p">]</span> <span class="o">=</span> <span class="n">cantidad</span>
+                <span class="k">if</span> <span class="n">cantidad</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">response_required</span><span class="p">(</span><span class="n">f</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">final_fields</span><span class="p">[</span><span class="n">f</span><span class="p">]</span> <span class="o">=</span> <span class="n">request_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">final_fields</span><span class="p">[</span><span class="n">f</span><span class="p">]</span> <span class="o">=</span> <span class="n">request_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>  
+
+            <span class="c1"># get t_relacion_codbarras</span>
+            <span class="n">product</span> <span class="o">=</span> <span class="n">TRelacionCodbarras</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">using</span><span class="p">(</span><span class="n">db_name</span><span class="p">)</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">codbarrasasignado</span><span class="o">=</span><span class="n">final_fields</span><span class="p">[</span><span class="s1">&#39;codbarrasasignado&#39;</span><span class="p">],</span> <span class="n">idinternoean</span><span class="o">=</span><span class="n">final_fields</span><span class="p">[</span><span class="s1">&#39;idinternoean&#39;</span><span class="p">])</span>
+
+            <span class="c1"># Check if the register exists</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">product</span><span class="p">))</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;The register with codbarrasasignado </span><span class="si">%s</span><span class="s1"> already exists&#39;</span> <span class="o">%</span> <span class="n">final_fields</span><span class="p">[</span><span class="s1">&#39;codbarrasasignado&#39;</span><span class="p">])</span>
+            
+            <span class="c1"># Create the register</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">TRelacionCodbarras</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">using</span><span class="p">(</span><span class="n">db_name</span><span class="p">)</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="o">**</span><span class="n">final_fields</span><span class="p">)</span> <span class="c1">#kwargs</span>
+
+                    <span class="c1"># Get the register</span>
+                    <span class="n">register</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">TRelacionCodbarras</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">using</span><span class="p">(</span><span class="n">db_name</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">()</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">codbarrasasignado</span><span class="o">=</span><span class="n">final_fields</span><span class="p">[</span><span class="s1">&#39;codbarrasasignado&#39;</span><span class="p">],</span> <span class="n">idinternoean</span><span class="o">=</span><span class="n">final_fields</span><span class="p">[</span><span class="s1">&#39;idinternoean&#39;</span><span class="p">]))[</span><span class="mi">0</span><span class="p">]</span>
+
+                    <span class="c1"># Return the product</span>
+                    <span class="k">return</span> <span class="n">register</span>
+
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">e</span><span class="p">)</span></div>
+
+        
+<div class="viewcode-block" id="response_required">
+<a class="viewcode-back" href="../../../../docs/wmsBase.functions.Barcode.html#wmsBase.functions.Barcode.create.response_required">[documentos]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">response_required</span><span class="p">(</span><span class="n">field</span><span class="p">:</span><span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        This function returns a message if the field is required</span>
+<span class="sd">        @params:</span>
+<span class="sd">            field: field to check</span>
+<span class="sd">        @return:</span>
+<span class="sd">            message: message to return</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">return</span> <span class="s2">&quot;Field </span><span class="si">{}</span><span class="s2"> is required&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">field</span><span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Derechos de autor 2025, Daniel Giraldo, Luis Gonzales, Jonathan Arroyave.</p>
+  </div>
+
+  Compilado con <a href="https://www.sphinx-doc.org/">Sphinx</a> usando un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">tema</a>
+    proporcionado por <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

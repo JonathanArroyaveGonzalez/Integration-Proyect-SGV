@@ -1,0 +1,296 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="es" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>settings.functions.read &mdash; documentación de Integration-Proyect-SGV - 1.0</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=4936afed"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../_static/translations.js?v=f85f4cfb"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Índice" href="../../../genindex.html" />
+    <link rel="search" title="Búsqueda" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Integration-Proyect-SGV
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Buscar documentos" aria-label="Buscar documentos" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contenido:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../docs/mercadolibre.endpoints.html">Endpoints de Mercadolibre</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../mercadolibre.utils.html">mercadolibre.utils package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../mercadolibre.views.html">mercadolibre.views package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Integration-Proyect-SGV</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Código de módulo</a></li>
+      <li class="breadcrumb-item active">settings.functions.read</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Código fuente para settings.functions.read</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Dependencies&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pymongo</span><span class="w"> </span><span class="kn">import</span> <span class="n">MongoClient</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dotenv</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_dotenv</span>
+
+<span class="sd">&quot;&quot;&quot; Local Dependencies &quot;&quot;&quot;</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">settings.settings</span><span class="w"> </span><span class="kn">import</span> <span class="n">global_settings</span>
+
+<span class="n">load_dotenv</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="get_collections">
+<a class="viewcode-back" href="../../../docs/settings.functions.html#settings.functions.read.get_collections">[documentos]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_collections</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function returns a list with the names of the collections in the database</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">apidbmongo</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;APIDBMONGO&quot;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Could not find a APIDBMONGO in environment&quot;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># connect to the mongo client</span>
+        <span class="n">client</span> <span class="o">=</span> <span class="n">MongoClient</span><span class="p">(</span><span class="n">global_settings</span><span class="o">.</span><span class="n">CONNECTION_STRING</span><span class="p">)</span>
+
+        <span class="c1"># select the database</span>
+        <span class="n">db</span> <span class="o">=</span> <span class="n">client</span><span class="p">[</span><span class="n">apidbmongo</span><span class="p">]</span>
+
+        <span class="c1"># get the collections</span>
+        <span class="n">collections</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">list_collection_names</span><span class="p">()</span>
+
+        <span class="c1"># close the connection</span>
+        <span class="n">client</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="c1"># return the collections</span>
+        <span class="k">return</span> <span class="n">collections</span>
+
+    <span class="c1"># if the connection fails, return an empty list</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[]</span></div>
+
+
+
+<div class="viewcode-block" id="get_apikeys">
+<a class="viewcode-back" href="../../../docs/settings.functions.html#settings.functions.read.get_apikeys">[documentos]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_apikeys</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function returns a dictionary with the apikeys for each collection</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">apidbmongo</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;APIDBMONGO&quot;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Could not find a APIDBMONGO in environment&quot;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># connect to the mongo client</span>
+        <span class="n">client</span> <span class="o">=</span> <span class="n">MongoClient</span><span class="p">(</span><span class="n">global_settings</span><span class="o">.</span><span class="n">CONNECTION_STRING</span><span class="p">)</span>
+
+        <span class="c1"># select the database</span>
+        <span class="n">db</span> <span class="o">=</span> <span class="n">client</span><span class="p">[</span><span class="n">apidbmongo</span><span class="p">]</span>
+
+        <span class="c1"># initialize the dictionary</span>
+        <span class="n">apikeys</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># for each collection, get the apikey</span>
+        <span class="k">for</span> <span class="n">collection</span> <span class="ow">in</span> <span class="n">db</span><span class="o">.</span><span class="n">list_collection_names</span><span class="p">():</span>
+
+            <span class="c1"># select the collection</span>
+            <span class="n">collection</span> <span class="o">=</span> <span class="n">db</span><span class="p">[</span><span class="n">collection</span><span class="p">]</span>
+
+            <span class="c1"># get the apikey</span>
+            <span class="n">item_details</span> <span class="o">=</span> <span class="n">collection</span><span class="o">.</span><span class="n">find</span><span class="p">({</span><span class="s2">&quot;apikey&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;$exists&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}})</span>
+
+            <span class="c1"># add the apikey to the dictionary</span>
+            <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">item_details</span><span class="p">:</span>
+                <span class="n">apikeys</span><span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;apikey&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">collection</span><span class="o">.</span><span class="n">name</span>
+
+        <span class="c1"># close the connection</span>
+        <span class="n">client</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="c1"># return the dictionary</span>
+        <span class="k">return</span> <span class="n">apikeys</span>
+
+    <span class="c1"># if the connection fails, return an empty dictionary</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{}</span></div>
+
+
+
+<div class="viewcode-block" id="get_db_connection">
+<a class="viewcode-back" href="../../../docs/settings.functions.html#settings.functions.read.get_db_connection">[documentos]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_db_connection</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function returns a dictionary with the database connection for each collection</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">apidbmongo</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;APIDBMONGO&quot;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Could not find a APIDBMONGO in environment&quot;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># connect to the mongo client</span>
+            <span class="n">client</span> <span class="o">=</span> <span class="n">MongoClient</span><span class="p">(</span><span class="n">global_settings</span><span class="o">.</span><span class="n">CONNECTION_STRING</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="c1"># if the connection fails, return an empty dictionary</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Could not connect to the database&quot;</span><span class="p">)</span>
+
+        <span class="c1"># select the database</span>
+        <span class="n">db</span> <span class="o">=</span> <span class="n">client</span><span class="p">[</span><span class="n">apidbmongo</span><span class="p">]</span>
+
+        <span class="c1"># initialize the dictionary</span>
+        <span class="n">db_connection</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># for each collection, get the database connection</span>
+        <span class="k">for</span> <span class="n">collection</span> <span class="ow">in</span> <span class="n">db</span><span class="o">.</span><span class="n">list_collection_names</span><span class="p">():</span>
+
+            <span class="c1"># select the collection</span>
+            <span class="n">collection</span> <span class="o">=</span> <span class="n">db</span><span class="p">[</span><span class="n">collection</span><span class="p">]</span>
+
+            <span class="c1"># get the database connection</span>
+            <span class="n">item_details</span> <span class="o">=</span> <span class="n">collection</span><span class="o">.</span><span class="n">find</span><span class="p">({</span><span class="s2">&quot;wms&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;$exists&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}})</span>
+
+            <span class="c1"># add the databases connections to the dictionary (adapter and base)</span>
+            <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">item_details</span><span class="p">:</span>
+                <span class="n">db_connection</span><span class="p">[</span><span class="n">collection</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="s2">&quot;wms&quot;</span><span class="p">][</span><span class="s2">&quot;db&quot;</span><span class="p">]</span>  <span class="c1"># adapter</span>
+                <span class="n">db_connection</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">collection</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;_base&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="s2">&quot;wms&quot;</span><span class="p">][</span>
+                    <span class="s2">&quot;db_base&quot;</span>
+                <span class="p">]</span>  <span class="c1"># base</span>
+
+        <span class="c1"># close the connection</span>
+        <span class="n">client</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="c1"># return the dictionary</span>
+        <span class="k">return</span> <span class="n">db_connection</span>
+
+    <span class="c1"># if the connection fails, return an empty dictionary</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{}</span></div>
+
+
+
+<div class="viewcode-block" id="get_time_zones">
+<a class="viewcode-back" href="../../../docs/settings.functions.html#settings.functions.read.get_time_zones">[documentos]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_time_zones</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function returns a dictionary with the time zones for each collection</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">apidbmongo</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;APIDBMONGO&quot;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Could not find a APIDBMONGO in environment&quot;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># connect to the mongo client</span>
+        <span class="n">client</span> <span class="o">=</span> <span class="n">MongoClient</span><span class="p">(</span><span class="n">global_settings</span><span class="o">.</span><span class="n">CONNECTION_STRING</span><span class="p">)</span>
+
+        <span class="c1"># select the database</span>
+        <span class="n">db</span> <span class="o">=</span> <span class="n">client</span><span class="p">[</span><span class="n">apidbmongo</span><span class="p">]</span>
+
+        <span class="c1"># initialize the dictionary</span>
+        <span class="n">time_zones</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># for each collection, get the time zone</span>
+        <span class="k">for</span> <span class="n">collection</span> <span class="ow">in</span> <span class="n">db</span><span class="o">.</span><span class="n">list_collection_names</span><span class="p">():</span>
+
+            <span class="c1"># select the collection</span>
+            <span class="n">collection</span> <span class="o">=</span> <span class="n">db</span><span class="p">[</span><span class="n">collection</span><span class="p">]</span>
+
+            <span class="c1"># get the time zone</span>
+            <span class="n">item_details</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">collection</span><span class="o">.</span><span class="n">find</span><span class="p">({</span><span class="s2">&quot;time_zone&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;$exists&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}}))</span>
+            <span class="c1"># add a default time zone to the dictionary</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">item_details</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">time_zones</span><span class="p">[</span><span class="n">collection</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;UTC&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># add the time zone to the dictionary</span>
+                <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">item_details</span><span class="p">:</span>
+                    <span class="n">time_zones</span><span class="p">[</span><span class="n">collection</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="s2">&quot;time_zone&quot;</span><span class="p">]</span>
+
+        <span class="c1"># close the connection</span>
+        <span class="n">client</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="c1"># return the dictionary</span>
+        <span class="k">return</span> <span class="n">time_zones</span>
+
+    <span class="c1"># if the connection fails, return an empty dictionary</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{}</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Derechos de autor 2025, Daniel Giraldo, Luis Gonzales, Jonathan Arroyave.</p>
+  </div>
+
+  Compilado con <a href="https://www.sphinx-doc.org/">Sphinx</a> usando un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">tema</a>
+    proporcionado por <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

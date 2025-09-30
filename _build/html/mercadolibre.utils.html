@@ -1,0 +1,442 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="es" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mercadolibre.utils package &mdash; documentación de Integration-Proyect-SGV - 1.0</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=4936afed"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/translations.js?v=f85f4cfb"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Índice" href="genindex.html" />
+    <link rel="search" title="Búsqueda" href="search.html" />
+    <link rel="next" title="mercadolibre.utils.mapper package" href="mercadolibre.utils.mapper.html" />
+    <link rel="prev" title="Endpoints de Mercadolibre" href="docs/mercadolibre.endpoints.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Integration-Proyect-SGV
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Buscar documentos" aria-label="Buscar documentos" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contenido:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="docs/mercadolibre.endpoints.html">Endpoints de Mercadolibre</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">mercadolibre.utils package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mercadolibre.utils.mapper.html">mercadolibre.utils.mapper package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#mercadolibre-utils-api-client-module">mercadolibre.utils.api_client module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#mercadolibre-utils-auth-helpers-module">mercadolibre.utils.auth_helpers module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-mercadolibre.utils.response_helpers">mercadolibre.utils.response_helpers module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#mercadolibre.utils.response_helpers.create_error_response"><code class="docutils literal notranslate"><span class="pre">create_error_response()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mercadolibre.utils.response_helpers.create_partial_success_response"><code class="docutils literal notranslate"><span class="pre">create_partial_success_response()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mercadolibre.utils.response_helpers.create_success_response"><code class="docutils literal notranslate"><span class="pre">create_success_response()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mercadolibre.utils.response_helpers.extract_response_data"><code class="docutils literal notranslate"><span class="pre">extract_response_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mercadolibre.utils.response_helpers.get_response_message"><code class="docutils literal notranslate"><span class="pre">get_response_message()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mercadolibre.utils.response_helpers.get_response_status_code"><code class="docutils literal notranslate"><span class="pre">get_response_status_code()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mercadolibre.utils.response_helpers.get_response_success"><code class="docutils literal notranslate"><span class="pre">get_response_success()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mercadolibre.utils.response_helpers.handle_internal_server_error"><code class="docutils literal notranslate"><span class="pre">handle_internal_server_error()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mercadolibre.utils.response_helpers.handle_json_decode_error"><code class="docutils literal notranslate"><span class="pre">handle_json_decode_error()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mercadolibre.utils.response_helpers.handle_request_validation"><code class="docutils literal notranslate"><span class="pre">handle_request_validation()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-mercadolibre.utils">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="mercadolibre.views.html">mercadolibre.views package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Integration-Proyect-SGV</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">mercadolibre.utils package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/mercadolibre.utils.rst.txt" rel="nofollow"> Ver código fuente de la página</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="mercadolibre-utils-package">
+<h1>mercadolibre.utils package<a class="headerlink" href="#mercadolibre-utils-package" title="Link to this heading"></a></h1>
+<section id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Link to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="mercadolibre.utils.mapper.html">mercadolibre.utils.mapper package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="mercadolibre.utils.mapper.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mercadolibre.utils.mapper.html#module-mercadolibre.utils.mapper.data_mapper">mercadolibre.utils.mapper.data_mapper module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.BarCodeMapper"><code class="docutils literal notranslate"><span class="pre">BarCodeMapper</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.BarCodeMapper.from_meli_item"><code class="docutils literal notranslate"><span class="pre">BarCodeMapper.from_meli_item()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.BarCodeMapper.to_dict"><code class="docutils literal notranslate"><span class="pre">BarCodeMapper.to_dict()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.CustomerMapper"><code class="docutils literal notranslate"><span class="pre">CustomerMapper</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.CustomerMapper.from_meli_customer"><code class="docutils literal notranslate"><span class="pre">CustomerMapper.from_meli_customer()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.CustomerMapper.to_dict"><code class="docutils literal notranslate"><span class="pre">CustomerMapper.to_dict()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.InventoryMapper"><code class="docutils literal notranslate"><span class="pre">InventoryMapper</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.InventoryMapper.bod"><code class="docutils literal notranslate"><span class="pre">InventoryMapper.bod</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.InventoryMapper.ubicacion"><code class="docutils literal notranslate"><span class="pre">InventoryMapper.ubicacion</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.InventoryMapper.productoean"><code class="docutils literal notranslate"><span class="pre">InventoryMapper.productoean</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.InventoryMapper.descripcion"><code class="docutils literal notranslate"><span class="pre">InventoryMapper.descripcion</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.InventoryMapper.fecharegistro"><code class="docutils literal notranslate"><span class="pre">InventoryMapper.fecharegistro</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.InventoryMapper.codigoalmacen"><code class="docutils literal notranslate"><span class="pre">InventoryMapper.codigoalmacen</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.InventoryMapper.estadodetransferencia"><code class="docutils literal notranslate"><span class="pre">InventoryMapper.estadodetransferencia</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.InventoryMapper.referencia"><code class="docutils literal notranslate"><span class="pre">InventoryMapper.referencia</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.InventoryMapper.valor"><code class="docutils literal notranslate"><span class="pre">InventoryMapper.valor</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.InventoryMapper.tipo_inventario"><code class="docutils literal notranslate"><span class="pre">InventoryMapper.tipo_inventario</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.InventoryMapper.etl"><code class="docutils literal notranslate"><span class="pre">InventoryMapper.etl</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.InventoryMapper.fecha_ultima_actualizacion"><code class="docutils literal notranslate"><span class="pre">InventoryMapper.fecha_ultima_actualizacion</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.InventoryMapper.fecha_prox_actualizacion"><code class="docutils literal notranslate"><span class="pre">InventoryMapper.fecha_prox_actualizacion</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.InventoryMapper.saldopt"><code class="docutils literal notranslate"><span class="pre">InventoryMapper.saldopt</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.InventoryMapper.cantbloqueadoerp"><code class="docutils literal notranslate"><span class="pre">InventoryMapper.cantbloqueadoerp</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.InventoryMapper.saldowms"><code class="docutils literal notranslate"><span class="pre">InventoryMapper.saldowms</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#id0"><code class="docutils literal notranslate"><span class="pre">InventoryMapper.bod</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#id1"><code class="docutils literal notranslate"><span class="pre">InventoryMapper.cantbloqueadoerp</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#id2"><code class="docutils literal notranslate"><span class="pre">InventoryMapper.codigoalmacen</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#id3"><code class="docutils literal notranslate"><span class="pre">InventoryMapper.descripcion</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#id4"><code class="docutils literal notranslate"><span class="pre">InventoryMapper.estadodetransferencia</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#id5"><code class="docutils literal notranslate"><span class="pre">InventoryMapper.etl</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#id6"><code class="docutils literal notranslate"><span class="pre">InventoryMapper.fecha_prox_actualizacion</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#id7"><code class="docutils literal notranslate"><span class="pre">InventoryMapper.fecha_ultima_actualizacion</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#id8"><code class="docutils literal notranslate"><span class="pre">InventoryMapper.fecharegistro</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.InventoryMapper.from_meli_item"><code class="docutils literal notranslate"><span class="pre">InventoryMapper.from_meli_item()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#id9"><code class="docutils literal notranslate"><span class="pre">InventoryMapper.productoean</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#id10"><code class="docutils literal notranslate"><span class="pre">InventoryMapper.referencia</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#id11"><code class="docutils literal notranslate"><span class="pre">InventoryMapper.saldopt</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#id12"><code class="docutils literal notranslate"><span class="pre">InventoryMapper.saldowms</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#id13"><code class="docutils literal notranslate"><span class="pre">InventoryMapper.tipo_inventario</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.InventoryMapper.to_dict"><code class="docutils literal notranslate"><span class="pre">InventoryMapper.to_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.InventoryMapper.to_wms_format"><code class="docutils literal notranslate"><span class="pre">InventoryMapper.to_wms_format()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.InventoryMapper.truncate_description"><code class="docutils literal notranslate"><span class="pre">InventoryMapper.truncate_description()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#id14"><code class="docutils literal notranslate"><span class="pre">InventoryMapper.ubicacion</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#id15"><code class="docutils literal notranslate"><span class="pre">InventoryMapper.valor</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.ProductMapper"><code class="docutils literal notranslate"><span class="pre">ProductMapper</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.ProductMapper.alergenos"><code class="docutils literal notranslate"><span class="pre">ProductMapper.alergenos</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.ProductMapper.bodega"><code class="docutils literal notranslate"><span class="pre">ProductMapper.bodega</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.ProductMapper.controla_status_calidad"><code class="docutils literal notranslate"><span class="pre">ProductMapper.controla_status_calidad</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.ProductMapper.costo"><code class="docutils literal notranslate"><span class="pre">ProductMapper.costo</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.ProductMapper.descripcion"><code class="docutils literal notranslate"><span class="pre">ProductMapper.descripcion</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.ProductMapper.descripcioningles"><code class="docutils literal notranslate"><span class="pre">ProductMapper.descripcioningles</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.ProductMapper.estado"><code class="docutils literal notranslate"><span class="pre">ProductMapper.estado</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.ProductMapper.estadotransferencia"><code class="docutils literal notranslate"><span class="pre">ProductMapper.estadotransferencia</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.ProductMapper.extension1"><code class="docutils literal notranslate"><span class="pre">ProductMapper.extension1</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.ProductMapper.extension2"><code class="docutils literal notranslate"><span class="pre">ProductMapper.extension2</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.ProductMapper.f120_tipo_item"><code class="docutils literal notranslate"><span class="pre">ProductMapper.f120_tipo_item</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.ProductMapper.factor"><code class="docutils literal notranslate"><span class="pre">ProductMapper.factor</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.ProductMapper.fecharegistro"><code class="docutils literal notranslate"><span class="pre">ProductMapper.fecharegistro</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.ProductMapper.from_meli_item"><code class="docutils literal notranslate"><span class="pre">ProductMapper.from_meli_item()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.ProductMapper.grupo"><code class="docutils literal notranslate"><span class="pre">ProductMapper.grupo</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.ProductMapper.ingredientes"><code class="docutils literal notranslate"><span class="pre">ProductMapper.ingredientes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.ProductMapper.instrucciones_de_uso"><code class="docutils literal notranslate"><span class="pre">ProductMapper.instrucciones_de_uso</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.ProductMapper.inventariable"><code class="docutils literal notranslate"><span class="pre">ProductMapper.inventariable</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.ProductMapper.item"><code class="docutils literal notranslate"><span class="pre">ProductMapper.item</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.ProductMapper.nuevoean"><code class="docutils literal notranslate"><span class="pre">ProductMapper.nuevoean</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.ProductMapper.observacion"><code class="docutils literal notranslate"><span class="pre">ProductMapper.observacion</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.ProductMapper.origencompra"><code class="docutils literal notranslate"><span class="pre">ProductMapper.origencompra</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.ProductMapper.peso"><code class="docutils literal notranslate"><span class="pre">ProductMapper.peso</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.ProductMapper.preciounitario"><code class="docutils literal notranslate"><span class="pre">ProductMapper.preciounitario</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.ProductMapper.presentacion"><code class="docutils literal notranslate"><span class="pre">ProductMapper.presentacion</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.ProductMapper.procedencia"><code class="docutils literal notranslate"><span class="pre">ProductMapper.procedencia</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.ProductMapper.productoean"><code class="docutils literal notranslate"><span class="pre">ProductMapper.productoean</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.ProductMapper.proveedor"><code class="docutils literal notranslate"><span class="pre">ProductMapper.proveedor</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.ProductMapper.qtyequivalente"><code class="docutils literal notranslate"><span class="pre">ProductMapper.qtyequivalente</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.ProductMapper.referencia"><code class="docutils literal notranslate"><span class="pre">ProductMapper.referencia</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.ProductMapper.referenciamdc"><code class="docutils literal notranslate"><span class="pre">ProductMapper.referenciamdc</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.ProductMapper.subgrupo"><code class="docutils literal notranslate"><span class="pre">ProductMapper.subgrupo</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.ProductMapper.tipo"><code class="docutils literal notranslate"><span class="pre">ProductMapper.tipo</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.ProductMapper.to_dict"><code class="docutils literal notranslate"><span class="pre">ProductMapper.to_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.ProductMapper.to_wms_format"><code class="docutils literal notranslate"><span class="pre">ProductMapper.to_wms_format()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.ProductMapper.truncate_description"><code class="docutils literal notranslate"><span class="pre">ProductMapper.truncate_description()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.ProductMapper.u_inv"><code class="docutils literal notranslate"><span class="pre">ProductMapper.u_inv</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.ProductMapper.u_inv_p"><code class="docutils literal notranslate"><span class="pre">ProductMapper.u_inv_p</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.ProductMapper.um1"><code class="docutils literal notranslate"><span class="pre">ProductMapper.um1</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mercadolibre.utils.mapper.html#mercadolibre.utils.mapper.data_mapper.ProductMapper.volumen"><code class="docutils literal notranslate"><span class="pre">ProductMapper.volumen</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mercadolibre.utils.mapper.html#module-mercadolibre.utils.mapper">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+</section>
+<section id="mercadolibre-utils-api-client-module">
+<h2>mercadolibre.utils.api_client module<a class="headerlink" href="#mercadolibre-utils-api-client-module" title="Link to this heading"></a></h2>
+</section>
+<section id="mercadolibre-utils-auth-helpers-module">
+<h2>mercadolibre.utils.auth_helpers module<a class="headerlink" href="#mercadolibre-utils-auth-helpers-module" title="Link to this heading"></a></h2>
+</section>
+<section id="module-mercadolibre.utils.response_helpers">
+<span id="mercadolibre-utils-response-helpers-module"></span><h2>mercadolibre.utils.response_helpers module<a class="headerlink" href="#module-mercadolibre.utils.response_helpers" title="Link to this heading"></a></h2>
+<p>Utilidades para estandarizar respuestas HTTP en la aplicación MercadoLibre</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="mercadolibre.utils.response_helpers.create_error_response">
+<span class="sig-prename descclassname"><span class="pre">mercadolibre.utils.response_helpers.</span></span><span class="sig-name descname"><span class="pre">create_error_response</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">errors</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">List</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">status</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">400</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error_code</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">JsonResponse</span></span></span><a class="reference internal" href="_modules/mercadolibre/utils/response_helpers.html#create_error_response"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#mercadolibre.utils.response_helpers.create_error_response" title="Link to this definition"></a></dt>
+<dd><p>Crea una respuesta HTTP de error estandarizada</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>message</strong> – Mensaje principal del error</p></li>
+<li><p><strong>errors</strong> – Detalles específicos del error</p></li>
+<li><p><strong>status</strong> – Código de estado HTTP (400, 500, etc.)</p></li>
+<li><p><strong>error_code</strong> – Código específico del error para debugging</p></li>
+</ul>
+</dd>
+<dt class="field-even">Devuelve<span class="colon">:</span></dt>
+<dd class="field-even"><p>Respuesta HTTP de error estandarizada</p>
+</dd>
+<dt class="field-odd">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-odd"><p>JsonResponse</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mercadolibre.utils.response_helpers.create_partial_success_response">
+<span class="sig-prename descclassname"><span class="pre">mercadolibre.utils.response_helpers.</span></span><span class="sig-name descname"><span class="pre">create_partial_success_response</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">created</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">errors</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">operation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'operación'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">JsonResponse</span></span></span><a class="reference internal" href="_modules/mercadolibre/utils/response_helpers.html#create_partial_success_response"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#mercadolibre.utils.response_helpers.create_partial_success_response" title="Link to this definition"></a></dt>
+<dd><p>Crea una respuesta para operaciones con éxitos parciales</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>created</strong> – Lista de elementos creados/actualizados exitosamente</p></li>
+<li><p><strong>errors</strong> – Lista de errores ocurridos</p></li>
+<li><p><strong>operation</strong> – Tipo de operación realizada</p></li>
+</ul>
+</dd>
+<dt class="field-even">Devuelve<span class="colon">:</span></dt>
+<dd class="field-even"><p>Respuesta HTTP con código apropiado</p>
+</dd>
+<dt class="field-odd">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-odd"><p>JsonResponse</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mercadolibre.utils.response_helpers.create_success_response">
+<span class="sig-prename descclassname"><span class="pre">mercadolibre.utils.response_helpers.</span></span><span class="sig-name descname"><span class="pre">create_success_response</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">List</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'Operación</span> <span class="pre">exitosa'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">status</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">200</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra_fields</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">JsonResponse</span></span></span><a class="reference internal" href="_modules/mercadolibre/utils/response_helpers.html#create_success_response"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#mercadolibre.utils.response_helpers.create_success_response" title="Link to this definition"></a></dt>
+<dd><p>Crea una respuesta HTTP exitosa estandarizada</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> – Datos a incluir en la respuesta</p></li>
+<li><p><strong>message</strong> – Mensaje de éxito</p></li>
+<li><p><strong>status</strong> – Código de estado HTTP (200, 201, etc.)</p></li>
+<li><p><strong>extra_fields</strong> – Campos adicionales para incluir en la respuesta</p></li>
+</ul>
+</dd>
+<dt class="field-even">Devuelve<span class="colon">:</span></dt>
+<dd class="field-even"><p>Respuesta HTTP estandarizada</p>
+</dd>
+<dt class="field-odd">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-odd"><p>JsonResponse</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mercadolibre.utils.response_helpers.extract_response_data">
+<span class="sig-prename descclassname"><span class="pre">mercadolibre.utils.response_helpers.</span></span><span class="sig-name descname"><span class="pre">extract_response_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">result</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/mercadolibre/utils/response_helpers.html#extract_response_data"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#mercadolibre.utils.response_helpers.extract_response_data" title="Link to this definition"></a></dt>
+<dd><p>Extract data payload from response, compatible with both structures.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>result</strong> – Response dictionary from service</p>
+</dd>
+<dt class="field-even">Devuelve<span class="colon">:</span></dt>
+<dd class="field-even"><p>Data payload</p>
+</dd>
+<dt class="field-odd">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mercadolibre.utils.response_helpers.get_response_message">
+<span class="sig-prename descclassname"><span class="pre">mercadolibre.utils.response_helpers.</span></span><span class="sig-name descname"><span class="pre">get_response_message</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">result</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="_modules/mercadolibre/utils/response_helpers.html#get_response_message"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#mercadolibre.utils.response_helpers.get_response_message" title="Link to this definition"></a></dt>
+<dd><p>Extract message from response, compatible with both old and new structures.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>result</strong> – Response dictionary from service</p>
+</dd>
+<dt class="field-even">Devuelve<span class="colon">:</span></dt>
+<dd class="field-even"><p>Response message</p>
+</dd>
+<dt class="field-odd">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mercadolibre.utils.response_helpers.get_response_status_code">
+<span class="sig-prename descclassname"><span class="pre">mercadolibre.utils.response_helpers.</span></span><span class="sig-name descname"><span class="pre">get_response_status_code</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">result</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="_modules/mercadolibre/utils/response_helpers.html#get_response_status_code"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#mercadolibre.utils.response_helpers.get_response_status_code" title="Link to this definition"></a></dt>
+<dd><p>Determine appropriate HTTP status code based on response.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>result</strong> – Response dictionary from service</p>
+</dd>
+<dt class="field-even">Devuelve<span class="colon">:</span></dt>
+<dd class="field-even"><p>HTTP status code</p>
+</dd>
+<dt class="field-odd">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mercadolibre.utils.response_helpers.get_response_success">
+<span class="sig-prename descclassname"><span class="pre">mercadolibre.utils.response_helpers.</span></span><span class="sig-name descname"><span class="pre">get_response_success</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">result</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="_modules/mercadolibre/utils/response_helpers.html#get_response_success"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#mercadolibre.utils.response_helpers.get_response_success" title="Link to this definition"></a></dt>
+<dd><p>Extract success status from response, compatible with both old and new structures.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>result</strong> – Response dictionary from service</p>
+</dd>
+<dt class="field-even">Devuelve<span class="colon">:</span></dt>
+<dd class="field-even"><p>Success status</p>
+</dd>
+<dt class="field-odd">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mercadolibre.utils.response_helpers.handle_internal_server_error">
+<span class="sig-prename descclassname"><span class="pre">mercadolibre.utils.response_helpers.</span></span><span class="sig-name descname"><span class="pre">handle_internal_server_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">error</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Exception</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">JsonResponse</span></span></span><a class="reference internal" href="_modules/mercadolibre/utils/response_helpers.html#handle_internal_server_error"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#mercadolibre.utils.response_helpers.handle_internal_server_error" title="Link to this definition"></a></dt>
+<dd><p>Maneja errores internos del servidor de manera estandarizada</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>error</strong> – Excepción capturada</p></li>
+<li><p><strong>context</strong> – Contexto adicional del error</p></li>
+</ul>
+</dd>
+<dt class="field-even">Devuelve<span class="colon">:</span></dt>
+<dd class="field-even"><p>Respuesta de error interno estandarizada</p>
+</dd>
+<dt class="field-odd">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-odd"><p>JsonResponse</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mercadolibre.utils.response_helpers.handle_json_decode_error">
+<span class="sig-prename descclassname"><span class="pre">mercadolibre.utils.response_helpers.</span></span><span class="sig-name descname"><span class="pre">handle_json_decode_error</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">JsonResponse</span></span></span><a class="reference internal" href="_modules/mercadolibre/utils/response_helpers.html#handle_json_decode_error"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#mercadolibre.utils.response_helpers.handle_json_decode_error" title="Link to this definition"></a></dt>
+<dd><p>Maneja errores de decodificación JSON de manera estandarizada</p>
+<dl class="field-list simple">
+<dt class="field-odd">Devuelve<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Respuesta de error estandarizada para JSON inválido</p>
+</dd>
+<dt class="field-even">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-even"><p>JsonResponse</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mercadolibre.utils.response_helpers.handle_request_validation">
+<span class="sig-prename descclassname"><span class="pre">mercadolibre.utils.response_helpers.</span></span><span class="sig-name descname"><span class="pre">handle_request_validation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allowed_methods</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">JsonResponse</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="_modules/mercadolibre/utils/response_helpers.html#handle_request_validation"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#mercadolibre.utils.response_helpers.handle_request_validation" title="Link to this definition"></a></dt>
+<dd><p>Valida que el método HTTP sea permitido</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>request</strong> – Objeto request de Django</p></li>
+<li><p><strong>allowed_methods</strong> – Lista de métodos HTTP permitidos</p></li>
+</ul>
+</dd>
+<dt class="field-even">Devuelve<span class="colon">:</span></dt>
+<dd class="field-even"><p>JsonResponse con error si el método no es válido, None si es válido</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-mercadolibre.utils">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-mercadolibre.utils" title="Link to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Pie de página">
+        <a href="docs/mercadolibre.endpoints.html" class="btn btn-neutral float-left" title="Endpoints de Mercadolibre" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Anterior</a>
+        <a href="mercadolibre.utils.mapper.html" class="btn btn-neutral float-right" title="mercadolibre.utils.mapper package" accesskey="n" rel="next">Siguiente <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Derechos de autor 2025, Daniel Giraldo, Luis Gonzales, Jonathan Arroyave.</p>
+  </div>
+
+  Compilado con <a href="https://www.sphinx-doc.org/">Sphinx</a> usando un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">tema</a>
+    proporcionado por <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
