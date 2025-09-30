@@ -211,3 +211,7 @@ __marimo__/
 # Documentacion adicional
 docs/
 
+_build/
+__pycache__/
+*.pyc
+logs/
