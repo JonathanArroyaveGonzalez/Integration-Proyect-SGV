@@ -487,7 +487,99 @@ class MeliService:
             logger.warning(f"Could not get description for {product_id}: {desc_error}")
             
         return product_data
+  
+    # Order-related methods 
 
+    def get_order(self, order_id: str) -> Dict[str, Any]:
+        """
+        Get order information from MercadoLibre.
+        
+        Args:
+            order_id: MercadoLibre order ID
+            
+        Returns:
+            Order data dictionary
+            
+        Raises:
+            requests.exceptions.RequestException: If API request fails
+        """
+        response = self.get(f'/orders/{order_id}')
+        if response.status_code != 200:
+            logger.error(f"Failed to get order {order_id}: {response.status_code}")
+            response.raise_for_status()
+        return response.json()
+
+    def get_orders_batch(self, order_ids: List[str]) -> List[Dict[str, Any]]:
+        """
+        Get detailed information for multiple orders.
+        
+        Args:
+            order_ids: List of order IDs
+            
+        Returns:
+            List of order details dictionaries
+            
+        Raises:
+            requests.exceptions.RequestException: If API request fails
+        """
+        if not order_ids:
+            return []
+        
+        orders = []
+        from concurrent.futures import ThreadPoolExecutor, as_completed
+        
+        # Process orders in parallel
+        with ThreadPoolExecutor(max_workers=5) as executor:
+            future_to_order = {
+                executor.submit(self.get_order, order_id): order_id 
+                for order_id in order_ids
+            }
+            
+            for future in as_completed(future_to_order):
+                order_id = future_to_order[future]
+                try:
+                    order_data = future.result()
+                    orders.append(order_data)
+                except Exception as e:
+                    logger.error(f"Error getting order {order_id}: {e}")
+        
+        return orders
+
+    def get_user_orders(
+        self,
+        user_id: str,
+        status: Optional[str] = None,
+        limit: int = 50
+    ) -> List[Dict[str, Any]]:
+        """
+        Get orders for a specific user (seller).
+        
+        Args:
+            user_id: MercadoLibre user ID
+            status: Optional order status filter (paid, cancelled, etc.)
+            limit: Maximum number of orders to retrieve
+            
+        Returns:
+            List of order dictionaries
+            
+        Raises:
+            requests.exceptions.RequestException: If API request fails
+        """
+        params = {
+            'seller': user_id,
+            'limit': limit
+        }
+        
+        if status:
+            params['order.status'] = status
+        
+        response = self.get('/orders/search', params=params)
+        if response.status_code != 200:
+            logger.error(f"Failed to get orders for user {user_id}: {response.status_code}")
+            response.raise_for_status()
+        
+        data = response.json()
+        return data.get('results', [])
 
 # Singleton instance
 _meli_service: Optional[MeliService] = None
