@@ -1,154 +1,143 @@
-from typing import Optional, Dict, Any, Self
+from typing import Optional, Dict, Any
+from dataclasses import dataclass
 from datetime import datetime
 import logging
 
 logger = logging.getLogger(__name__)
 
 
+@dataclass
 class ProductMapper:
-    def __init__(
-        self,
-        productoean: str,
-        descripcion: str,
-        referencia: str,
-        inventariable: int,
-        um1: str,
-        bodega: str,
-        factor: float,
-        estado: int,
-        qtyequivalente: Optional[float] = None,
-        presentacion: Optional[str] = None,
-        costo: Optional[float] = None,
-        referenciamdc: Optional[str] = None,
-        descripcioningles: Optional[str] = None,
-        item: Optional[str] = None,
-        u_inv: Optional[str] = None,
-        grupo: Optional[str] = None,
-        subgrupo: Optional[str] = None,
-        extension1: Optional[str] = None,
-        extension2: Optional[str] = None,
-        nuevoean: Optional[str] = None,
-        origencompra: Optional[str] = None,
-        tipo: Optional[str] = None,
-        f120_tipo_item: Optional[str] = None,
-        fecharegistro: Optional[str] = None,
-        peso: Optional[float] = None,
-        procedencia: Optional[str] = None,
-        estadotransferencia: Optional[int] = None,
-        volumen: Optional[float] = None,
-        proveedor: Optional[str] = None,
-        preciounitario: Optional[float] = None,
-        ingredientes: Optional[str] = None,
-        instrucciones_de_uso: Optional[str] = None,
-        u_inv_p: Optional[str] = None,
-        observacion: Optional[str] = None,
-        controla_status_calidad: Optional[int] = None,
-        alergenos: Optional[str] = None,
-    ):
-        self.productoean = productoean
-        self.descripcion = descripcion
-        self.referencia = referencia
-        self.inventariable = inventariable
-        self.um1 = um1
-        self.presentacion = presentacion
-        self.costo = costo
-        self.referenciamdc = referenciamdc
-        self.descripcioningles = descripcioningles
-        self.item = item
-        self.u_inv = u_inv
-        self.grupo = grupo
-        self.subgrupo = subgrupo
-        self.extension1 = extension1
-        self.extension2 = extension2
-        self.nuevoean = nuevoean
-        self.qtyequivalente = qtyequivalente
-        self.origencompra = origencompra
-        self.tipo = tipo
-        self.factor = factor
-        self.f120_tipo_item = f120_tipo_item
-        self.fecharegistro = fecharegistro
-        self.peso = peso
-        self.bodega = bodega
-        self.procedencia = procedencia
-        self.estadotransferencia = estadotransferencia
-        self.volumen = volumen
-        self.proveedor = proveedor
-        self.preciounitario = preciounitario
-        self.ingredientes = ingredientes
-        self.instrucciones_de_uso = instrucciones_de_uso
-        self.u_inv_p = u_inv_p
-        self.observacion = observacion
-        self.controla_status_calidad = controla_status_calidad
-        self.estado = estado
-        self.alergenos = alergenos
+    productoean: str
+    descripcion: str
+    referencia: str
+    inventariable: int
+    um1: str
+    bodega: str
+    factor: float
+    estado: int
+    qtyequivalente: Optional[float] = 1
+    presentacion: Optional[str] = None
+    costo: Optional[float] = 0.0
+    referenciamdc: Optional[str] = None
+    descripcioningles: Optional[str] = None
+    item: Optional[str] = None
+    u_inv: Optional[str] = None
+    grupo: Optional[str] = None
+    subgrupo: Optional[str] = None
+    extension1: Optional[str] = None
+    extension2: Optional[str] = None
+    nuevoean: Optional[str] = None
+    origencompra: Optional[str] = None
+    tipo: Optional[str] = None
+    f120_tipo_item: Optional[str] = None
+    fecharegistro: Optional[str] = None
+    peso: Optional[float] = None
+    procedencia: Optional[str] = None
+    estadotransferencia: Optional[int] = None
+    volumen: Optional[float] = 0.0
+    proveedor: Optional[str] = None
+    preciounitario: Optional[float] = None
+    ingredientes: Optional[str] = None
+    instrucciones_de_uso: Optional[str] = None
+    u_inv_p: Optional[str] = None
+    observacion: Optional[str] = None
+    controla_status_calidad: Optional[int] = None
+    alergenos: Optional[str] = None
+
+    def __post_init__(self):
+        # Truncamiento defensivo al crear el objeto
+        self.descripcion = self.truncate_description(self.descripcion)
 
     def to_dict(self) -> Dict[str, Any]:
-        return {k: v for k, v in self.__dict__.items() if v is not None}
+        """
+        Convierte el objeto en un diccionario, omitiendo claves con valores None o "".
+        """
+        return {k: v for k, v in self.__dict__.items() if v is not None and v != ""}
 
     def to_wms_format(self) -> Dict[str, Any]:
         """
-        Convierte el ProductMapper al formato requerido por el WMS
+        Convierte a formato requerido por el WMS, con descripción truncada adicional.
         """
-        return self.to_dict()
+        data = self.to_dict()
+        if "descripcion" in data:
+            data["descripcion"] = self.truncate_description(data["descripcion"])
+        return data
+
+    @staticmethod
+    def truncate_description(text: Optional[str], max_length: int = 250) -> str:
+        """
+        Trunca inteligentemente una descripción sin cortar palabras.
+        """
+        if not text:
+            return ""
+        if len(text) <= max_length:
+            return text
+        truncated = text[:max_length]
+        last_space = truncated.rfind(" ")
+        if last_space > max_length * 0.8:
+            return truncated[:last_space].strip() + "..."
+        else:
+            return truncated.strip() + "..."
 
     @classmethod
     def from_meli_item(cls, meli_item: Dict[str, Any]) -> "ProductMapper":
-        """
-        Construye un ProductMapper a partir de un item de Mercado Libre.
-        Si algún atributo no está presente, se asigna None.
-        """
-        # Extraer atributos en un dict por ID
         attributes = {
-            attr["id"]: attr.get("value_name")
+            attr.get("id"): attr.get("value_name")
             for attr in meli_item.get("attributes", [])
         }
 
-        # EAN / SKU / Referencia
-        ean = attributes.get("GTIN") or attributes.get("SELLER_SKU")
-        referencia = attributes.get("id")
+        ean = attributes.get("GTIN") or attributes.get("SELLER_SKU") or ""
+        peso = None
 
-        # Peso en gramos (si existe)
         peso_attr = next(
             (a for a in meli_item.get("attributes", []) if a["id"] == "UNIT_WEIGHT"),
             None,
         )
-        peso = (
-            peso_attr["values"][0]["struct"]["number"]
-            if peso_attr and peso_attr["values"][0]["struct"]
-            else None
-        )
+        if peso_attr:
+            values = peso_attr.get("values", [])
+            if values and isinstance(values[0], dict):
+                struct = values[0].get("struct")
+                if struct:
+                    peso = struct.get("number")
 
-        # Stock disponible
-        stock = meli_item.get("available_quantity")
+        # Descripción: usar descripción detallada si existe, o el título
+        description_data = meli_item.get("description_data", {})
+        plain_text = description_data.get("plain_text", "").strip()
+        title = meli_item.get("title", "").strip()
+
+        if plain_text and len(plain_text) < 50 and title:
+            raw_description = f"{title} - {plain_text}"
+        else:
+            raw_description = plain_text or title
 
         return cls(
-            productoean=ean or "",
-            descripcion=meli_item.get("title", ""),
-            referencia=meli_item.get("id", "SELLER_SKU"),
+            productoean=ean,
+            descripcion=raw_description,
+            referencia=meli_item.get("id", ean),
             inventariable=1,
             um1="UND",
             bodega="01",
             factor=1,
             estado=1 if meli_item.get("status") == "active" else 0,
-            # qtyequivalente=float(stock) if stock is not None else None,
             qtyequivalente=1,
             costo=0.0,
             presentacion=attributes.get("PACKAGING_TYPE"),
-            descripcioningles=None,
+            descripcioningles="",
             item=ean,
             referenciamdc=ean,
             grupo=meli_item.get("category_id"),
             subgrupo=attributes.get("LINE"),
             extension1=attributes.get("MODEL"),
             nuevoean=ean,
-            tipo=attributes.get("COFFEE_TYPE"),
+            tipo="Producto terminado",
             f120_tipo_item=None,
             fecharegistro=meli_item.get("date_created"),
             peso=peso,
-            procedencia=meli_item.get("seller_address", {}).get("state", {}).get("name"),
+            procedencia=meli_item.get("seller_address", {})
+            .get("state", {})
+            .get("name"),
             volumen=0,
-
-            #Debe ser el nombre de la cuenta se debe agregar una peticion mas para obtener el nombre de la cuenta
             proveedor=str(meli_item.get("seller_id")),
             preciounitario=meli_item.get("price"),
             observacion=meli_item.get("permalink"),
@@ -156,7 +145,10 @@ class ProductMapper:
         )
 
     def __repr__(self):
-        return f"ProductMapper({self.productoean}, {self.descripcion}, qty={self.qtyequivalente}, estado={self.estado})"
+        return (
+            f"<ProductMapper ean={self.productoean} "
+            f"desc='{self.descripcion[:20]}...' estado={self.estado}>"
+        )
 
 
 class BarCodeMapper:
@@ -226,7 +218,7 @@ class BarCodeMapper:
             return cls(
                 idinternoean=ean,
                 codbarrasasignado=ean,
-                #cantidad=meli_item.get("available_quantity", 1),
+                # cantidad=meli_item.get("available_quantity", 1),
                 cantidad=1,
                 qtynew=None,
                 fechacrea=fechacrea,
@@ -312,7 +304,9 @@ class CustomerMapper:
         self.compania = compania
 
     def to_dict(self) -> Dict[str, Any]:
-
+        """
+        Serializa el objeto a un diccionario filtrando None
+        """
         return {k: v for k, v in self.__dict__.items() if v is not None}
 
     @classmethod
@@ -369,35 +363,156 @@ class CustomerMapper:
         return f"CustomerMapper({self.nombrecliente}, nit={self.nit}, item={self.item})"
 
 
+@dataclass
+class InventoryMapper:
+    """
+    Class representing the mapping of inventory data.
+
+    Attributes:
+        bod (str): Bodega donde se almacena el producto. Default = "01".
+        ubicacion (str): Ubicación específica dentro de la bodega. Default = "01".
+        productoean (str): Código EAN del producto.
+        descripcion (str): Descripción del producto.
+        fecharegistro (Optional[str]): Fecha de registro del producto.
+        codigoalmacen (Optional[str]): Código del almacén.
+        estadodetransferencia (Optional[int]): Estado de la transferencia.
+        referencia (Optional[str]): Referencia del producto.
+        valor (Optional[float]): Valor del producto. Default = 0.0.
+        tipo_inventario (Optional[str]): Tipo de inventario al que pertenece el producto.
+        etl (Optional[str]): Estado ETL del registro.
+        fecha_ultima_actualizacion (Optional[str]): Fecha de la última actualización.
+        fecha_prox_actualizacion (Optional[str]): Fecha de la próxima actualización.
+        saldopt (Optional[float]): Saldo del producto terminado. Default = 0.0.
+        cantbloqueadoerp (Optional[float]): Cantidad bloqueada en el ERP. Default = 0.0.
+        saldowms (Optional[float]): Saldo del producto en el WMS. Default = 0.0.
+    """
+
+    bod: str = "01"
+    ubicacion: str = "01"
+    productoean: str = ""  # default vacío
+    descripcion: str = ""  # default vacío
+    fecharegistro: Optional[str] = None
+    codigoalmacen: Optional[str] = "0"
+    estadodetransferencia: Optional[int] = 0
+    referencia: Optional[str] = None
+    valor: Optional[float] = 0.0
+    tipo_inventario: Optional[str] = "0"
+    etl: Optional[str] = None
+    fecha_ultima_actualizacion: Optional[str] = None
+    fecha_prox_actualizacion: Optional[str] = None
+
+    saldopt: Optional[float] = 0.0  # default definido
+    cantbloqueadoerp: Optional[float] = 0.0
+    saldowms: Optional[float] = 0.0
+
+    def to_dict(self) -> Dict[str, Any]:
+        """
+        Convierte el objeto en un diccionario, omitiendo claves con valores None o "".
+        """
+        return {k: v for k, v in self.__dict__.items() if v is not None and v != ""}
+
+    def to_wms_format(self) -> Dict[str, Any]:
+        """
+        Convierte a formato requerido por el WMS.
+        """
+        data = self.to_dict()
+        # Aquí podrías aplicar reglas específicas para WMS, ej:
+        if "descripcion" in data:
+            data["descripcion"] = self.truncate_description(data["descripcion"])
+        return data
+
+    @staticmethod
+    def truncate_description(text: Optional[str], max_length: int = 250) -> str:
+        """
+        Trunca inteligentemente una descripción sin cortar palabras.
+        """
+        if not text:
+            return ""
+        if len(text) <= max_length:
+            return text
+        truncated = text[:max_length]
+        last_space = truncated.rfind(" ")
+        if last_space > max_length * 0.8:
+            return truncated[:last_space].strip() + "..."
+        else:
+            return truncated.strip() + "..."
+
+    @classmethod
+    def from_meli_item(cls, meli_item: Dict[str, Any]) -> "InventoryMapper":
+        attributes = {
+            attr.get("id"): attr.get("value_name")
+            for attr in meli_item.get("attributes", [])
+        }
+
+        ean = attributes.get("GTIN") or attributes.get("SELLER_SKU") or ""
+        id = meli_item.get("id", ean)
+        quantity = meli_item.get("available_quantity", 0)
+        date_created = datetime.now().isoformat(timespec="milliseconds")
+        last_updated = meli_item.get("last_updated")
+
+        # Descripción: usar descripción detallada si existe, o el título
+        description_data = meli_item.get("description_data", {})
+        plain_text = description_data.get("plain_text", "").strip()
+        title = meli_item.get("title", "").strip()
+
+        if plain_text and len(plain_text) < 50 and title:
+            raw_description = f"{title} - {plain_text}"
+        else:
+            raw_description = plain_text or title
+
+        return cls(
+            productoean=ean,
+            descripcion=raw_description,
+            fecharegistro=date_created,
+            codigoalmacen="0",
+            estadodetransferencia=0,
+            referencia=id,
+            valor=0.0,
+            tipo_inventario="0",
+            etl=None,
+            fecha_ultima_actualizacion=last_updated,
+            fecha_prox_actualizacion=None,
+            saldopt=float(quantity),
+            cantbloqueadoerp=0.0,
+            saldowms=0.0,
+        )
+
+    def __repr__(self):
+        return (
+            f"<InventoryMapper ean={self.productoean} "
+            f"bod={self.bod} saldo_wms={self.saldowms}>"
+        )
+
+
 class SupplierMapper:
     def __init__(
         self,
-        nit: Optional[str],
-        nombrecliente: Optional[str],
-        direccion: Optional[str],
-        isactivoproveedor: Optional[int],
-        condicionescompra: Optional[str],
-        codigoPais: Optional[str],
-        monedadefacturacion: Optional[str],
-        item: Optional[str],
-        activoCliente: Optional[int],
-        fecharegistro: Optional[str],
-        estadotransferencia: Optional[int],
-        sucursal: Optional[str],
-        email: Optional[str],
-        beneficiario: Optional[int],
-        item_sucursal: Optional[str],
-        codigoter: Optional[str],
+        nit: Optional[str] = None,
+        nombrecliente: Optional[str] = None,
+        direccion: Optional[str] = None,
+        isactivoproveedor: Optional[int] = None,
+        condicionescompra: Optional[str] = None,
+        codigopais: Optional[str] = None,
+        monedadefacturacion: Optional[str] = None,
+        item: Optional[str] = None,
+        activocliente: Optional[int] = None,
+        fecharegistro: Optional[str] = None,
+        estadotransferencia: Optional[int] = None,
+        sucursal: Optional[str] = None,
+        email: Optional[str] = None,
+        beneficiario: Optional[int] = None,
+        item_sucursal: Optional[str] = None,
+        codigoter: Optional[str] = None,
     ):
         self.nit = nit
         self.nombrecliente = nombrecliente
         self.direccion = direccion
         self.isactivoproveedor = isactivoproveedor
         self.condicionescompra = condicionescompra
-        self.codigoPais = codigoPais
+        self.codigopais = codigopais
         self.monedadefacturacion = monedadefacturacion
         self.item = item
-        self.activoCliente = activoCliente
+        self.activocliente = activocliente
         self.fecharegistro = fecharegistro
         self.estadotransferencia = estadotransferencia
         self.sucursal = sucursal
@@ -406,10 +521,34 @@ class SupplierMapper:
         self.item_sucursal = item_sucursal
         self.codigoter = codigoter
 
-    def to_dict(self) -> Dict[str, any]:
-        return {}
+    def to_dict(self) -> Dict[str, Any]:
+        """Convierte el mapper a diccionario ignorando valores None"""
+        return {k: v for k, v in self.__dict__.items() if v is not None}
 
     @staticmethod
-    def from_meli_supplier(cls, ml_supplier: Dict[str, any]) -> "SupplierMapper":
-        # cls referencia a la clase
-        return cls()
+    def from_meli_to_wms_supplier(ml_supplier_data: Dict[str, Any]) -> "SupplierMapper":
+        """
+        Mapea la respuesta de MercadoLibre a formato WMS.
+        """
+        try:
+            nit = ml_supplier_data.get("identification", {}).get("number")
+            nombrecliente = f"{ml_supplier_data.get('first_name', '')} {ml_supplier_data.get('last_name', '')}".strip() or ml_supplier_data.get(
+                "nickname"
+            )
+            direccion = ml_supplier_data.get("address", {}).get("address")
+            codigopais = ml_supplier_data.get("country_id")
+            email = ml_supplier_data.get("email")
+            item = str(ml_supplier_data.get("id"))
+
+            return SupplierMapper(
+                nit=nit,
+                nombrecliente=nombrecliente,
+                direccion=direccion,
+                isactivoproveedor=1,
+                codigopais=codigopais,
+                email=email,
+                item=item,
+            )
+        except Exception as e:
+            logger.error(f"Error mapeando customer: {e}")
+            return None

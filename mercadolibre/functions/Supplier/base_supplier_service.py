@@ -1,15 +1,15 @@
-"""
-BaseCustomerService: Core customer operations for MercadoLibre -> WMS.
-Provides reusable methods for fetching, mapping, and creating customers.
-"""
+from dataclasses import dataclass
+from typing import Any, Dict, Optional
 
 import logging
-from dataclasses import dataclass
-from typing import Dict, Any, Optional
-from mercadolibre.services.internal_api_service import InternalAPIService
+from mercadolibre.services.internal_api_service import (
+    InternalAPIService,
+    get_internal_api_service,
+)
 from mercadolibre.services.meli_service import FetchUser
 from mercadolibre.utils.exceptions import UserMappingError, WMSRequestError
-from mercadolibre.utils.mapper.data_mapper import CustomerMapper
+from mercadolibre.utils.mapper.data_mapper import SupplierMapper
+
 
 logger = logging.getLogger(__name__)
 
@@ -23,50 +23,38 @@ class ServiceResult:
     error: Optional[str] = None
 
 
-# ------------------------------
-# Servicio principal
-# ------------------------------
-class BaseCustomerService:
-    """
-    Core reusable customer operations.
-    Handles:
-        - Fetching user from MercadoLibre
-        - Mapping customer data to WMS format
-        - Creating customer in WMS
-    """
+class BaseSupplierService:
 
-    CUSTOMER_ENDPOINT = "/wms/adapter/v2/clt"
+    SUPPLIER_ENDPOINT = "/wms/adapter/v2/prv"
 
     def __init__(self):
-        self.internal_api_service = InternalAPIService()
-        self.customer_mapper = CustomerMapper
+        self.internal_api_service = get_internal_api_service()
+        self.supplier_mapper = SupplierMapper
 
-    def get_customer_from_meli(self, customer_id: str) -> Optional[Dict[str, Any]]:
-        """Fetch customer data from MercadoLibre using FetchUser helper."""
-        return FetchUser.fetch_user(customer_id)
+    def get_supplier_from_meli(self, supplier_id):
+        return FetchUser.fetch_user(supplier_id)
 
-    def map_customer_to_wms(self, meli_customer: Dict[str, Any]) -> Dict[str, Any]:
-        """Map MercadoLibre customer to WMS format using CustomerMapper."""
+    def map_supplier_to_wms(self, meli_supplier):
         try:
-            mapper = self.customer_mapper.from_meli_customer(meli_customer)
+            mapper = self.supplier_mapper.from_meli_to_wms_supplier(meli_supplier)
             return mapper.to_dict()
-        except Exception as e:
-            logger.error(f"Error mapping customer {meli_customer.get('id')}: {e}")
+        except Exception as exception:
+            logger.error(
+                f"Error mapping customer {meli_supplier.get('id')}: {exception}"
+            )
             raise UserMappingError(
-                type_user="Customer",
-                customer_id=meli_customer.get("id", "unknown"),
-                message="Failed to map MercadoLibre customer to WMS format",
+                type_user="Supplier",
+                message="Failed to map MercadoLibre Supplier to WMS format",
+                user_id=meli_supplier.get("id", "unknown"),
             )
 
-    def create_customer_in_wms(
-        self, wms_customer: Dict[str, Any], original_request: Any = None
-    ) -> ServiceResult:
-        """Create a customer in WMS and return a structured result."""
+    def create_supplier_in_wms(self, wms_supplier, original_request):
         try:
+            print(f"{original_request}")
             response = self.internal_api_service.post(
-                self.CUSTOMER_ENDPOINT,
+                self.SUPPLIER_ENDPOINT,
                 original_request=original_request,
-                json=[wms_customer],  # WMS expects an array
+                json=[wms_supplier],  # WMS expects an array
             )
 
             if response.status_code not in (200, 201):

@@ -650,16 +650,9 @@ class ProductUpdateService:
             }
     
     def _get_product_detail(self, product_id: str) -> Optional[Dict[str, Any]]:
-        """Get product detail from MercadoLibre."""
+        """Get product detail from MercadoLibre including description."""
         try:
-            response = self.meli.get(f'/items/{product_id}')
-            
-            if response.status_code == 200:
-                return response.json()
-            else:
-                logger.error(f"Failed to get product {product_id}: {response.status_code}")
-                return None
-                
+            return self.meli.get_product(product_id)
         except Exception as e:
             logger.error(f"Error getting product detail: {e}")
             return None

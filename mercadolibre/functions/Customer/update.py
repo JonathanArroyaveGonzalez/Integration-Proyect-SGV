@@ -9,11 +9,11 @@ Uses BaseCustomerService for core operations (fetching, mapping, creating).
 import logging
 from typing import Any, Dict, Optional
 from datetime import datetime
+
+from mercadolibre.utils.exceptions import UserMappingError, WMSRequestError
 from .base_customer_service import (
     BaseCustomerService,
     ServiceResult,
-    CustomerMappingError,
-    WMSRequestError,
 )
 
 logger = logging.getLogger(__name__)
@@ -62,7 +62,7 @@ class CustomerUpdateService:
 
             return update_result
 
-        except CustomerMappingError as e:
+        except UserMappingError as e:
             logger.error(f"Mapping error for customer {customer_id}: {e}")
             return ServiceResult(
                 success=False, action="error", message=str(e), error="mapping_error"

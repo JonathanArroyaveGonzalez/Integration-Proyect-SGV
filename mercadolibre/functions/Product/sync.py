@@ -2,7 +2,7 @@
 
 import logging
 from typing import List, Dict, Any, Optional
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 
 from mercadolibre.services.meli_service import get_meli_service
@@ -105,14 +105,7 @@ class MeliWMSSyncService:
             if not user_id:
                 raise ValueError("No user account ID configured")
             
-            response = self.meli.get(f'/users/{user_id}/items/search')
-            
-            if response.status_code == 200:
-                data = response.json()
-                return data.get('results', [])
-            else:
-                logger.error(f"Failed to get product IDs: {response.status_code}")
-                return []
+            return self.meli.get_user_products(user_id)
                 
         except Exception as e:
             logger.error(f"Error extracting product IDs: {e}")
@@ -130,47 +123,25 @@ class MeliWMSSyncService:
         """
         if not product_ids:
             return []
-        
-        products = []
-        
-        # MercadoLibre allows max 20 IDs per request
-        for i in range(0, len(product_ids), 20):
-            batch = product_ids[i:i+20]
-            ids_param = ','.join(batch)
             
-            try:
-                response = self.meli.get(f'/items?ids={ids_param}')
-                if response.status_code == 200:
-                    items = response.json()
-                    products.extend(items)
-                else:
-                    logger.error(f"Failed to get product details: {response.status_code}")
-                    
-            except Exception as e:
-                logger.error(f"Error getting product details batch: {e}")
-                continue
-                
-        return products
+        try:
+            return self.meli.get_products_batch(product_ids)
+        except Exception as e:
+            logger.error(f"Error getting products details: {e}")
+            return []
     
     def get_product_detail(self, product_id: str) -> Optional[Dict[str, Any]]:
         """
-        Get detailed information for a single product.
+        Get detailed information for a single product including description.
         
         Args:
             product_id: Product ID
             
         Returns:
-            Product details or None
+            Product details with description_data or None
         """
         try:
-            response = self.meli.get(f'/items/{product_id}')
-            
-            if response.status_code == 200:
-                return response.json()
-            else:
-                logger.error(f"Failed to get product {product_id}: {response.status_code}")
-                return None
-                
+            return self.meli.get_product(product_id)
         except Exception as e:
             logger.error(f"Error getting product detail: {e}")
             return None

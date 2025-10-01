@@ -9,11 +9,11 @@ import logging
 from typing import List, Dict, Any, Optional
 from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor
+
+from mercadolibre.utils.exceptions import UserMappingError, WMSRequestError
 from .base_customer_service import (
     BaseCustomerService,
     ServiceResult,
-    CustomerMappingError,
-    WMSRequestError,
 )
 
 logger = logging.getLogger(__name__)
@@ -66,7 +66,7 @@ class MeliCustomerSyncService:
 
             return result
 
-        except CustomerMappingError as e:
+        except UserMappingError as e:
             logger.error(f"Mapping error for customer {customer_id}: {e}")
             return ServiceResult(
                 success=False, action="error", message=str(e), error="mapping_error"
