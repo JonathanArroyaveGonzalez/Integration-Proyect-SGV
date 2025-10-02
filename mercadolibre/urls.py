@@ -4,6 +4,7 @@ from mercadolibre.views.auth import auth
 from mercadolibre.views.customer import MeliCustomerSyncView
 from mercadolibre.views.product import MeliProductSyncView
 from mercadolibre.views.inventory import MeliInventoryView
+from mercadolibre.views.order import MeliOrderSyncView
 
 
 mercadolibre_endpoints = [
@@ -19,5 +20,9 @@ mercadolibre_endpoints = [
 
     # Inventario - Gestión unificada
     path('inventory/', MeliInventoryView.as_view(), name='meli-inventory'),
+
+    # Pedidos - Sincronización unificada
+    path('order/', MeliOrderSyncView.as_view(), name='meli_order_sync'),
+
     
 ]

@@ -1,4 +1,4 @@
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 from dataclasses import dataclass
 from datetime import datetime
 import logging
@@ -477,4 +477,245 @@ class InventoryMapper:
             f"<InventoryMapper ean={self.productoean} "
             f"bod={self.bod} saldo_wms={self.saldowms}>"
         )
-    
+
+
+
+
+@dataclass
+class OrderMapper:
+    """
+    Mapper único para órdenes de MercadoLibre a formato WMS.
+    Mapea tanto el header de la orden como sus líneas de detalle.
+    """
+
+    # ============ HEADER FIELDS (Required) ============
+    tipodocto: str
+    doctoerp: str
+    numpedido: str
+    item: str
+    nombrecliente: str
+    direccion_despacho: str
+    ciudad_despacho: str
+    ciudad: str
+    estadoerp: str
+    bodega: str
+    order_detail: List[Dict[str, Any]]
+
+    # ============ HEADER FIELDS (Optional) ============
+    fechaplaneacion: Optional[str] = None
+    f_pedido: Optional[str] = None
+    contacto: Optional[str] = None
+    email: Optional[str] = None
+    notas: Optional[str] = None
+    pais_despacho: Optional[str] = None
+    departamento_despacho: Optional[str] = None
+    sucursal_despacho: Optional[str] = None
+    idsucursal: Optional[str] = None
+    pedidorelacionado: Optional[str] = None
+    cargue: Optional[str] = None
+    nit: Optional[str] = None
+    estadopicking: Optional[int] = None
+    fecharegistro: Optional[str] = None
+    fpedido: Optional[str] = None
+    fechtrans: Optional[str] = None
+    transportadora: Optional[str] = None
+    centrooperacion: Optional[str] = None
+    picking_batch: Optional[str] = None
+    field_condicionpago: Optional[str] = None
+    field_documentoreferencia: Optional[str] = None
+    vendedor2: Optional[str] = None
+    numguia: Optional[str] = None
+    f_ultima_actualizacion: Optional[str] = None
+    bodegaerp: Optional[str] = None
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert to dictionary for WMS API, omitting None values."""
+        return {k: v for k, v in self.__dict__.items() if v is not None}
+
+    def to_wms_format(self) -> List[Dict[str, Any]]:
+        """Convert to WMS API format (array with single order)."""
+        return [self.to_dict()]
+
+    @staticmethod
+    def _format_date(date_str: Optional[str]) -> Optional[str]:
+        """
+        Format ISO date to SQL Server format (YYYY-MM-DD HH:MM:SS).
+        """
+        if not date_str:
+            return None
+        try:
+            from datetime import datetime
+            dt = datetime.fromisoformat(date_str.replace("Z", "+00:00"))
+            return dt.strftime("%Y-%m-%d %H:%M:%S")
+        except Exception as e:
+            logger.warning(f"Could not parse date: {date_str}, error: {e}")
+            return None
+
+    @staticmethod
+    def _build_order_detail_item(
+        order_item: Dict[str, Any],
+        order_id: str,
+        buyer_id: str,
+        bodega: str,
+        meli_order: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """Build a single order detail line item."""
+        item = order_item.get("item", {})
+        item_id = item.get("id", "")
+
+        # EAN o SKU
+        ean = item_id
+        variation_attrs = item.get("variation_attributes", [])
+        for attr in variation_attrs:
+            if attr.get("id") == "GTIN":
+                ean = attr.get("value_name", ean)
+                break
+        if ean == item_id and item.get("seller_sku"):
+            ean = item.get("seller_sku")
+
+        quantity = float(order_item.get("quantity", 0))
+        unit_price = float(order_item.get("unit_price", 0))
+        description = item.get("title", "")[:250]
+        id = item.get("id", "")
+
+        return {
+            "referencia": item_id,
+            "refpadre": id,
+            "descripcion": description,
+            "qtypedido": quantity,
+            "qtyreservado": quantity,
+            "productoean": ean,
+            "costo": unit_price,
+            "bodega": bodega,
+            "tipodocto": "",
+            "doctoerp": order_id,
+            "qtyenpicking": 0.0,
+            "estadodetransferencia": 0,
+            "item": buyer_id,
+            "idco": bodega,
+            "preciounitario": unit_price,
+            "descripcionco": description,
+            "factor": 1,
+            "numpedido": order_id,
+            "field_qtypedidabase": quantity,
+            "lineaidpicking": meli_order.get("shipping", {}).get("id"),
+            "qtyfacturado": quantity,
+            "f_ultima_actualizacion": OrderMapper._format_date(
+                meli_order.get("date_closed")
+            ),
+        }
+
+    @classmethod
+    def from_meli_order(
+        cls,
+        meli_order: Dict[str, Any],
+        buyer_data: Optional[Dict[str, Any]] = None,
+        bodega: str = "Principal"
+    ) -> "OrderMapper":
+        """Create OrderMapper from MercadoLibre order data."""
+        order_id = str(meli_order.get("id", ""))
+        buyer = meli_order.get("buyer", {})
+        buyer_id = str(buyer.get("id", ""))
+
+        # ====== BUYER INFO ======
+        buyer_name, buyer_email, buyer_phone, nit = "Unknown", None, None, buyer_id
+        if buyer_data:
+            buyer_name = f"{buyer_data.get('first_name', '')} {buyer_data.get('last_name', '')}".strip() \
+                         or buyer_data.get("nickname", "Unknown")
+            buyer_email = buyer_data.get("email")
+            phone_data = buyer_data.get("phone", {})
+            if phone_data:
+                area = phone_data.get("area_code", "")
+                number = phone_data.get("number", "")
+                buyer_phone = f"{area}{number}" if area and number else None
+            nit = buyer_data.get("identification", {}).get("number") or buyer_id
+
+        # ====== SHIPPING INFO ======
+        shipping = meli_order.get("shipping", {})
+        shipping_id = shipping.get("id")
+        city, state, country, full_address = "N/A", "", "", "N/A"
+        receiver_address = shipping.get("receiver_address", {})
+        if receiver_address:
+            city = receiver_address.get("city", {}).get("name", "N/A")
+            state = receiver_address.get("state", {}).get("name", "")
+            country = receiver_address.get("country", {}).get("id", "")
+            street = receiver_address.get("street_name", "")
+            number = receiver_address.get("street_number", "")
+            if street or number:
+                full_address = ", ".join(filter(None, [street, number]))
+
+        # ====== STATUS ======
+        status = meli_order.get("status", "")
+        if status == "paid":
+            estado_picking, estado_erp = 15, "paid"
+        elif status == "confirmed":
+            estado_picking, estado_erp = 3, "confirmed"
+        elif status == "cancelled":
+            estado_picking, estado_erp = 0, "cancelled"
+        else:
+            estado_picking, estado_erp = 0, status
+
+        # ====== DATES ======
+        date_created = meli_order.get("date_created")
+        date_closed = meli_order.get("date_closed")
+        f_pedido = cls._format_date(date_created)
+        fecharegistro = cls._format_date(date_created)
+        fechtrans = str(shipping_id) if shipping_id else None
+        f_ultima_actualizacion = cls._format_date(date_closed)
+
+        # ====== DETAILS ======
+        order_items = meli_order.get("order_items", [])
+        order_details = [
+            cls._build_order_detail_item(item, order_id, buyer_id, bodega, meli_order)
+            for item in order_items
+        ]
+        item_id = meli_order.get("order_items", [{}])[0].get("item", {}).get("id", "") if order_items else ""
+
+        # ====== NOTES ======
+        notes_parts = [f"ML Order: {order_id}"]
+        if status:
+            notes_parts.append(f"Status: {status}")
+        tags = meli_order.get("tags", [])
+        if tags:
+            notes_parts.append(f"Tags: {', '.join(tags)}")
+        notas = " | ".join(notes_parts)
+
+        return cls(
+            tipodocto="ML",
+            doctoerp="",
+            numpedido=order_id,
+            item=item_id,
+            nombrecliente=buyer_name,
+            direccion_despacho=full_address,
+            ciudad_despacho=str(meli_order.get("seller", {}).get("id", "")),
+            ciudad=city,
+            estadoerp=estado_erp,
+            bodega=bodega,
+            order_detail=order_details,
+            f_pedido=f_pedido,
+            contacto=buyer_phone or buyer_name,
+            email=buyer_email,
+            notas=notas,
+            pais_despacho=country.lower() if country else None,
+            departamento_despacho=state,
+            nit=nit,
+            estadopicking=estado_picking,
+            fecharegistro=fecharegistro,
+            fpedido=f_pedido,
+            fechtrans=fechtrans,
+            transportadora=str(shipping_id) if shipping_id else None,
+            centrooperacion=bodega,
+            field_condicionpago="",
+            field_documentoreferencia=order_id,
+            vendedor2=str(meli_order.get("seller", {}).get("id", "")),
+            numguia=str(shipping_id) if shipping_id else None,
+            f_ultima_actualizacion=f_ultima_actualizacion,
+            bodegaerp=bodega,
+        )
+
+    def __repr__(self):
+        return (
+            f"OrderMapper(order_id={self.doctoerp}, buyer={self.nit}, "
+            f"items={len(self.order_detail)}, status={self.estadoerp})"
+        )
+
