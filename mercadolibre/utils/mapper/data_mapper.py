@@ -480,13 +480,14 @@ class InventoryMapper:
 
 
 
+
 @dataclass
 class OrderMapper:
     """
     Mapper único para órdenes de MercadoLibre a formato WMS.
     Mapea tanto el header de la orden como sus líneas de detalle.
     """
-    
+
     # ============ HEADER FIELDS (Required) ============
     tipodocto: str
     doctoerp: str
@@ -499,7 +500,7 @@ class OrderMapper:
     estadoerp: str
     bodega: str
     order_detail: List[Dict[str, Any]]
-    
+
     # ============ HEADER FIELDS (Optional) ============
     fechaplaneacion: Optional[str] = None
     f_pedido: Optional[str] = None
@@ -529,10 +530,7 @@ class OrderMapper:
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for WMS API, omitting None values."""
-        return {
-            k: v for k, v in self.__dict__.items()
-            if v is not None
-        }
+        return {k: v for k, v in self.__dict__.items() if v is not None}
 
     def to_wms_format(self) -> List[Dict[str, Any]]:
         """Convert to WMS API format (array with single order)."""
@@ -542,12 +540,6 @@ class OrderMapper:
     def _format_date(date_str: Optional[str]) -> Optional[str]:
         """
         Format ISO date to SQL Server format (YYYY-MM-DD HH:MM:SS).
-        
-        Args:
-            date_str: ISO format date string
-            
-        Returns:
-            Formatted date string or None
         """
         if not date_str:
             return None
@@ -564,46 +556,31 @@ class OrderMapper:
         order_item: Dict[str, Any],
         order_id: str,
         buyer_id: str,
-        bodega: str
+        bodega: str,
+        meli_order: Dict[str, Any]
     ) -> Dict[str, Any]:
-        """
-        Build a single order detail line item.
-        
-        Args:
-            order_item: Single item from order_items array
-            order_id: MercadoLibre order ID
-            buyer_id: Buyer ID
-            bodega: Warehouse code
-            
-        Returns:
-            Dictionary with order detail fields
-        """
+        """Build a single order detail line item."""
         item = order_item.get("item", {})
         item_id = item.get("id", "")
-        
-        # Get EAN/SKU
-        ean = item_id  # Default to item ID
-        
-        # Try to get from variation_attributes
+
+        # EAN o SKU
+        ean = item_id
         variation_attrs = item.get("variation_attributes", [])
         for attr in variation_attrs:
             if attr.get("id") == "GTIN":
                 ean = attr.get("value_name", ean)
                 break
-        
-        # Try seller_sku if no GTIN
         if ean == item_id and item.get("seller_sku"):
             ean = item.get("seller_sku")
-        
+
         quantity = float(order_item.get("quantity", 0))
         unit_price = float(order_item.get("unit_price", 0))
-        
-        # Truncate description
         description = item.get("title", "")[:250]
-        
+        id = item.get("id", "")
+
         return {
             "referencia": item_id,
-            "refpadre": item_id,
+            "refpadre": id,
             "descripcion": description,
             "qtypedido": quantity,
             "qtyreservado": quantity,
@@ -620,7 +597,12 @@ class OrderMapper:
             "descripcionco": description,
             "factor": 1,
             "numpedido": order_id,
-            "field_qtypedidabase": quantity
+            "field_qtypedidabase": quantity,
+            "lineaidpicking": meli_order.get("shipping", {}).get("id"),
+            "qtyfacturado": quantity,
+            "f_ultima_actualizacion": OrderMapper._format_date(
+                meli_order.get("date_closed")
+            ),
         }
 
     @classmethod
@@ -630,154 +612,86 @@ class OrderMapper:
         buyer_data: Optional[Dict[str, Any]] = None,
         bodega: str = "Principal"
     ) -> "OrderMapper":
-        """
-        Create OrderMapper from MercadoLibre order data.
-        
-        Args:
-            meli_order: Complete order data from MercadoLibre API
-            buyer_data: Optional buyer information from /users/{buyer_id} endpoint
-            bodega: Warehouse code (default: "381")
-            
-        Returns:
-            OrderMapper instance with all mapped fields
-        """
-        # ============ EXTRACT ORDER ID ============
+        """Create OrderMapper from MercadoLibre order data."""
         order_id = str(meli_order.get("id", ""))
-        
-        # ============ BUYER INFORMATION ============
         buyer = meli_order.get("buyer", {})
         buyer_id = str(buyer.get("id", ""))
-        
+
+        # ====== BUYER INFO ======
+        buyer_name, buyer_email, buyer_phone, nit = "Unknown", None, None, buyer_id
         if buyer_data:
-            # Use detailed buyer data from /users endpoint
-            first_name = buyer_data.get("first_name", "")
-            last_name = buyer_data.get("last_name", "")
-            buyer_name = f"{first_name} {last_name}".strip() or buyer_data.get("nickname", "Unknown")
+            buyer_name = f"{buyer_data.get('first_name', '')} {buyer_data.get('last_name', '')}".strip() \
+                         or buyer_data.get("nickname", "Unknown")
             buyer_email = buyer_data.get("email")
-            
-            # Phone
-            buyer_phone_data = buyer_data.get("phone", {})
-            if buyer_phone_data:
-                area = buyer_phone_data.get("area_code", "")
-                number = buyer_phone_data.get("number", "")
+            phone_data = buyer_data.get("phone", {})
+            if phone_data:
+                area = phone_data.get("area_code", "")
+                number = phone_data.get("number", "")
                 buyer_phone = f"{area}{number}" if area and number else None
-            else:
-                buyer_phone = None
-            
-            # NIT from identification
-            identification = buyer_data.get("identification", {})
-            nit = identification.get("number") or buyer_id
-        else:
-            # Fallback to basic buyer info from order
-            buyer_name = buyer.get("nickname", "Unknown")
-            buyer_email = None
-            buyer_phone = None
-            nit = buyer_id
-        
-        # ============ SHIPPING INFORMATION ============
+            nit = buyer_data.get("identification", {}).get("number") or buyer_id
+
+        # ====== SHIPPING INFO ======
         shipping = meli_order.get("shipping", {})
         shipping_id = shipping.get("id")
-        
-        # For orders without shipping details, use defaults
-        city = "N/A"
-        state = ""
-        country = ""
-        full_address = "N/A"
-        shipping_method = "Standard"
-        
-        # Try to get receiver address if available
+        city, state, country, full_address = "N/A", "", "", "N/A"
         receiver_address = shipping.get("receiver_address", {})
         if receiver_address:
-            city_data = receiver_address.get("city", {})
-            city = city_data.get("name", "N/A")
-            
-            state_data = receiver_address.get("state", {})
-            state = state_data.get("name", "")
-            
-            country_data = receiver_address.get("country", {})
-            country = country_data.get("id", "")
-            
-            # Build address
-            street_name = receiver_address.get("street_name", "")
-            street_number = receiver_address.get("street_number", "")
-            
-            if street_name or street_number:
-                address_parts = [street_name, street_number]
-                full_address = ", ".join(filter(None, address_parts))
-        
-        # Shipping method
-        if shipping.get("shipping_method_id"):
-            shipping_method = shipping.get("shipping_method_id")
-        
-        # ============ ORDER STATUS ============
+            city = receiver_address.get("city", {}).get("name", "N/A")
+            state = receiver_address.get("state", {}).get("name", "")
+            country = receiver_address.get("country", {}).get("id", "")
+            street = receiver_address.get("street_name", "")
+            number = receiver_address.get("street_number", "")
+            if street or number:
+                full_address = ", ".join(filter(None, [street, number]))
+
+        # ====== STATUS ======
         status = meli_order.get("status", "")
-        
-        # Map ML status to WMS status
         if status == "paid":
-            estado_picking = 15
-            estado_erp = "99"
+            estado_picking, estado_erp = 15, "paid"
         elif status == "confirmed":
-            estado_picking = 3
-            estado_erp = "1"
+            estado_picking, estado_erp = 3, "confirmed"
         elif status == "cancelled":
-            estado_picking = 0
-            estado_erp = "0"
+            estado_picking, estado_erp = 0, "cancelled"
         else:
-            estado_picking = 0
-            estado_erp = "0"
-        
-        # ============ PAYMENT INFORMATION ============
-        payments = meli_order.get("payments", [])
-        payment_method = ""
-        if payments and len(payments) > 0:
-            payment_method = payments[0].get("payment_type_id", "")
-        
-        # ============ DATES ============
+            estado_picking, estado_erp = 0, status
+
+        # ====== DATES ======
         date_created = meli_order.get("date_created")
         date_closed = meli_order.get("date_closed")
-        
         f_pedido = cls._format_date(date_created)
         fecharegistro = cls._format_date(date_created)
-        fechtrans = cls._format_date(date_closed)
-        f_ultima_actualizacion = cls._format_date(date_created)
-        
-        # ============ ORDER ITEMS (DETAIL) ============
+        fechtrans = str(shipping_id) if shipping_id else None
+        f_ultima_actualizacion = cls._format_date(date_closed)
+
+        # ====== DETAILS ======
         order_items = meli_order.get("order_items", [])
         order_details = [
-            cls._build_order_detail_item(item, order_id, buyer_id, bodega)
+            cls._build_order_detail_item(item, order_id, buyer_id, bodega, meli_order)
             for item in order_items
         ]
-        
-        # ============ BUILD NOTES ============
+        item_id = meli_order.get("order_items", [{}])[0].get("item", {}).get("id", "") if order_items else ""
+
+        # ====== NOTES ======
         notes_parts = [f"ML Order: {order_id}"]
         if status:
             notes_parts.append(f"Status: {status}")
-        if payment_method:
-            notes_parts.append(f"Payment: {payment_method}")
-        
-        # Add tags if available
         tags = meli_order.get("tags", [])
         if tags:
             notes_parts.append(f"Tags: {', '.join(tags)}")
-        
         notas = " | ".join(notes_parts)
-        
-        # ============ RETURN MAPPED ORDER ============
+
         return cls(
-            # Required fields
             tipodocto="ML",
-            doctoerp=order_id,
+            doctoerp="",
             numpedido=order_id,
-            item=buyer_id,
+            item=item_id,
             nombrecliente=buyer_name,
             direccion_despacho=full_address,
-            ciudad_despacho=city,
+            ciudad_despacho=str(meli_order.get("seller", {}).get("id", "")),
             ciudad=city,
             estadoerp=estado_erp,
-            bodega="Principal",
+            bodega=bodega,
             order_detail=order_details,
-            
-            # Optional fields
             f_pedido=f_pedido,
             contacto=buyer_phone or buyer_name,
             email=buyer_email,
@@ -789,14 +703,14 @@ class OrderMapper:
             fecharegistro=fecharegistro,
             fpedido=f_pedido,
             fechtrans=fechtrans,
-            transportadora=shipping_method,
+            transportadora=str(shipping_id) if shipping_id else None,
             centrooperacion=bodega,
-            field_condicionpago=payment_method,
+            field_condicionpago="",
             field_documentoreferencia=order_id,
-            vendedor2="MercadoLibre",
+            vendedor2=str(meli_order.get("seller", {}).get("id", "")),
             numguia=str(shipping_id) if shipping_id else None,
             f_ultima_actualizacion=f_ultima_actualizacion,
-            bodegaerp="Principal"
+            bodegaerp=bodega,
         )
 
     def __repr__(self):
@@ -804,3 +718,4 @@ class OrderMapper:
             f"OrderMapper(order_id={self.doctoerp}, buyer={self.nit}, "
             f"items={len(self.order_detail)}, status={self.estadoerp})"
         )
+
