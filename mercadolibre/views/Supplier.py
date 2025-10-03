@@ -52,7 +52,7 @@ class SupplierSyncView(View):
 
             if not supplier_id:
                 return JsonResponse(
-                    {"success": False, "message": "Debes enviar supplier_id"},
+                    {"success": False, "message": "supplier_id is required"},
                     status=400,
                 )
 
@@ -60,12 +60,12 @@ class SupplierSyncView(View):
 
             return JsonResponse(asdict(result), status=200)
 
-        except Exception as e:
+        except Exception as exception:
             return JsonResponse(
                 {
                     "success": False,
                     "message": "Error inesperado al actualizar el supplier",
-                    "error": str(e),
+                    "error": str(exception),
                 },
                 status=500,
             )
