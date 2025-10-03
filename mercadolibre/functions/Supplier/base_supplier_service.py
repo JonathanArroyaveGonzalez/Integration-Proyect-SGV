@@ -3,7 +3,6 @@ from typing import Any, Dict, Optional
 
 import logging
 from mercadolibre.services.internal_api_service import (
-    InternalAPIService,
     get_internal_api_service,
 )
 from mercadolibre.services.meli_service import FetchUser
@@ -30,6 +29,9 @@ class BaseSupplierService:
     def __init__(self):
         self.internal_api_service = get_internal_api_service()
         self.supplier_mapper = SupplierMapper
+
+    def get_internal_api(self):
+        return self.internal_api_service
 
     def get_supplier_from_meli(self, supplier_id):
         return FetchUser.fetch_user(supplier_id)

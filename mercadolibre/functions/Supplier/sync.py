@@ -31,7 +31,7 @@ class MeliSupplierService:
                 return ServiceResult(
                     success=False,
                     action="error",
-                    message="Customer not found in MercadoLibre",
+                    message="Supplier not found in MercadoLibre",
                     error="not_found",
                 )
 

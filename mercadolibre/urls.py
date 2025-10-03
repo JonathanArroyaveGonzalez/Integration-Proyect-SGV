@@ -5,6 +5,7 @@ from mercadolibre.views.Customer import MeliCustomerSyncView
 from mercadolibre.views.Product import MeliProductSyncView
 from mercadolibre.views.Supplier import SupplierSyncView
 from mercadolibre.views.inventory import MeliInventoryView
+from mercadolibre.views.order import MeliOrderSyncView
 
 
 mercadolibre_endpoints = [
@@ -17,5 +18,6 @@ mercadolibre_endpoints = [
     path("product/", MeliProductSyncView.as_view(), name="meli-sync"),
     # Inventario - Gestión unificada
     path("inventory/", MeliInventoryView.as_view(), name="meli-inventory"),
-    path("supplier/", SupplierSyncView.as_view(), name="meli-supplier-sync"),
+    # Pedidos - Sincronización unificada
+    path("order/", MeliOrderSyncView.as_view(), name="meli_order_sync"),
 ]
