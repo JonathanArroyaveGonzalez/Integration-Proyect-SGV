@@ -235,19 +235,22 @@ class MeliService:
     # -------------------
     # Funciones de negocio
     # -------------------
-    def get_customer(self, customer_id: str) -> Dict[str, Any]:
-        response = self.get(f"/users/{customer_id}")
+    def get_user(self, user_id: str) -> Dict[str, Any]:
+        """Obtiene información de un usuario en MercadoLibre"""
+        response = self.get(f"/users/{user_id}")
         if response.status_code != 200:
             response.raise_for_status()
         return response.json()
 
     def get_user_products(self, user_id: str) -> List[str]:
+        """Obtiene los IDs de los productos publicados por un usuario"""
         response = self.get(f"/users/{user_id}/items/search")
         if response.status_code != 200:
             response.raise_for_status()
         return response.json().get("results", [])
 
     def get_product_description(self, product_id: str) -> Optional[Dict[str, Any]]:
+        """Obtiene la descripción de un producto"""
         try:
             response = self.get(f"/items/{product_id}/description")
             if response.status_code == 200:
@@ -271,6 +274,7 @@ class MeliService:
         return []
 
     def get_products_batch(self, product_ids: List[str]) -> List[Dict[str, Any]]:
+        """Obtiene múltiples productos en batch de 20 en 20"""
         if not product_ids:
             return []
 
@@ -281,6 +285,7 @@ class MeliService:
             batch = product_ids[i : i + 20]
             batch_products = self._get_batch_products(batch)
 
+            # En paralelo traemos las descripciones
             with ThreadPoolExecutor(max_workers=5) as executor:
                 future_to_product = {
                     executor.submit(
@@ -304,6 +309,7 @@ class MeliService:
         return products
 
     def get_product(self, product_id: str) -> Dict[str, Any]:
+        """Obtiene un producto y su descripción si existe"""
         response = self.get(f"/items/{product_id}")
         if response.status_code != 200:
             response.raise_for_status()
@@ -318,21 +324,9 @@ class MeliService:
 
         return product_data
 
-    # Order-related methods
-
+    # Métodos relacionados con órdenes
     def get_order(self, order_id: str) -> Dict[str, Any]:
-        """
-        Get order information from MercadoLibre.
-
-        Args:
-            order_id: MercadoLibre order ID
-
-        Returns:
-            Order data dictionary
-
-        Raises:
-            requests.exceptions.RequestException: If API request fails
-        """
+        """Obtiene información de una orden en MercadoLibre"""
         response = self.get(f"/orders/{order_id}")
         if response.status_code != 200:
             logger.error(f"Failed to get order {order_id}: {response.status_code}")
@@ -340,25 +334,13 @@ class MeliService:
         return response.json()
 
     def get_orders_batch(self, order_ids: List[str]) -> List[Dict[str, Any]]:
-        """
-        Get detailed information for multiple orders.
-
-        Args:
-            order_ids: List of order IDs
-
-        Returns:
-            List of order details dictionaries
-
-        Raises:
-            requests.exceptions.RequestException: If API request fails
-        """
+        """Obtiene múltiples órdenes en paralelo"""
         if not order_ids:
             return []
 
         orders = []
         from concurrent.futures import ThreadPoolExecutor, as_completed
 
-        # Process orders in parallel
         with ThreadPoolExecutor(max_workers=5) as executor:
             future_to_order = {
                 executor.submit(self.get_order, order_id): order_id
@@ -378,22 +360,8 @@ class MeliService:
     def get_user_orders(
         self, user_id: str, status: Optional[str] = None, limit: int = 50
     ) -> List[Dict[str, Any]]:
-        """
-        Get orders for a specific user (seller).
-
-        Args:
-            user_id: MercadoLibre user ID
-            status: Optional order status filter (paid, cancelled, etc.)
-            limit: Maximum number of orders to retrieve
-
-        Returns:
-            List of order dictionaries
-
-        Raises:
-            requests.exceptions.RequestException: If API request fails
-        """
+        """Obtiene todas las órdenes de un usuario vendedor"""
         params = {"seller": user_id, "limit": limit}
-
         if status:
             params["order.status"] = status
 
@@ -426,22 +394,3 @@ def make_authenticated_request(
 ) -> requests.Response:
     service = get_meli_service()
     return service.request(method, endpoint, **kwargs)
-
-
-# -------------------------------------------------------------------
-# Helper para usuarios
-# -------------------------------------------------------------------
-class FetchUser:
-    """Helper class to fetch user data from MercadoLibre."""
-
-    @staticmethod
-    def fetch_user(user_id: str, meli_client: Optional[MeliService] = None):
-        meli = get_meli_service()
-        try:
-            response = meli.get(f"/users/{user_id}")
-            if response.status_code == 200:
-                return response.json()
-            return None
-        except Exception as e:
-            logger.exception(f"Error fetching user {user_id}: {e}")
-            return None

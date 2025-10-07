@@ -1,9 +1,8 @@
 from concurrent.futures import ThreadPoolExecutor
-from dataclasses import asdict
 import datetime
 from typing import Any, List, Optional, Dict
-from mercadolibre.functions.Customer.base_customer_service import ServiceResult
 from mercadolibre.functions.Supplier.base_supplier_service import BaseSupplierService
+from mercadolibre.functions.Customer.base_customer_service import ServiceResult
 from mercadolibre.utils.exceptions import UserMappingError
 
 import logging
@@ -13,16 +12,14 @@ logger = logging.getLogger(__name__)
 
 class MeliSupplierService:
 
-    ENDPOINT_SUPPLIER = "wms/adapter/v2/supplier"
-
     def __init__(self):
         self.base_supplier_service = BaseSupplierService()
 
     def _sync_single_supplier(
-        self, supplier_id: str, original_request: Any = None, force_update: bool = False
-    ):
+        self, supplier_id: str, original_request: Any = None
+    ) -> ServiceResult:
+        """Sync a single supplier (create only)."""
         try:
-            # Step 1: Fetch customer from MercadoLibre
             supplier_data = self.base_supplier_service.get_supplier_from_meli(
                 supplier_id
             )
@@ -34,23 +31,21 @@ class MeliSupplierService:
                     error="not_found",
                 )
 
-            # Step 2: Map ML customer data to WMS format
             wms_supplier = self.base_supplier_service.map_supplier_to_wms(supplier_data)
 
-            # Step 3: Create customer in WMS
             result = self.base_supplier_service.create_supplier_in_wms(
                 wms_supplier, original_request
             )
 
-            # Agregar datos extra al resultado
+            # Keep raw WMS response
             result.wms_response = {
-                "customer_id": supplier_id,
-                "ml_data": supplier_data,
+                "supplier_id": supplier_id,
                 "wms_data": wms_supplier,
-                "raw": asdict(result.wms_response),
+                "raw": result.wms_response,
             }
 
             return result
+
         except UserMappingError as e:
             return ServiceResult(
                 success=False, action="error", message=str(e), error="mapping_error"
@@ -60,17 +55,16 @@ class MeliSupplierService:
         self,
         suppliers_ids: List[str],
         original_request: Any = None,
-        force_update: bool = False,
-    ):
+    ) -> Dict[str, Any]:
+
         results_summary = {
             "success": True,
             "message": "",
             "total_processed": 0,
             "total_created": 0,
-            "total_updated": 0,
-            "total_errors": 0,
-            "customers": [],
-            "errors": [],
+            "total_failed": 0,
+            "suppliers_created": [],
+            "suppliers_failed": [],
             "processed_at": datetime.datetime.now().isoformat(),
         }
 
@@ -78,78 +72,86 @@ class MeliSupplierService:
             results_summary.update(
                 {
                     "success": False,
-                    "total_errors": 1,
-                    "errors": ["Customer IDs list is empty"],
-                    "message": "No customer IDs provided",
+                    "total_failed": 1,
+                    "suppliers_failed": [
+                        {
+                            "supplier_id": None,
+                            "error_type": "empty_list",
+                            "message": "No supplier IDs provided",
+                        }
+                    ],
                 }
             )
             return results_summary
 
-        # Step 1: Process customers in parallel using ThreadPoolExecutor
         with ThreadPoolExecutor(max_workers=5) as executor:
             futures = {
-                cid: executor.submit(
-                    self._sync_single_supplier, cid, original_request, force_update
-                )
-                for cid in suppliers_ids
+                sid: executor.submit(self._sync_single_supplier, sid, original_request)
+                for sid in suppliers_ids
             }
-            for cid, future in futures.items():
+
+            for sid, future in futures.items():
                 try:
                     result: ServiceResult = future.result()
-                    results_summary["customers"].append(result.__dict__)
                     results_summary["total_processed"] += 1
 
-                    if result.success:
-                        if result.action == "created":
-                            results_summary["total_created"] += 1
-                        elif result.action == "updated":
-                            results_summary["total_updated"] += 1
+                    if result.success and result.action == "created":
+                        results_summary["total_created"] += 1
+                        results_summary["suppliers_created"].append(result.wms_response)
                     else:
-                        results_summary["total_errors"] += 1
-                        results_summary["errors"].append(
-                            f"Customer {cid}: {result.message}"
+                        results_summary["total_failed"] += 1
+                        results_summary["suppliers_failed"].append(
+                            {
+                                "supplier_id": sid,
+                                "error_type": result.error or "unknown",
+                                "message": result.message,
+                            }
                         )
 
                 except Exception as e:
-                    logger.exception(f"Error processing customer {cid}")
+                    logger.exception(f"Exception processing supplier {sid}")
                     results_summary["total_processed"] += 1
-                    results_summary["total_errors"] += 1
-                    results_summary["errors"].append(f"Customer {cid}: {str(e)}")
+                    results_summary["total_failed"] += 1
+                    results_summary["suppliers_failed"].append(
+                        {
+                            "supplier_id": sid,
+                            "error_type": "exception",
+                            "message": str(e),
+                        }
+                    )
 
-        # Step 2: Build summary message
-        if results_summary["total_errors"] == 0:
+        if results_summary["total_failed"] == 0:
             results_summary["message"] = (
-                f"All {results_summary['total_processed']} customers synced successfully"
+                f"All {results_summary['total_processed']} suppliers synced successfully"
             )
-        elif results_summary["total_errors"] < results_summary["total_processed"]:
+        elif results_summary["total_created"] > 0:
             results_summary["message"] = (
-                f"{results_summary['total_processed'] - results_summary['total_errors']} "
-                f"customers synced, {results_summary['total_errors']} errors"
+                f"{results_summary['total_created']} suppliers created, "
+                f"{results_summary['total_failed']} failed"
             )
         else:
             results_summary["success"] = False
-            results_summary["message"] = (
-                f"All {results_summary['total_errors']} customers failed to sync"
-            )
+            results_summary["message"] = "All suppliers failed to sync"
 
         return results_summary
 
 
+# Singleton + helper
 _sync_service: Optional[MeliSupplierService] = None
 
 
 def get_supplier_sync_service():
-    """Get or create singleton instance of MeliCustomerSyncService."""
+    """Get or create singleton instance of MeliSupplierService."""
     global _sync_service
     if _sync_service is None:
         _sync_service = MeliSupplierService()
     return _sync_service
 
 
-def sync_customers(
+def sync_suppliers(
     supplier_ids: List[str], original_request: Any = None
 ) -> Dict[str, Any]:
-    """Convenience function to sync customers without directly instantiating the service."""
+    """Convenience function to sync suppliers without directly instantiating the service."""
     return get_supplier_sync_service().sync_specific_suppliers(
         supplier_ids, original_request
     )

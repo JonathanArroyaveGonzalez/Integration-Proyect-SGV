@@ -6,6 +6,15 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+SITE_TO_CURRENCY = {
+    "MLA": "ARS",  # Argentina
+    "MLM": "MXN",  # México
+    "MCO": "COP",  # Colombia
+    "MLB": "BRL",  # Brasil
+    "MLC": "CLP",  # Chile
+}
+
+
 @dataclass
 class ProductMapper:
     productoean: str
@@ -232,135 +241,89 @@ class BarCodeMapper:
         return f"BarCodeMapper(idinternoean={self.idinternoean}, codbarrasasignado={self.codbarrasasignado})"
 
 
+@dataclass
 class CustomerMapper:
-    def __init__(
-        self,
-        nit: Optional[str] = None,
-        nombrecliente: Optional[str] = None,
-        direccion: Optional[str] = None,
-        isactivoproveedor: Optional[int] = None,
-        condicionescompra: Optional[str] = None,
-        codigopais: Optional[str] = None,
-        monedadefacturacion: Optional[str] = None,
-        item: Optional[str] = None,
-        activocliente: Optional[int] = None,
-        ciudaddestino: Optional[str] = None,
-        dptodestino: Optional[str] = None,
-        paisdestino: Optional[str] = None,
-        codciudaddestino: Optional[str] = None,
-        coddptodestino: Optional[str] = None,
-        codpaisdestino: Optional[str] = None,
-        fecharegistro: Optional[str] = None,
-        telefono: Optional[str] = None,
-        cuidad: Optional[str] = None,
-        cuidaddespacho: Optional[str] = None,
-        notas: Optional[str] = None,
-        contacto: Optional[str] = None,
-        email: Optional[str] = None,
-        paisdespacho: Optional[str] = None,
-        departamentodespacho: Optional[str] = None,
-        sucursaldespacho: Optional[str] = None,
-        idsucursal: Optional[str] = None,
-        isactivocliente: Optional[int] = None,
-        isactivoproveed: Optional[int] = None,
-        estadotransferencia: Optional[int] = None,
-        vendedor: Optional[str] = None,
-        zip_code: Optional[str] = None,
-        licencia: Optional[str] = None,
-        compania: Optional[str] = None,
-    ):
-        self.nit = nit
-        self.nombrecliente = nombrecliente
-        self.direccion = direccion
-        self.isactivoproveedor = isactivoproveedor
-        self.condicionescompra = condicionescompra
-        self.codigopais = codigopais
-        self.monedadefacturacion = monedadefacturacion
-        self.item = item
-        self.activocliente = activocliente
-        self.ciudaddestino = ciudaddestino
-        self.dptodestino = dptodestino
-        self.paisdestino = paisdestino
-        self.codciudaddestino = codciudaddestino
-        self.coddptodestino = coddptodestino
-        self.codpaisdestino = codpaisdestino
-        self.fecharegistro = fecharegistro
-        self.telefono = telefono
-        self.cuidad = cuidad
-        self.cuidaddespacho = cuidaddespacho
-        self.notas = notas
-        self.contacto = contacto
-        self.email = email
-        self.paisdespacho = paisdespacho
-        self.departamentodespacho = departamentodespacho
-        self.sucursaldespacho = sucursaldespacho
-        self.idsucursal = idsucursal
-        self.isactivocliente = isactivocliente
-        self.isactivoproveed = isactivoproveed
-        self.estadotransferencia = estadotransferencia
-        self.vendedor = vendedor
-        self.zip_code = zip_code
-        self.licencia = licencia
-        self.compania = compania
-
-    def to_dict(self) -> Dict[str, Any]:
-        """
-        Serializa el objeto a un diccionario filtrando None
-        """
-        return {k: v for k, v in self.__dict__.items() if v is not None}
+    nit: Optional[str] = None
+    nombrecliente: Optional[str] = None
+    direccion: Optional[str] = None
+    isactivoproveedor: Optional[int] = None
+    condicionescompra: Optional[str] = None
+    codigopais: Optional[str] = None
+    monedadefacturacion: Optional[str] = None
+    item: Optional[str] = None
+    activocliente: Optional[int] = None
+    ciudaddestino: Optional[str] = None
+    dptodestino: Optional[str] = None
+    paisdestino: Optional[str] = None
+    codciudaddestino: Optional[str] = None
+    coddptodestino: Optional[str] = None
+    codpaisdestino: Optional[str] = None
+    fecharegistro: Optional[str] = None
+    telefono: Optional[str] = None
+    cuidad: Optional[str] = None  # coincide con la columna de la BD
+    cuidaddespacho: Optional[str] = None
+    notas: Optional[str] = None
+    contacto: Optional[str] = None
+    email: Optional[str] = None
+    paisdespacho: Optional[str] = None
+    departamentodespacho: Optional[str] = None
+    sucursaldespacho: Optional[str] = None
+    idsucursal: Optional[str] = None
+    isactivocliente: Optional[int] = None
+    isactivoproveed: Optional[int] = None
+    estadotransferencia: Optional[int] = None
+    vendedor: Optional[str] = None
+    zip_code: Optional[str] = None
+    licencia: Optional[str] = None
+    compania: Optional[str] = None
 
     @classmethod
     def from_meli_customer(cls, ml_customer_data: Dict[str, Any]) -> "CustomerMapper":
-        """
-        Crea un CustomerMapper desde la respuesta de MercadoLibre.
-        Convierte fecha al formato YYYY-MM-DD HH:MM:SS para SQL Server.
-        """
-        try:
-            nit = ml_customer_data.get("identification", {}).get("number")
-            nombrecliente = f"{ml_customer_data.get('first_name', '')} {ml_customer_data.get('last_name', '')}".strip()
-            direccion = ml_customer_data.get("address", {}).get("address")
-            ciudad = ml_customer_data.get("address", {}).get("city")
-            codigopais = ml_customer_data.get("country_id")
-            zip_code = ml_customer_data.get("address", {}).get("zip_code")
-            telefono = None
-            phone_obj = ml_customer_data.get("phone")
-            if phone_obj and phone_obj.get("area_code") and phone_obj.get("number"):
-                telefono = f"{phone_obj.get('area_code')}{phone_obj.get('number')}"
-            email = ml_customer_data.get("email")
-            item = str(ml_customer_data.get("id"))
+        # Dirección completa
+        address_obj = ml_customer_data.get("address", {})
+        direccion_parts = [
+            address_obj.get("address"),
+            address_obj.get("city"),
+            address_obj.get("state"),
+            address_obj.get("zip_code"),
+        ]
+        direccion = ", ".join([part for part in direccion_parts if part])
 
-            # === Conversión de fecha para SQL Server ===
-            fecharegistro = None
-            fecha_raw = ml_customer_data.get("registration_date")
-            if fecha_raw:
-                try:
-                    dt = datetime.fromisoformat(fecha_raw.replace("Z", "+00:00"))
-                    fecharegistro = dt.strftime("%Y-%m-%d %H:%M:%S")
-                except Exception as e:
-                    logger.warning(f"No se pudo parsear fecha: {fecha_raw}, error: {e}")
+        # Teléfono
+        telefono = None
+        phone_obj = ml_customer_data.get("phone")
+        if phone_obj and phone_obj.get("number"):
+            area_code = phone_obj.get("area_code", "").strip()
+            telefono = f"{area_code}{phone_obj.get('number')}".strip()
 
-            return cls(
-                nit=nit,
-                nombrecliente=nombrecliente
-                or ml_customer_data.get("nickname"),  # TODO : Quitar nickame
-                direccion=direccion,
-                fecharegistro=fecharegistro,
-                codigopais=codigopais,
-                telefono=telefono,
-                cuidad=ciudad,
-                contacto=nombrecliente,
-                email=email,
-                zip_code=zip_code,
-                item=item,
-                isactivocliente=1,
-            )
+        # Códigos y país
+        codigopais = ml_customer_data.get("country_id")
+        paisdespacho = address_obj.get("country_id", codigopais)
+        zip_code = address_obj.get("zip_code")
 
-        except Exception as e:
-            logger.error(f"Error mapeando customer: {e}")
-            return None
+        # Nombre y contacto
+        nombrecliente = f"{ml_customer_data.get('first_name', '')} {ml_customer_data.get('last_name', '')}".strip()
 
-    def __repr__(self):
-        return f"CustomerMapper({self.nombrecliente}, nit={self.nit}, item={self.item})"
+        return cls(
+            nit=ml_customer_data.get("identification", {}).get("number"),
+            nombrecliente=nombrecliente or ml_customer_data.get("nickname"),
+            direccion=direccion,
+            cuidad=address_obj.get("city"),
+            telefono=telefono,
+            codigopais=codigopais,
+            paisdespacho=paisdespacho,
+            email=ml_customer_data.get("email"),
+            item=str(ml_customer_data.get("id")),
+            isactivocliente=1,
+            isactivoproveed=0,
+            zip_code=zip_code,
+            contacto=nombrecliente,
+            monedadefacturacion=SITE_TO_CURRENCY.get(ml_customer_data.get("site_id")),
+        )
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Serializa el objeto a un diccionario filtrando None."""
+        return {k: v for k, v in self.__dict__.items() if v is not None}
 
 
 @dataclass
@@ -484,15 +447,6 @@ class InventoryMapper:
         )
 
 
-SITE_TO_CURRENCY = {
-    "MLA": "ARS",  # Argentina
-    "MLM": "MXN",  # México
-    "MCO": "COP",  # Colombia
-    "MLB": "BRL",  # Brasil
-    "MLC": "CLP",  # Chile
-}
-
-
 @dataclass
 class SupplierMapper:
     nit: Optional[str] = None
@@ -520,13 +474,24 @@ class SupplierMapper:
     def from_meli_to_wms_supplier(ml_supplier_data: Dict[str, Any]) -> "SupplierMapper":
         """
         Mapea la respuesta de MercadoLibre a formato WMS.
+        Concatenando calle, ciudad, estado y zip en 'direccion'.
         """
         try:
             nit = ml_supplier_data.get("identification", {}).get("number")
             nombrecliente = f"{ml_supplier_data.get('first_name', '')} {ml_supplier_data.get('last_name', '')}".strip() or ml_supplier_data.get(
                 "nickname"
             )
-            direccion = ml_supplier_data.get("address", {}).get("address")
+
+            # Construir direccion completa
+            address_data = ml_supplier_data.get("address", {})
+            direccion_parts = [
+                address_data.get("address"),
+                address_data.get("city"),
+                address_data.get("state"),
+            ]
+            # Solo incluir partes que no sean None o vacías
+            direccion = ", ".join([part for part in direccion_parts if part])
+
             codigopais = ml_supplier_data.get("country_id")
             email = ml_supplier_data.get("email")
             item = str(ml_supplier_data.get("id"))

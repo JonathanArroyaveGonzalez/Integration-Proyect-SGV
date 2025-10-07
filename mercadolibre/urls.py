@@ -20,4 +20,6 @@ mercadolibre_endpoints = [
     path("inventory/", MeliInventoryView.as_view(), name="meli-inventory"),
     # Pedidos - Sincronización unificada
     path("order/", MeliOrderSyncView.as_view(), name="meli_order_sync"),
+    # Provedores
+    path("supplier/", SupplierSyncView.as_view(), name="meli_supplier_sync"),
 ]
