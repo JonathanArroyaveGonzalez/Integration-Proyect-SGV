@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from typing import Any, Dict, Optional
 
 import logging
@@ -20,6 +20,10 @@ class ServiceResult:
     message: Optional[str] = None
     wms_response: Optional[Dict[str, Any]] = None
     error: Optional[str] = None
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Convierte el resultado a un dict limpio para serializar en JSON."""
+        return asdict(self)
 
 
 class BaseSupplierService:

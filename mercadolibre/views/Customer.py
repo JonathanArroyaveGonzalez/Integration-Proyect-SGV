@@ -6,7 +6,7 @@ from django.http import JsonResponse
 from django.views import View
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
-from mercadolibre.functions.Customer.sync import get_customer_sync_service
+from mercadolibre.functions.Customer.create import get_customer_sync_service
 from mercadolibre.functions.Customer.update import get_customer_update_service
 from mercadolibre.utils.response_helpers import get_response_status_code
 

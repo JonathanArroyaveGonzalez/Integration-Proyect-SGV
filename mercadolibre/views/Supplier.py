@@ -16,16 +16,6 @@ class SupplierSyncView(View):
             supplier_ids = body.get("supplier_ids")
             supplier_id = body.get("supplier_id")
 
-            if not supplier_ids and not supplier_id:
-                return JsonResponse(
-                    {
-                        "success": False,
-                        "message": "Debes enviar supplier_id o supplier_ids",
-                    },
-                    status=400,
-                )
-
-            # Normalizar a lista
             if supplier_id:
                 supplier_ids = [supplier_id]
 
@@ -50,15 +40,9 @@ class SupplierSyncView(View):
             body = json.loads(request.body.decode("utf-8"))
             supplier_id = body.get("supplier_id")
 
-            if not supplier_id:
-                return JsonResponse(
-                    {"success": False, "message": "supplier_id is required"},
-                    status=400,
-                )
-
             result = update_single_supplier(supplier_id, original_request=request)
 
-            return JsonResponse(asdict(result), status=200)
+            return JsonResponse(result.to_dict(), status=200)
 
         except Exception as exception:
             return JsonResponse(

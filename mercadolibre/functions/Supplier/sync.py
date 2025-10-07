@@ -1,4 +1,5 @@
 from concurrent.futures import ThreadPoolExecutor
+from dataclasses import asdict
 import datetime
 from typing import Any, List, Optional, Dict
 from mercadolibre.functions.Customer.base_customer_service import ServiceResult
@@ -14,8 +15,6 @@ class MeliSupplierService:
 
     ENDPOINT_SUPPLIER = "wms/adapter/v2/supplier"
 
-    # La logica por la cual pienso es consumir el servicio de sincronizacion de
-    # clientes y actualizacion de clientes, como tal para los datos
     def __init__(self):
         self.base_supplier_service = BaseSupplierService()
 
@@ -48,12 +47,11 @@ class MeliSupplierService:
                 "customer_id": supplier_id,
                 "ml_data": supplier_data,
                 "wms_data": wms_supplier,
-                "raw": result.wms_response,
+                "raw": asdict(result.wms_response),
             }
 
             return result
         except UserMappingError as e:
-            logger.error(f"Mapping error for customer {supplier_id}: {e}")
             return ServiceResult(
                 success=False, action="error", message=str(e), error="mapping_error"
             )

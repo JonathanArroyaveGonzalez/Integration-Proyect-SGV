@@ -1,5 +1,5 @@
 from typing import Optional, Dict, Any, List
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from datetime import datetime
 import logging
 
@@ -484,46 +484,37 @@ class InventoryMapper:
         )
 
 
+SITE_TO_CURRENCY = {
+    "MLA": "ARS",  # Argentina
+    "MLM": "MXN",  # México
+    "MCO": "COP",  # Colombia
+    "MLB": "BRL",  # Brasil
+    "MLC": "CLP",  # Chile
+}
+
+
+@dataclass
 class SupplierMapper:
-    def __init__(
-        self,
-        nit: Optional[str] = None,
-        nombrecliente: Optional[str] = None,
-        direccion: Optional[str] = None,
-        isactivoproveedor: Optional[int] = None,
-        condicionescompra: Optional[str] = None,
-        codigopais: Optional[str] = None,
-        monedadefacturacion: Optional[str] = None,
-        item: Optional[str] = None,
-        activocliente: Optional[int] = None,
-        fecharegistro: Optional[str] = None,
-        estadotransferencia: Optional[int] = None,
-        sucursal: Optional[str] = None,
-        email: Optional[str] = None,
-        beneficiario: Optional[int] = None,
-        item_sucursal: Optional[str] = None,
-        codigoter: Optional[str] = None,
-    ):
-        self.nit = nit
-        self.nombrecliente = nombrecliente
-        self.direccion = direccion
-        self.isactivoproveedor = isactivoproveedor
-        self.condicionescompra = condicionescompra
-        self.codigopais = codigopais
-        self.monedadefacturacion = monedadefacturacion
-        self.item = item
-        self.activocliente = activocliente
-        self.fecharegistro = fecharegistro
-        self.estadotransferencia = estadotransferencia
-        self.sucursal = sucursal
-        self.email = email
-        self.beneficiario = beneficiario
-        self.item_sucursal = item_sucursal
-        self.codigoter = codigoter
+    nit: Optional[str] = None
+    nombrecliente: Optional[str] = None
+    direccion: Optional[str] = None
+    isactivoproveedor: Optional[int] = 1
+    condicionescompra: Optional[str] = None
+    codigopais: Optional[str] = None
+    monedadefacturacion: Optional[str] = None
+    item: Optional[str] = None
+    activocliente: Optional[int] = None
+    fecharegistro: Optional[str] = None
+    estadotransferencia: Optional[int] = None
+    sucursal: Optional[str] = None
+    email: Optional[str] = None
+    beneficiario: Optional[int] = None
+    item_sucursal: Optional[str] = None
+    codigoter: Optional[str] = None
 
     def to_dict(self) -> Dict[str, Any]:
-        """Convierte el mapper a diccionario ignorando valores None"""
-        return {k: v for k, v in self.__dict__.items() if v is not None}
+        """Convierte a dict ignorando None"""
+        return {k: v for k, v in asdict(self).items() if v is not None}
 
     @staticmethod
     def from_meli_to_wms_supplier(ml_supplier_data: Dict[str, Any]) -> "SupplierMapper":
@@ -546,12 +537,15 @@ class SupplierMapper:
                 direccion=direccion,
                 isactivoproveedor=1,
                 codigopais=codigopais,
+                monedadefacturacion=SITE_TO_CURRENCY.get(
+                    ml_supplier_data.get("site_id")
+                ),
                 email=email,
                 item=item,
             )
         except Exception as e:
-            logger.error(f"Error mapeando customer: {e}")
-            return None
+            logger.error(f"Error mapeando supplier desde ML: {e}")
+            raise
 
 
 @dataclass
