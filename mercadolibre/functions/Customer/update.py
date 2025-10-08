@@ -20,7 +20,7 @@ class CustomerUpdateService:
     """Service for updating single MercadoLibre customers in WMS."""
 
     def __init__(self):
-        self.base_service = BaseCustomerService()
+        self.base_service_wms = BaseCustomerService()
 
     def update_single_customer(
         self, customer_id: str, original_request: Any = None
@@ -36,8 +36,7 @@ class CustomerUpdateService:
             )
 
         try:
-            # 1️⃣ Traer datos desde MercadoLibre
-            customer_data = self.base_service.get_customer_from_meli(customer_id)
+            customer_data = self.base_service_wms.get_customer_from_meli(customer_id)
             if not customer_data:
                 return ServiceResult(
                     success=False,
@@ -46,14 +45,12 @@ class CustomerUpdateService:
                     error="not_found",
                 )
 
-            # 2️⃣ Mapear a WMS
-            wms_customer = self.base_service.map_customer_to_wms(customer_data)
+            wms_customer = self.base_service_wms.map_customer_to_wms(customer_data)
             if not isinstance(wms_customer, dict):
                 wms_customer = getattr(wms_customer, "to_dict", lambda: wms_customer)()
 
-            # 3️⃣ Intentar actualizar en WMS
-            response = self.base_service.wms.put(
-                self.base_service.CUSTOMER_ENDPOINT,
+            response = self.base_service_wms.internal_api_service.put(
+                self.base_service_wms.CUSTOMER_ENDPOINT,
                 original_request=original_request,
                 json=wms_customer,
             )
@@ -70,7 +67,7 @@ class CustomerUpdateService:
             # 4️⃣ PUT devuelve 404 → fallback a creación
             elif response.status_code == 404:
                 logger.warning(f"Customer {customer_id} not found in WMS. Creating...")
-                create_result = self.base_service.create_customer_in_wms(
+                create_result = self.base_service_wms.create_customer_in_wms(
                     wms_customer, original_request
                 )
                 return ServiceResult(
