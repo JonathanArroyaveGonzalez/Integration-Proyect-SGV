@@ -25,7 +25,6 @@ class CustomerUpdateService:
     def update_single_customer(
         self, customer_id: str, original_request: Any = None
     ) -> ServiceResult:
-        # 0️⃣ Validación inicial
         if not customer_id:
             logger.warning("No customer_id provided to update_single_customer")
             return ServiceResult(
@@ -59,12 +58,10 @@ class CustomerUpdateService:
                 response.json() if hasattr(response, "json") and response.text else {}
             )
 
-            # ✅ PUT exitoso
             if response.status_code in (200, 201):
                 action = "updated"
                 message = "Customer updated successfully"
 
-            # 4️⃣ PUT devuelve 404 → fallback a creación
             elif response.status_code == 404:
                 logger.warning(f"Customer {customer_id} not found in WMS. Creating...")
                 create_result = self.base_service_wms.create_customer_in_wms(
@@ -77,7 +74,6 @@ class CustomerUpdateService:
                     wms_response=create_result.wms_response,
                 )
 
-            # 5️⃣ PUT devuelve 400 con "record already exists"
             elif response.status_code == 400 and "record already exists" in str(
                 resp_json.get("errors", [])
             ):
@@ -87,7 +83,6 @@ class CustomerUpdateService:
                 action = "already_exists"
                 message = "Customer already exists in WMS"
 
-            # 6️⃣ Otros errores
             else:
                 raise WMSRequestError(
                     status_code=response.status_code, message=response.text[:200]
