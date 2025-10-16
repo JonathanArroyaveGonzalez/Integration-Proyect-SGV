@@ -121,9 +121,9 @@ class ProductMapper:
             raw_description = plain_text or title
 
         return cls(
-            productoean=ean,
+            productoean=meli_item.get("id", ean),
             descripcion=raw_description,
-            referencia=meli_item.get("id", ean),
+            referencia=ean,
             inventariable=1,
             um1="UND",
             bodega="01",
@@ -198,6 +198,9 @@ class BarCodeMapper:
         """
         Construye un BarCodeMapper a partir de un item de Mercado Libre.
         Si no se encuentra un EAN válido, retorna None.
+        
+        El idinternoean siempre será el ID de MercadoLibre para mantener la consistencia.
+        El codbarrasasignado será el EAN/SKU real del producto.
         """
         from datetime import datetime
 
@@ -205,37 +208,39 @@ class BarCodeMapper:
             attr["id"]: attr.get("value_name")
             for attr in meli_item.get("attributes", [])
         }
+        
+        meli_id = meli_item.get("id")
+        if not meli_id:
+            return None
+            
         ean = attributes.get("GTIN") or attributes.get("SELLER_SKU")
+        
+        # Formatear fecha de creación
+        fecha_creacion = meli_item.get("date_created")
+        if fecha_creacion:
+            # Convertir a formato ISO con milisegundos si es necesario
+            try:
+                fecha_dt = datetime.fromisoformat(
+                    fecha_creacion.replace("Z", "+00:00")
+                )
+                fechacrea = fecha_dt.strftime("%Y-%m-%dT%H:%M:%S.%f")[
+                    :-3
+                ]  # Formato con 3 decimales
+            except (ValueError, AttributeError):
+                fechacrea = fecha_creacion
+        else:
+            fechacrea = None
 
-        if ean:
-            # Formatear fecha de creación
-            fecha_creacion = meli_item.get("date_created")
-            if fecha_creacion:
-                # Convertir a formato ISO con milisegundos si es necesario
-                try:
-                    fecha_dt = datetime.fromisoformat(
-                        fecha_creacion.replace("Z", "+00:00")
-                    )
-                    fechacrea = fecha_dt.strftime("%Y-%m-%dT%H:%M:%S.%f")[
-                        :-3
-                    ]  # Formato con 3 decimales
-                except (ValueError, AttributeError):
-                    fechacrea = fecha_creacion
-            else:
-                fechacrea = None
-
-            return cls(
-                idinternoean=ean,
-                codbarrasasignado=ean,
-                # cantidad=meli_item.get("available_quantity", 1),
-                cantidad=1,
-                qtynew=None,
-                fechacrea=fechacrea,
-                pesobruto=None,
-                qtytara=None,
-                cantidad_tara=None,
-            )
-        return None
+        return cls(
+            idinternoean=meli_id,  # Siempre usar el ID de ML como identificador interno
+            codbarrasasignado=ean or meli_id,  # Usar EAN si existe, sino el ID de ML
+            cantidad=1,
+            qtynew=None,
+            fechacrea=fechacrea,
+            pesobruto=None,
+            qtytara=None,
+            cantidad_tara=None,
+        )
 
     def __repr__(self):
         return f"BarCodeMapper(idinternoean={self.idinternoean}, codbarrasasignado={self.codbarrasasignado})"

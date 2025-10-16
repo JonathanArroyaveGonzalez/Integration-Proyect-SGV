@@ -1,8 +1,8 @@
 from django.urls import re_path, path
 
-from mercadolibre.views.Auth import auth
+from mercadolibre.views.auth import auth
 from mercadolibre.views.Customer import MeliCustomerSyncView
-from mercadolibre.views.Product import MeliProductSyncView
+from mercadolibre.views.product import MeliProductSyncView
 from mercadolibre.views.Supplier import SupplierSyncView
 from mercadolibre.views.inventory import MeliInventoryView
 from mercadolibre.views.order import MeliOrderSyncView

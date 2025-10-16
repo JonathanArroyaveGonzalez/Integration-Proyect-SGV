@@ -327,23 +327,23 @@ class ProductUpdateService:
         original_request: Any = None
     ) -> Dict[str, Any]:
         """
-        Update barcode with product information already determined.
-        This is more efficient than re-discovering product info.
+        Actualiza el código de barras usando el ID de MercadoLibre como identificador estable.
         """
         try:
-            # Extract barcode data from MercadoLibre item
+            # Extraer datos usando el BarCodeMapper
             barcode_mapper = BarCodeMapper.from_meli_item(meli_item)
             
             if not barcode_mapper:
                 return {
                     'success': False,
-                    'message': 'No barcode/EAN found in MercadoLibre product'
+                    'message': 'No se encontró EAN en el producto de MercadoLibre'
                 }
             
             barcode_data = barcode_mapper.to_dict()
-            current_ean = barcode_data.get('codbarrasasignado')
+            meli_id = meli_item.get('id')  # ID de MercadoLibre
+            current_ean = barcode_data['codbarrasasignado']  # EAN actual
             
-            logger.info(f"Processing barcode with product info - Current EAN: {current_ean}, EAN changed: {ean_changed}, Previous: {previous_ean}")
+            logger.info(f"Procesando código de barras - ID MercadoLibre: {meli_id}, EAN actual: {current_ean}, Cambio de EAN: {ean_changed}")
             
             if ean_changed and previous_ean:
                 # EAN has changed - handle barcode change using provided info
@@ -360,7 +360,7 @@ class ProductUpdateService:
                 logger.info(f"Updating existing barcode record with previous EAN: {previous_ean}")
                 
                 update_barcode_data = {
-                    'idinternoean': previous_ean,
+                    'idinternoean': meli_id,  # Use MercadoLibre ID as stable identifier
                     'codbarrasasignado': current_ean,
                     'cantidad': barcode_data.get('cantidad', 1)
                 }
@@ -675,52 +675,52 @@ class ProductUpdateService:
             logger.error(f"Error mapping product {meli_item.get('id')}: {e}")
             return None
     
-    def _get_product_from_wms_by_reference(
+    def _get_product_from_wms_by_productoean(
         self, 
-        referencia: str, 
+        meli_id: str, 
         original_request: Any = None
     ) -> Optional[Dict[str, Any]]:
         """
-        Get product from WMS by reference (more reliable than EAN).
+        Get product from WMS by MercadoLibre ID (stored in productoean field).
         
         Args:
-            referencia: Product reference to search for
+            meli_id: MercadoLibre ID to search for
             original_request: Original Django request for auth
             
         Returns:
             Product data from WMS or None if not found
         """
         try:
-            logger.info(f"Searching product in WMS by reference: {referencia}")
+            logger.info(f"Buscando producto en WMS por ID de MercadoLibre: {meli_id}")
             
-            # Search by reference parameter
+            # Buscar por ID de MercadoLibre en el campo productoean
             search_response = self.wms.get(
                 self.PRODUCT_ENDPOINT,
                 original_request=original_request,
-                params={'referencia': referencia}
+                params={'productoean': meli_id}
             )
             
             if search_response.status_code == 200:
                 products = search_response.json()
                 
-                # If products is a list, get the first match
+                # Si products es una lista, obtener la primera coincidencia
                 if isinstance(products, list) and len(products) > 0:
                     product = products[0]
-                    logger.info(f"Found product in WMS: {product.get('productoean', 'N/A')}")
+                    logger.info(f"Producto encontrado en WMS: {product.get('productoean', 'N/A')}")
                     return product
                 elif isinstance(products, dict):
-                    # Single product returned
-                    logger.info(f"Found product in WMS: {products.get('productoean', 'N/A')}")
+                    # Un solo producto retornado
+                    logger.info(f"Producto encontrado en WMS: {products.get('productoean', 'N/A')}")
                     return products
                 else:
-                    logger.info(f"No product found with reference: {referencia}")
+                    logger.info(f"No se encontró producto con ID de MercadoLibre: {meli_id}")
                     return None
             else:
-                logger.warning(f"WMS search failed: {search_response.status_code}")
+                logger.warning(f"Búsqueda en WMS falló: {search_response.status_code}")
                 return None
                 
         except Exception as e:
-            logger.error(f"Error searching product by reference {referencia}: {e}")
+            logger.error(f"Error al buscar producto por ID de MercadoLibre {meli_id}: {e}")
             return None
     
     def _detect_ean_change(
@@ -823,63 +823,62 @@ class ProductUpdateService:
         original_request: Any = None
     ) -> Dict[str, Any]:
         """
-        Update product in WMS using reference-based search instead of EAN.
-        Sends complete data to WMS for automatic field updates.
+        Update product in WMS using productoean (MercadoLibre ID) as the stable identifier.
         """
         try:
-            product_ean = wms_product.get('productoean')
-            product_reference = wms_product.get('referencia')
+            meli_id = wms_product.get('productoean')  # ID de MercadoLibre (identificador estable)
+            current_ean = wms_product.get('referencia')  # EAN actual
             
-            if not product_reference:
+            if not meli_id:
                 return {
                     'success': False,
-                    'message': 'Product reference is required for WMS update',
+                    'message': 'MercadoLibre ID (productoean) is required for WMS update',
                     'action': 'error'
                 }
             
-            logger.info(f"Updating product with reference: {product_reference}, EAN: {product_ean}")
+            logger.info(f"Updating product - MercadoLibre ID (productoean): {meli_id}, Current EAN (referencia): {current_ean}")
             
-            # Step 1: Check if product exists in WMS by reference
-            existing_product = self._get_product_from_wms_by_reference(
-                product_reference, 
+            # Buscar producto por ID de MercadoLibre (ahora en productoean)
+            existing_product = self._get_product_from_wms_by_productoean(
+                meli_id, 
                 original_request
             )
             
-            # Step 2: Prepare complete update data (WMS handles field updates automatically)
+            # Preparar datos para actualización
             update_data = {
                 k: v for k, v in wms_product.items() if v is not None
             }
             
-            # Step 3: Detect EAN change and determine if update is needed
+            # Detectar cambio de EAN y determinar si se necesita actualización
             ean_changed = False
             previous_ean = None
-            needs_update = True  # Default to true for safety
+            needs_update = True  # Por defecto actualizar
             
             if existing_product:
-                previous_ean = existing_product.get('productoean')
-                ean_changed = previous_ean and previous_ean != product_ean
+                previous_ean = existing_product.get('referencia')  # El EAN ahora está en referencia
+                ean_changed = previous_ean and previous_ean != current_ean
                 
                 if ean_changed:
-                    logger.info(f"EAN change detected: {previous_ean} → {product_ean}")
-                    needs_update = True  # Always update when EAN changes
+                    logger.info(f"Cambio de EAN detectado: {previous_ean} → {current_ean}")
+                    needs_update = True  # Siempre actualizar cuando cambia el EAN
                 else:
-                    # No EAN change - check if other fields changed
-                    logger.info("No EAN change detected - checking if product needs updating...")
+                    # No hay cambio de EAN - verificar otros cambios
+                    logger.info("No hay cambio de EAN - verificando si necesita actualización...")
                     update_analysis = self._needs_product_update(existing_product, update_data)
                     needs_update = update_analysis['needs_update']
                     
                     if needs_update:
-                        logger.info(f"Product needs update: {update_analysis['reason']}")
+                        logger.info(f"El producto necesita actualización: {update_analysis['reason']}")
                         for change in update_analysis['changes']:
                             logger.info(f"  - {change['field']}: '{change['old_value']}' → '{change['new_value']}'")
                     else:
-                        logger.info("Product is already synchronized - no update needed")
+                        logger.info("Producto ya sincronizado - no necesita actualización")
                         return {
                             'success': True,
-                            'message': 'Product already synchronized, no updates needed',
+                            'message': 'Producto ya sincronizado, no requiere actualización',
                             'action': 'already_synchronized',
-                            'reference': product_reference,
-                            'ean': product_ean,
+                            'meli_id': meli_id,
+                            'current_ean': current_ean,
                             'previous_ean': previous_ean,
                             'ean_changed': False,
                             'needs_update': False,
@@ -912,8 +911,8 @@ class ProductUpdateService:
                         'success': True,
                         'message': 'Product updated successfully via reference search',
                         'action': 'updated',
-                        'reference': product_reference,
-                        'ean': product_ean,
+                        'meli_id': meli_id,
+                        'current_ean': current_ean,
                         'previous_ean': previous_ean,
                         'ean_changed': ean_changed,
                         'needs_update': True,
@@ -928,8 +927,8 @@ class ProductUpdateService:
                             'success': True,
                             'message': 'Product already exists and is up to date',
                             'action': 'exists',
-                            'reference': product_reference,
-                            'ean': product_ean,
+                            'meli_id': meli_id,
+                            'current_ean': current_ean,
                             'previous_ean': previous_ean,
                             'ean_changed': ean_changed,
                             'needs_update': False,
@@ -943,8 +942,8 @@ class ProductUpdateService:
                             'message': f'Product update failed: {update_response.text[:200] if update_response.text else "Unknown error"}',
                             'error': update_response.text[:200] if update_response.text else 'No details',
                             'action': 'update_failed',
-                            'reference': product_reference,
-                            'ean': product_ean,
+                            'meli_id': meli_id,
+                            'current_ean': current_ean,
                             'previous_ean': previous_ean,
                             'ean_changed': ean_changed,
                             'needs_update': True,
@@ -956,8 +955,8 @@ class ProductUpdateService:
                         'message': f'Product update failed: {update_response.status_code}',
                         'error': update_response.text[:200] if update_response.text else 'No details',
                         'action': 'update_failed',
-                        'reference': product_reference,
-                        'ean': product_ean,
+                        'meli_id': meli_id,
+                        'current_ean': current_ean,
                         'previous_ean': previous_ean,
                         'ean_changed': ean_changed,
                         'needs_update': True
@@ -977,8 +976,8 @@ class ProductUpdateService:
                         'success': True,
                         'message': 'Product created successfully (not found in WMS)',
                         'action': 'created',
-                        'reference': product_reference,
-                        'ean': product_ean,
+                        'meli_id': meli_id,
+                        'current_ean': current_ean,
                         'existing_product': None
                     }
                 elif create_response.status_code == 400 and 'already exists' in create_response.text.lower():
@@ -986,8 +985,8 @@ class ProductUpdateService:
                         'success': True,
                         'message': 'Product already exists in WMS (creation detected existing)',
                         'action': 'exists',
-                        'reference': product_reference,
-                        'ean': product_ean,
+                        'meli_id': meli_id,
+                        'current_ean': current_ean,
                         'existing_product': None
                     }
                 else:
@@ -996,8 +995,8 @@ class ProductUpdateService:
                         'message': f'Product creation failed: {create_response.status_code}',
                         'error': create_response.text[:200] if create_response.text else 'No details',
                         'action': 'failed',
-                        'reference': product_reference,
-                        'ean': product_ean
+                        'meli_id': meli_id,
+                        'current_ean': current_ean
                     }
                 
         except Exception as e:
