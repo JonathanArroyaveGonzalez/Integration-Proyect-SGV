@@ -34,3 +34,21 @@ jobs:
     - name: Run Tests
       run: |
         python manage.py test
+
+  auto-merge:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/develop/transprensa' && success()
+    
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - name: Automatic Merge to feat/transprensa
+      run: |
+        git config --global user.name 'GitHub Actions'
+        git config --global user.email 'actions@github.com'
+        git checkout feat/transprensa
+        git pull origin feat/transprensa
+        git merge --no-ff origin/develop/transprensa -m "Merge develop/transprensa into feat/transprensa"
+        git push origin feat/transprensa

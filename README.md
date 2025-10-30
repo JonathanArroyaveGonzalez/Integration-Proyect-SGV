@@ -76,6 +76,15 @@ El proyecto utiliza GitHub Actions para la integración continua. El pipeline de
 
 El pipeline incluye:
 1. Construcción en Ubuntu Latest
-2. Pruebas en múltiples versiones de Python (3.9, 3.10, 3.11)
-3. Verificación del sistema Django (`python manage.py check`)
-4. Ejecución de pruebas (`python manage.py test`)
+2. Verificación del sistema Django (`python manage.py check`)
+3. Ejecución de pruebas (`python manage.py test`)
+4. Merge automático a `feat/transprensa`
+
+#### Merge Automático
+Cuando se hace push a la rama `develop/transprensa` y todas las pruebas pasan exitosamente:
+1. Se crea automáticamente un merge a la rama `feat/transprensa`
+2. El merge se realiza con la opción `--no-ff` para mantener un historial claro
+3. Se genera un mensaje de commit automático
+4. Los cambios se propagan automáticamente a `feat/transprensa`
+
+Este proceso automatizado asegura que `feat/transprensa` siempre contenga una versión estable y probada del código.
