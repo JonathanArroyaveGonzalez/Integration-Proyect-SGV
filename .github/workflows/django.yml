@@ -1,5 +1,10 @@
 name: Django CI
 
+# Permisos necesarios para el workflow
+permissions:
+  contents: write
+  pull-requests: write
+
 on:
   push:
     branches: 
@@ -45,9 +50,12 @@ jobs:
       with:
         fetch-depth: 0
     - name: Automatic Merge to feat/transprensa
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         git config --global user.name 'GitHub Actions'
         git config --global user.email 'actions@github.com'
+        git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git
         git checkout feat/transprensa
         git pull origin feat/transprensa
         git merge --no-ff origin/develop/transprensa -m "Merge develop/transprensa into feat/transprensa"
