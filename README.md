@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://github.com/JonathanArroyaveGonzalez/Integration-Proyect-SGV/actions/workflows/django.yml">
-    <img src="https://github.com/JonathanArroyaveGonzalez/Integration-Project-SGV/actions/workflows/django.yml/badge.svg?branch=develop/transprensa" alt="Django CI">
+    <img src="https://github.com/JonathanArroyaveGonzalez/Integration-Proyect-SGV/actions/workflows/django.yml/badge.svg" alt="Django CI">
   </a>
   <a href="https://www.djangoproject.com/">
     <img src="https://img.shields.io/badge/Powered%20by-Django-092E20?logo=django&logoColor=white" alt="Powered by Django">
