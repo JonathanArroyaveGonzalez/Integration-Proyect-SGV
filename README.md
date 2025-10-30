@@ -1,10 +1,24 @@
+
+<p align="center">
+  <a href="https://github.com/JonathanArroyaveGonzalez/Integration-Project-SGV/actions/workflows/django.yml">
+    <img src="https://github.com/JonathanArroyaveGonzalez/Integration-Project-SGV/actions/workflows/django.yml/badge.svg" alt="Django CI">
+  </a>
+  <a href="https://www.djangoproject.com/">
+    <img src="https://img.shields.io/badge/Powered%20by-Django-092E20?logo=django&logoColor=white" alt="Powered by Django">
+  </a>
+</p>
+
 # WMS_Copernico_Base_Integration
+
+
 
 [![Python](https://img.shields.io/badge/python-3.13+-blue.svg)](https://www.python.org)
 [![Django](https://img.shields.io/badge/django-5.2+-green.svg)](https://www.djangoproject.com)
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)](https://conventionalcommits.org)
 [![Development Status](https://img.shields.io/badge/status-development-orange)](https://github.com/JonathanArroyaveGonzalez/Integration-Proyect-SGV)
 [![Branch develop/transprensa](https://img.shields.io/badge/branch-develop%2Ftransprensa-blue)](https://github.com/JonathanArroyaveGonzalez/Integration-Proyect-SGV/tree/develop/transprensa)
+[![Powered by Django](https://img.shields.io/badge/CI%20by-Django-092E20?logo=django&logoColor=white)](https://github.com/JonathanArroyaveGonzalez/Integration-Project-SGV/actions/workflows/django.yml)
+
 
 Proyecto base del sistema WMS Copernico para Integración con sistemas externos.
 
@@ -53,3 +67,15 @@ docs: actualizar instrucciones de instalación
    git checkout feat/transprensa
    git merge develop/transprensa
    ```
+
+### Integración Continua (CI)
+
+El proyecto utiliza GitHub Actions para la integración continua. El pipeline de CI se ejecuta automáticamente en:
+- Cada push a las ramas `develop/transprensa` y `feat/transprensa`
+- Cada pull request hacia estas ramas
+
+El pipeline incluye:
+1. Construcción en Ubuntu Latest
+2. Pruebas en múltiples versiones de Python (3.9, 3.10, 3.11)
+3. Verificación del sistema Django (`python manage.py check`)
+4. Ejecución de pruebas (`python manage.py test`)
