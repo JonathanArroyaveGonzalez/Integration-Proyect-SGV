@@ -1,4 +1,3 @@
-from django.http import JsonResponse
 from wmsAdapterV2.utils.utils import exec_query
 
 
