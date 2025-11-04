@@ -41,8 +41,8 @@ def carrier(request):
     elif request.method == "POST":
         try:
             request_data = json.loads(request.body)
-            picking = request_data.get("delivery_number", "")
-            delivery_number = request_data.get("picking", "")
+            delivery_number = request_data.get("delivery_number", "")
+            picking = request_data.get("picking", "")
             pdf_base64 = request_data.get("pdf_base64", "")
 
             response = save_guide(
@@ -60,8 +60,8 @@ def carrier(request):
     elif request.method == "DELETE":
         try:
             request_data = json.loads(request.body)
-            picking = request_data.get("delivery_number", "")
-            delivery_number = request_data.get("picking", "")
+            delivery_number = request_data.get("delivery_number", "")
+            picking = request_data.get("picking", "")
 
             response = cancel_guide(
                 database=db_name, delivery_number=delivery_number, picking=picking
