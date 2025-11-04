@@ -10,10 +10,27 @@ class TransprensaModel:
 
     def get_config(self) -> dict:
         """
-        Obtiene todo el documento de configuración de Transprensa.
+        Obtiene el documento de configuración de Transprensa,
+        reemplazando test_url y production_url por base_url.
         """
-        document = self.collection.find_one({}, {"_id": 0})
-        return document or {}
+        document = self.collection.find_one({}, {"_id": 0}) or {}
+        trans_conf = document.get("transprensa_config", {})
+
+        # Extraer valores
+        test_url = trans_conf.get("test_url")
+        production_url = trans_conf.get("production_url")
+        is_test = trans_conf.get("test", "True").lower() == "true"
+
+        # Calcular base_url
+        base_url = test_url if is_test else production_url
+
+        # Reemplazar en el documento
+        trans_conf["base_url"] = base_url
+        trans_conf.pop("test_url", None)
+        trans_conf.pop("production_url", None)
+
+        document["transprensa_config"] = trans_conf
+        return document
 
     def get_field(self, field_path: str):
         """
