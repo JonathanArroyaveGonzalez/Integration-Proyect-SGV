@@ -14,14 +14,23 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
 from django.contrib import admin
 from django.urls import path, re_path, include
 
 from wmsAdapterV2.urls import wms_endpoints_v2
 from wmsBase.urls import wms_base_endpoints
+from transprensa.urls import transprensa_endpoints
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    re_path(r'^wms/adapter/v2/', include(wms_endpoints_v2)),
-    re_path(r'^wms/base/v2/', include(wms_base_endpoints)),
+    path("admin/", admin.site.urls),
+    re_path(r"^wms/adapter/v2/", include(wms_endpoints_v2)),
+    re_path(r"^wms/base/v2/", include(wms_base_endpoints)),
+    re_path(r"^wms/tp/v1/", include(transprensa_endpoints)),
 ]
+
+# Manejadores de error HTTP por defecto
+handler400 = "django.views.defaults.bad_request"
+handler403 = "django.views.defaults.permission_denied"
+handler404 = "django.views.defaults.page_not_found"
+handler500 = "django.views.defaults.server_error"
