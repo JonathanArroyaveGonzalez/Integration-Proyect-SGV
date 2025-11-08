@@ -8,6 +8,7 @@ from wmsAdapterV2.views.PurchaseOrder import purchase_order
 from wmsAdapterV2.views.SaleOrder import sale_order
 from wmsAdapterV2.views.Customer import clt
 from wmsAdapterV2.views.Supplier import prv
+from wmsAdapterV2.views.carrier.guide import carrier
 
 wms_endpoints_v2 = [
     re_path(r'^art$', art), 
@@ -18,6 +19,7 @@ wms_endpoints_v2 = [
     re_path(r'^production_order$', production_order), 
     re_path(r'^inventory$', inventory), 
     re_path(r'^inventory_adjustment$', inventory_adjustment), 
+    re_path(r'^carrier/guide$', carrier),
 ]
 
      
