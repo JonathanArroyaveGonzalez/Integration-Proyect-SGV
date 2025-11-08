@@ -134,7 +134,7 @@ def mapear_guia_a_remesa(guia_data: Dict[str, Any]) -> Optional[Remesa]:
     """Mapea datos de guía consultada a Remesa."""
     try:
         dataguide, detalle = get_data_from_guia(guia_data)
-        guide_number = "0006"  # Valor temporal fijo para pruebas
+        guide_number = "0007"  # Valor temporal fijo para pruebas
         # destinatario_ciudad_codigo=obtener_codigo_dane(limpiar_espacios(dataguide.get("ciudad_destinatario"))),
         destinatario_ciudad_codigo = "05360000"  # Itagui Temporalmente Fijo
 
@@ -161,7 +161,7 @@ def mapear_guia_a_remesa(guia_data: Dict[str, Any]) -> Optional[Remesa]:
         detalle = Detalle(
             detalle_peso=detalle.get("peso_real", "0"),
             detalle_volumen=detalle.get("volumen", "0"),
-            detalle_valordeclarado=detalle.get("valor_declarado", "0"),
+            detalle_valordeclarado=dataguide.get("valor_declarado", "0"),
             detalle_producto_codigo=PRODUCTO_CAJAS,
             detalle_cantidad=detalle.get("unidades", ""),
             detalle_descripcion=limpiar_espacios(detalle.get("descripcion", "")),
