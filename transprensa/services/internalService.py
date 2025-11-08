@@ -1,16 +1,20 @@
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 
 from wmsAdapterV2.functions.SaleOrder.read import read_sale_orders
 from wmsAdapterV2.functions.carrier.save_guide import save_guide
 from wmsAdapterV2.functions.carrier.cancel_guide import cancel_guide
 from wmsAdapterV2.functions.carrier.read_data_guide import read_data_guide
 from transprensa.services.transprensaService import get_transprensa_service
+from settings.settings import global_settings
 
 # Singleton global para InternalQueryService
 _internal_query_service_instance: Optional["InternalQueryService"] = None
 
 # Cache persistente de ciudades para evitar consultas repetidas
 _CIUDAD_CACHE: Dict[str, str] = {}
+
+# Configuración global para la base de datos de wmsAdapterV2
+database_name_wms = global_settings.DATABASE_NAME
 
 
 class MockRequest:
@@ -27,7 +31,7 @@ class MockRequest:
                 if isinstance(value, list):
                     self.GET[key] = value
                 else:
-                    self.GET[key] = [str(value)]  
+                    self.GET[key] = [str(value)]
 
         self.body = body_params or b""
         self.method = "GET"
@@ -64,7 +68,7 @@ class InternalQueryService:
         # Normalizar nombre para búsqueda en cache
         nombre_normalizado = nombre_ciudad.upper().strip()
 
-        # Verificar cache primero 
+        # Verificar cache primero
         if nombre_normalizado in _CIUDAD_CACHE:
             return _CIUDAD_CACHE[nombre_normalizado]
 
@@ -174,17 +178,128 @@ class InternalQueryService:
     ) -> Dict[str, Any]:
         """
         Lee datos de una guía usando wmsAdapterV2.
+
+        Retorna estructura estándar:
+        {
+            "success": bool,
+            "message": str,
+            "data": list o dict con datos de la guía
+        }
         """
         try:
-            return read_data_guide(
+            data = read_data_guide(
                 self.db_name, picking, bigpedido, 1 if is_detail else 0
             )
+            return {
+                "success": True,
+                "message": "Guía obtenida exitosamente",
+                "data": data if data else [],
+            }
         except Exception as e:
             return {
                 "success": False,
                 "message": f"Error al leer datos de guía: {str(e)}",
                 "data": [],
             }
+
+    def leer_datos_guia_comparativo(
+        self, picking: str, bigpedido: str
+    ) -> Dict[str, Any]:
+        """
+        Lee datos de una guía con AMBAS versiones (sin detalle y con detalle).
+        Útil para identificar qué datos están disponibles en cada versión.
+
+        Retorna estructura:
+        {
+            "picking": str,
+            "bigpedido": str,
+            "is_detail_0": {...datos sin detalle...},
+            "is_detail_1": {...datos con detalle...}
+        }
+        """
+        try:
+            # Obtener versión sin detalle (is_detail=0)
+            data_sin_detalle = self.leer_datos_guia(picking, bigpedido, is_detail=False)
+
+            # Obtener versión con detalle (is_detail=1)
+            data_con_detalle = self.leer_datos_guia(picking, bigpedido, is_detail=True)
+
+            return {
+                "picking": picking,
+                "bigpedido": bigpedido,
+                "is_detail_0": {
+                    "success": data_sin_detalle.get("success"),
+                    "message": data_sin_detalle.get("message"),
+                    "data": data_sin_detalle.get("data", []),
+                },
+                "is_detail_1": {
+                    "success": data_con_detalle.get("success"),
+                    "message": data_con_detalle.get("message"),
+                    "data": data_con_detalle.get("data", []),
+                },
+            }
+        except Exception as e:
+            return {
+                "picking": picking,
+                "bigpedido": bigpedido,
+                "error": str(e),
+                "is_detail_0": {"success": False, "data": []},
+                "is_detail_1": {"success": False, "data": []},
+            }
+
+    def collectGuidesFromPickings(
+        self, picking_list: List[Dict[str, Any]]
+    ) -> List[Dict[str, Any]]:
+        """
+        Obtiene guías completas a partir de lista de pickings.
+        SIEMPRE consulta con is_detail=0 y agrega datos de guía al JSON.
+
+        Args:
+            picking_list: Lista de dicts con picking, bigpedido
+
+        Returns:
+            Lista de guías con sus datos incluidos en el JSON
+        """
+        all_guides = []
+        for item in picking_list:
+            try:
+                picking = str(item.get("picking", "")).strip()
+                bigpedido = str(item.get("bigpedido", "")).strip()
+
+                # SIEMPRE consultar con is_detail=0
+                guide_data = self.leer_datos_guia(picking, bigpedido, is_detail=False)
+
+                guide_item = {
+                    "picking": picking,
+                    "bigpedido": bigpedido,
+                    "is_detail": 0,
+                    "estado": "procesada" if guide_data.get("success") else "error",
+                    "success": guide_data.get("success", False),
+                }
+
+                # Agregar datos de la guía al JSON
+                if guide_data.get("success"):
+                    guide_item["guia_data"] = guide_data.get("data", [])
+                else:
+                    guide_item["error"] = guide_data.get("message", "Error desconocido")
+                    guide_item["guia_data"] = []
+
+                all_guides.append(guide_item)
+
+            except Exception as e:
+                all_guides.append(
+                    {
+                        "picking": str(item.get("picking", "")),
+                        "bigpedido": str(item.get("bigpedido", "")),
+                        "is_detail": 0,
+                        "estado": "error",
+                        "success": False,
+                        "error": str(e),
+                        "guia_data": [],
+                    }
+                )
+
+        return all_guides
 
 
 def get_internal_query_service() -> InternalQueryService:
@@ -201,6 +316,6 @@ def get_internal_query_service() -> InternalQueryService:
     if _internal_query_service_instance is None:
         tp_client = get_transprensa_service()
         _internal_query_service_instance = InternalQueryService(
-            db_name="couca01_test", transprensa_client=tp_client
+            db_name=database_name_wms, transprensa_client=tp_client
         )
     return _internal_query_service_instance
