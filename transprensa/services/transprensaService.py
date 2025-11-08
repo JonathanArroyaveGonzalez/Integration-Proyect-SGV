@@ -17,8 +17,7 @@ def retry_on_failure(max_retries: int = 3, delay: int = 3):
             for attempt in range(1, max_retries + 1):
                 try:
                     return func(*args, **kwargs)
-                except (requests.exceptions.RequestException, TimeoutError) as e:
-                    print(f"Reintento {attempt}/{max_retries}: {e}")
+                except (requests.exceptions.RequestException, TimeoutError):
                     if attempt < max_retries:
                         time.sleep(delay)
                     else:
@@ -80,25 +79,14 @@ class TransprensaService:
                 "Cookie": self.cookie,
             }
 
-            print(f"[DEBUG] URL de login: {self.base_url}")
-            print(f"[DEBUG] Payload de login: {payload}")
-
-            # response = self.session.post(self.base_url, headers=headers, data=payload)
             login_url = f"{self.base_url}?api={self.api_login}"
             response = self.session.post(login_url, headers=headers, data=payload)
-
-            print(f"[DEBUG] Status code login: {response.status_code}")
-            print(
-                f"[DEBUG] Response text login (primeros 200 chars): {response.text[:200]}"
-            )
 
             response.raise_for_status()
 
             try:
                 data = response.json()
-            except ValueError as e:
-                print(f"[ERROR] Respuesta de login no es JSON válido: {e}")
-                print(f"[ERROR] Response text completo: {response.text}")
+            except ValueError:
                 raise RuntimeError(
                     f"La API de login devolvió una respuesta no válida: {response.text[:100]}"
                 )
@@ -116,11 +104,9 @@ class TransprensaService:
             self.repo.update_field("transprensa_config.token", new_token)
             self.token = new_token
 
-            print(f"[SUCCESS] Token actualizado correctamente: {new_token[:20]}...")
             return new_token
 
-        except Exception as e:
-            print(f"[ERROR] Error al refrescar el token: {str(e)}")
+        except Exception:
             raise
 
     def request(
@@ -150,35 +136,14 @@ class TransprensaService:
             }
 
             try:
-                print(f"[DEBUG] Realizando petición a: {url}")
-                print(f"[DEBUG] Headers: {headers}")
-                # No imprimir el payload completo si es muy grande (contiene PDFs en base64)
-                if data and isinstance(data, dict):
-                    data_str = str(data)
-                    if len(data_str) > 500:
-                        print(
-                            f"[DEBUG] Data: {{payload de {len(data_str)} caracteres}}"
-                        )
-                    else:
-                        print(f"[DEBUG] Data: {data}")
-                else:
-                    print(f"[DEBUG] Data: {data}")
-
                 response = self.session.request(
                     method, url, headers=headers, json=data, timeout=10
-                )
-
-                print(f"[DEBUG] Status code: {response.status_code}")
-                print(
-                    f"[DEBUG] Response text (primeros 200 chars): {response.text[:200]}"
                 )
 
                 # Verificar si la respuesta es JSON válida
                 try:
                     json_response = response.json()
-                except ValueError as e:
-                    print(f"[ERROR] Respuesta no es JSON válido: {e}")
-                    print(f"[ERROR] Response text completo: {response.text}")
+                except ValueError:
                     raise ValueError(
                         f"La API devolvió una respuesta no válida: {response.text[:100]}"
                     )
@@ -195,7 +160,6 @@ class TransprensaService:
                     )
                 ):
                     if attempt == 0:  # Solo intentar refrescar en el primer intento
-                        print("Token expirado detectado, refrescando...")
                         self._refresh_token()
                         continue  # Reintentar con el nuevo token
                     else:
@@ -207,15 +171,11 @@ class TransprensaService:
                 response.raise_for_status()
                 return json_response
 
-            except requests.exceptions.RequestException as e:
-                print(f"[ERROR] Error en la petición HTTP: {e}")
+            except requests.exceptions.RequestException:
                 if attempt == 1:  # En el último intento, relanzar la excepción
                     raise
                 # En el primer intento, intentar refrescar token
-                print("Intentando refrescar token debido a error HTTP...")
                 self._refresh_token()
-
-        # Si llegamos aquí, algo salió mal
         raise RuntimeError(
             "No se pudo completar la petición después de intentar refrescar el token"
         )

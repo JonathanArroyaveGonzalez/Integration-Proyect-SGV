@@ -17,8 +17,8 @@ def convert_array_records_to_array_json(array=[], descriptions=()) -> list:
 
 def exec_query(query='', params=(), database="default"):
     cursor = connections[database].cursor()
-    print(query)
-    print(params)
+    #print(query)
+    #print(params)
     try:
         cursor.execute(query, params)
         response = cursor.fetchall()

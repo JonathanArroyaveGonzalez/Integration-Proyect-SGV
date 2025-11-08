@@ -1,9 +1,9 @@
 # urls.py  (de la app de integración)
 
 from django.urls import path
-from transprensa.views.createRemesa import crear_y_guardar_guia_view
+from transprensa.views.remesaView import  procesar_guia
 
 transprensa_endpoints = [
-    
-    path("remesas/v2", crear_y_guardar_guia_view, name="crear_y_guardar_guia"),
+    # Endpoint Procesar Guía
+    path("guia/procesar/", procesar_guia, name="procesar_guia"),
 ]

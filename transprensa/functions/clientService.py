@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Cliente Transprensa consolidado.
 Funciones para interactuar con el servicio de Transprensa.
@@ -11,21 +10,18 @@ from transprensa.services.internalService import (
     get_internal_query_service,
     InternalQueryService,
 )
-from transprensa.services.transprensaService import get_transprensa_service
-from transprensa.services.responseService import response_service
+from transprensa.services.transprensaService import TransprensaService, get_transprensa_service
 
 
-# =========================
-#  Servicio interno
-# =========================
+
 def getInternalService() -> InternalQueryService:
     """Obtiene instancia singleton del servicio de consultas internas."""
     return get_internal_query_service()
 
+def getExternalService() -> TransprensaService:
+    """Obtiene instancia singleton del servicio Transprensa."""
+    return get_transprensa_service()
 
-# =========================
-#  Órdenes
-# =========================
 def collectOrdersFromIds(
     service: InternalQueryService, ids: List[str]
 ) -> List[Dict[str, Any]]:
@@ -34,17 +30,10 @@ def collectOrdersFromIds(
 
     for oid in ids:
         raw = service.get_orden_por_id(str(oid))
-        fmt = response_service.format_wms_response(raw, "Orden encontrada exitosamente")
-
-        if fmt.get("success") and isinstance(fmt.get("data"), list):
-            all_orders.extend(fmt["data"])
-
-    return all_orders
+    return raw
 
 
-# =========================
-#  Remesas
-# =========================
+
 def createRemesasInTransprensa(payload: Dict[str, Any]) -> Dict[str, Any]:
     """Envía payload de remesas a Transprensa para creación."""
     tp_client = get_transprensa_service()
