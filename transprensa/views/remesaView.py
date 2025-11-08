@@ -1,93 +1,101 @@
 # -*- coding: utf-8 -*-
 """
-Vista para procesar el workflow completo de remesas.
+Vista para procesar el workflow completo de remesas y guías.
 
-Endpoint único:
-- POST /api/remesa/procesar/ -> Ejecuta workflow completo end-to-end
+Endpoints:
+- POST /api/remesa/procesar/ -> Ejecuta workflow completo end-to-end (MÚLTIPLES órdenes)
+- POST /api/guia/procesar/ -> Procesa UNA SOLA guía completamente (NUEVO - V2)
+- GET /wms/tp/v1/guia/obtener/ -> Obtiene guía comparativa (sin y con detalle)
+- POST /api/remesa/procesar_multiple/ -> Procesa múltiples guías (solo obtención)
 """
 
 import json
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
-
-from transprensa.functions.create import executeRemesaWorkflow
+from transprensa.functions.create import execute_guide_workflow_v2
 
 
 @csrf_exempt
-@require_http_methods(["POST"])
-def procesar_remesa(request):
+@require_http_methods(["GET", "POST"])
+def procesar_guia(request):
     """
-    Procesa remesas desde órdenes: obtiene, mapea, crea, obtiene guías y almacena.
+    NUEVO FLUJO V2 - Procesa UNA SOLA GUÍA completamente:
+    1. Obtiene datos (sin y con detalle)
+    2. Mapea a Remesa
+    3. Crea en Transprensa
+    4. Obtiene PDF
+    5. Descarga PDF
+    6. Guarda en BD
 
-    Entrada JSON:
+    Soporta GET y POST:
+
+    GET (Query Parameters):
+    /wms/tp/v1/guia/procesar/?picking=7746&bigpedido=PD-103888
+
+    POST (Body JSON):
     {
-        "order_ids": ["103888", "103889"]
+        "picking": "7746",
+        "bigpedido": "PD-103888"
     }
 
-    Salida JSON (formato limpio tipo Transprensa):
+    Salida JSON:
     {
         "success": true,
-        "data": [
-            {
-                "orden": "103888",
-                "remesa": "103999",
-                "validacion": "",
-                "success": true
-            },
-            {
-                "orden": "103889",
-                "remesa": "",
-                "validacion": "Mensaje de error",
-                "success": false
-            }
-        ],
-        "msg": "OK | [ 2145 ]"
+        "picking": "7746",
+        "bigpedido": "PD-103888",
+        "remesa_numero": "103999",
+        "pdf_saved": true,
+        "estado": "completado",
+        "msg": "Guía procesada exitosamente",
+        "tiempo_ms": 5234
     }
     """
     try:
-        # Parsear JSON del body
-        body = {}
-        if request.body:
-            try:
-                body = json.loads(request.body.decode("utf-8"))
-            except json.JSONDecodeError:
-                return JsonResponse(
-                    {
-                        "success": False,
-                        "data": [],
-                        "msg": "Body debe ser JSON válido",
-                    },
-                    status=400,
-                )
+        # Obtener parámetros según el método
+        if request.method == "GET":
+            # Obtener de query parameters
+            picking = request.GET.get("picking", "").strip()
+            bigpedido = request.GET.get("bigpedido", "").strip()
+        else:
+            # Obtener de body JSON (POST)
+            body = {}
+            if request.body:
+                try:
+                    body = json.loads(request.body.decode("utf-8"))
+                except json.JSONDecodeError:
+                    return JsonResponse(
+                        {
+                            "success": False,
+                            "picking": "",
+                            "bigpedido": "",
+                            "remesa_numero": "",
+                            "pdf_saved": False,
+                            "estado": "error",
+                            "msg": "Body debe ser JSON válido",
+                        },
+                        status=400,
+                    )
 
-        # Validar presencia de order_ids
-        order_ids = body.get("order_ids", [])
-        if not order_ids or not isinstance(order_ids, list):
+            picking = str(body.get("picking", "")).strip()
+            bigpedido = str(body.get("bigpedido", "")).strip()
+
+        # Validar parámetros requeridos
+        if not picking or not bigpedido:
             return JsonResponse(
                 {
                     "success": False,
-                    "data": [],
-                    "msg": 'Falta "order_ids" o no es una lista. Envía: {"order_ids": ["123", "456"]}',
+                    "picking": picking,
+                    "bigpedido": bigpedido,
+                    "remesa_numero": "",
+                    "pdf_saved": False,
+                    "estado": "error",
+                    "msg": 'Faltan parámetros. Requeridos: picking, bigpedido. GET: ?picking=7746&bigpedido=PD-103888 o POST: {"picking": "7746", "bigpedido": "PD-103888"}',
                 },
                 status=400,
             )
 
-        # Convertir IDs a strings
-        order_ids = [str(oid).strip() for oid in order_ids if oid]
-
-        if not order_ids:
-            return JsonResponse(
-                {
-                    "success": False,
-                    "data": [],
-                    "msg": "Proporciona al menos una order_id válida",
-                },
-                status=400,
-            )
-
-        # Ejecutar workflow - ya devuelve formato limpio
-        result = executeRemesaWorkflow(order_ids)
+        result = execute_guide_workflow_v2(picking, bigpedido)
 
         # Retornar resultado
         status_code = 200 if result.get("success") else 400
@@ -97,7 +105,11 @@ def procesar_remesa(request):
         return JsonResponse(
             {
                 "success": False,
-                "data": [],
+                "picking": "",
+                "bigpedido": "",
+                "remesa_numero": "",
+                "pdf_saved": False,
+                "estado": "error",
                 "msg": f"Error inesperado: {str(e)}",
             },
             status=500,
