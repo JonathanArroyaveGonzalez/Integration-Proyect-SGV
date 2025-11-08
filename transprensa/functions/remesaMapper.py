@@ -1,14 +1,10 @@
 from __future__ import annotations
-import os
-import django
 from dataclasses import dataclass, asdict
 from typing import Any, Dict, List, Optional
-
-# Configurar Django antes de importar modelos
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "project.settings")
-django.setup()
-
-from transprensa.services.internalService import get_internal_query_service
+from transprensa.services.clientService import (
+    get_ciudad_codigo_by_nombre,
+    get_cliente_codigo_by_nit,
+)
 
 
 #  Constantes OSAKA
@@ -22,8 +18,20 @@ DANE_MEDELLIN = "05001000"
 TIPODOC_CEDULA = "1"
 TIPODOC_NIT = "2"
 
-# Instancia servicio consulta interno
-internal_service = get_internal_query_service()
+
+#  Utilidades
+def obtener_codigo_dane(ciudad: str) -> str:
+    """Obtiene código DANE de ciudad o retorna el de Medellín por defecto."""
+    if not ciudad:
+        return "05001000"
+    return get_ciudad_codigo_by_nombre(ciudad.upper().strip()) or "05001000"
+
+
+def consultar_cliente_transprensa(nit: str) -> str:
+    """Consulta datos de cliente en Transprensa por NIT."""
+    if not nit:
+        return ""
+    return get_cliente_codigo_by_nit(nit.strip()) or ""
 
 
 def limpiar_espacios(valor: Any) -> Any:
@@ -36,6 +44,7 @@ def limpiar_espacios(valor: Any) -> Any:
     return valor
 
 
+# Definición de dataclasses
 @dataclass
 class Cliente:
     cliente_codigo: Optional[str] = OSAKA_CLIENTE_CODIGO
@@ -106,123 +115,84 @@ class Remesa:
     remesa_codigo: Optional[str] = None
 
 
-def obtener_codigo_dane(ciudad: str, default: str = DANE_MEDELLIN) -> str:
-    """
-    Obtiene el código DANE de una ciudad.
-    Si no existe en el mapa, retorna el valor por defecto.
-    """
-    if not ciudad:
-        return default
+# Funciones de mapeo
+
+
+def get_data_from_guia(guia_data: Dict[str, Any]):
+    """Extrae datos de guía según su estructura. (Con y sin detalle)"""
+    # validar estructura de datos
+    if "is_detail_0" in guia_data:
+        sin_detalle = guia_data.get("is_detail_0", {}).get("data", [{}])[0]
+        con_detalle = guia_data.get("is_detail_1", {}).get("data", [{}])[0]
     else:
-        consultaCiudad = internal_service.get_ciudad_codigo_by_nombre(ciudad.upper().strip())
-    return consultaCiudad
+        return None
+
+    return sin_detalle, con_detalle
 
 
-def mapperOrderToRemesa(orden_api: Dict[str, Any]) -> Optional[Remesa]:
-    """
-    Mapea un objeto de la API externa a una estructura Remesa.
-
-    Args:
-        orden_api: Diccionario con los datos de la orden desde la API externa
-
-    Returns:
-        Objeto Remesa poblado con los datos mapeados o None si faltan datos críticos
-    """
+def mapear_guia_a_remesa(guia_data: Dict[str, Any]) -> Optional[Remesa]:
+    """Mapea datos de guía consultada a Remesa."""
     try:
+        dataguide, detalle = get_data_from_guia(guia_data)
+        guide_number = "0006"  # Valor temporal fijo para pruebas
+        # destinatario_ciudad_codigo=obtener_codigo_dane(limpiar_espacios(dataguide.get("ciudad_destinatario"))),
+        destinatario_ciudad_codigo = "05360000"  # Itagui Temporalmente Fijo
+
         # Extraer datos del destinatario
         destinatario = Destinatario(
             destinatario_codigo="",
             tipo_documentodestinatario_codigo=TIPODOC_NIT,
-            destinatario_documento=limpiar_espacios(orden_api.get("nit"))
+            destinatario_documento=limpiar_espacios(dataguide.get("nit_destinatario"))
             .replace("-", "")
             .strip(),
-            destinatario_nombre=limpiar_espacios(orden_api.get("nombrecliente")),
+            destinatario_nombre=limpiar_espacios(dataguide.get("nombre_destinatario")),
             destinatario_direccion=limpiar_espacios(
-                orden_api.get("direccion_despacho")
+                dataguide.get("direccion_destinatario")
             ),
-            destinatario_telefono=limpiar_espacios(orden_api.get("contacto", ""))
+            destinatario_telefono=limpiar_espacios(
+                dataguide.get("telefono_destinatario", "")
+            )
             or "0000000000",
-            destinatario_ciudad_codigo=obtener_codigo_dane(
-                limpiar_espacios(orden_api.get("ciudad_despacho"))
-            ),
+            # destinatario_ciudad_codigo=obtener_codigo_dane(limpiar_espacios(sin_detalle.get("ciudad_destinatario"))),
+            destinatario_ciudad_codigo=destinatario_ciudad_codigo,
         )
 
-        # Crear detalles a partir de order_detail
-        detalles = []
-        order_details = orden_api.get("order_detail", [])
-
-        for item in order_details:
-            detalle = Detalle(
-                detalle_peso="0",
-                detalle_volumen="0",
-                # detalle_valordeclarado = str((float(item.get("preciounitario") or 0)) * int(float(item.get("qtypedido") or 0))),
-                detalle_valordeclarado="0",
-                detalle_producto_codigo=PRODUCTO_CAJAS,
-                detalle_cantidad=str(int(float(item.get("qtypedido", 0)))),
-                detalle_descripcion="Mercancia Delicada",
-            )
-            detalles.append(detalle)
-
-        # Si no hay detalles, crear uno por defecto
-        if not detalles:
-            detalles.append(
-                Detalle(
-                    detalle_peso="1",
-                    detalle_volumen="1",
-                    detalle_valordeclarado="0",
-                    detalle_producto_codigo=PRODUCTO_CAJAS,
-                    detalle_cantidad="1",
-                    detalle_descripcion="Mercancia Delicada",
-                )
-            )
+        # Detalle
+        detalle = Detalle(
+            detalle_peso=detalle.get("peso_real", "0"),
+            detalle_volumen=detalle.get("volumen", "0"),
+            detalle_valordeclarado=detalle.get("valor_declarado", "0"),
+            detalle_producto_codigo=PRODUCTO_CAJAS,
+            detalle_cantidad=detalle.get("unidades", ""),
+            detalle_descripcion=limpiar_espacios(detalle.get("descripcion", "")),
+        )
 
         # Crear remesa completa
         remesa = Remesa(
             ciudad_codigo_origen=DANE_MEDELLIN,
-            ciudad_codigo_destino=obtener_codigo_dane(
-                limpiar_espacios(orden_api.get("ciudad_despacho"))
-            ),
+            ciudad_codigo_destino=destinatario_ciudad_codigo,
             tipo_servicio=TIPO_SERVICIO_PAQUETEO,
             cliente=Cliente(),  # Usar valores por defecto
             remitente=Remitente(),  # Usar valores por defecto
             destinatario=destinatario,
-            detalle=detalles,
+            detalle=detalle,
             remesa_total="",
             remesa_manejo="",
             remesa_tarifa="",
             centro_costo=CENTRO_COSTO_MEDELLIN,
             orden_carga="",
             forma_pago=FORMA_PAGO_CREDITO,
-            documento_cliente=limpiar_espacios(orden_api.get("pedidorelacionado")),
-            orden_compra=limpiar_espacios(orden_api.get("numpedido")),
-            remesa_observacion=limpiar_espacios(orden_api.get("notas"))
+            documento_cliente=limpiar_espacios(dataguide.get("referencia", "")),
+            orden_compra="",
+            remesa_observacion=limpiar_espacios(dataguide.get("observaciones", ""))
             or "SIN VERIFICAR PESO NI CONTENIDO",
-            remesa_codigo=limpiar_espacios(orden_api.get("numpedido")),
+            remesa_codigo=guide_number,
         )
-
         return remesa
 
     except Exception as e:
-        print(f"Error mapeando orden: {e}")
+        print(f"Error mapeando guía: {e}")
         return None
-
-
-def mapear_lista_ordenes(ordenes_api: List[Dict[str, Any]]) -> List[Remesa]:
-    """
-    Mapea una lista completa de órdenes de la API a objetos Remesa.
-
-    Args:
-        ordenes_api: Lista de diccionarios con datos de órdenes
-
-    Returns:
-        Lista de objetos Remesa
-    """
-    remesas = []
-    for orden in ordenes_api:
-        remesa = mapperOrderToRemesa(orden)
-        if remesa:
-            remesas.append(remesa)
-    return remesas
 
 
 def remesa_a_dict(remesa: Remesa) -> Dict[str, Any]:
@@ -242,7 +212,9 @@ def remesa_a_dict(remesa: Remesa) -> Dict[str, Any]:
         "cliente": asdict(remesa.cliente),
         "remitente": asdict(remesa.remitente),
         "destinatario": asdict(remesa.destinatario),
-        "detalle": [asdict(d) for d in remesa.detalle],
+        "detalle": [asdict(d) for d in remesa.detalle]
+        if isinstance(remesa.detalle, list)
+        else [asdict(remesa.detalle)],
         "remesa_total": remesa.remesa_total,
         "remesa_manejo": remesa.remesa_manejo,
         "remesa_tarifa": remesa.remesa_tarifa,
@@ -256,80 +228,15 @@ def remesa_a_dict(remesa: Remesa) -> Dict[str, Any]:
     }
 
 
-def crear_payload_api(remesas: List[Remesa]) -> Dict[str, Any]:
+def crear_payload_api(guias: List[Dict[str, Any]]) -> Dict[str, Any]:
     """
     Crea el payload completo para enviar al API de SILOGTRAN.
 
     Args:
-        remesas: Lista de objetos Remesa
+        guias: Lista de diccionarios que representan las guías
 
     Returns:
         Diccionario con el formato esperado por el API
     """
+    remesas: List[Remesa] = [r for r in (mapear_guia_a_remesa(g) for g in guias) if r]
     return {"remesas": [remesa_a_dict(r) for r in remesas]}
-
-
-# =========================
-#  Ejemplo de Uso
-# =========================
-if __name__ == "__main__":
-    # Datos de ejemplo de la API externa WMS
-    respuesta_api = [
-        {
-            "tipodocto": "PD",
-            "doctoerp": "103888",
-            "picking": "7746",
-            "numpedido": "103888",
-            "fechaplaneacion": "2025-10-30T16:59:58.153",
-            "f_pedido": "2025-10-30T16:59:58.153",
-            "item": "1045047287-4   ",
-            "nombrecliente": "ORTIZ BERRIO DANIEL",
-            "contacto": "                                   ",
-            "email": "",
-            "notas": "",
-            "ciudad_despacho": "itagui                                                    ",
-            "pais_despacho": "",
-            "departamento_despacho": "",
-            "sucursal_despacho": "",
-            "direccion_despacho": "CALLE 57 B #51 D 19 MEDELLIN                                                                                                                                                                                                                              ",
-            "idsucursal": "0",
-            "ciudad": "MEDELLIN                                                    ",
-            "pedidorelacionado": "PD-103888    ",
-            "cargue": "20230523",
-            "nit": "1045047287-4   ",
-            "estadopicking": 9,
-            "fecharegistro": "2025-10-30T16:59:58.153",
-            "fpedido": "2025-10-30T16:59:58.153",
-            "fechtrans": None,
-            "transportadora": "",
-            "centrooperacion": "01",
-            "estadoerp": "1",
-            "picking_batch": None,
-            "field_condicionpago": None,
-            "field_documentoreferencia": None,
-            "bodega": "01",
-            "vendedor2": "18             ",
-            "numguia": None,
-            "id": 1,
-            "f_ultima_actualizacion": "2025-10-31T17:32:32.380",
-            "bodegaerp": "01",
-            "tipoaduana": "AUTOADUANA",
-            "order_detail": [
-                {"qtypedido": "50.0000", "preciounitario": "1000.000"},
-                {"qtypedido": "10.0000", "preciounitario": "1000.000"},
-                {"qtypedido": "50.0000", "preciounitario": None},
-                {"qtypedido": "10.0000", "preciounitario": None},
-            ],
-        }
-    ]
-
-    # Mapear las órdenes a remesas
-    remesas = mapear_lista_ordenes(respuesta_api)
-
-    # Crear payload para el API
-    payload = crear_payload_api(remesas)
-
-    # Mostrar resultado
-    import json
-
-    print(json.dumps(payload, indent=2, ensure_ascii=False))
