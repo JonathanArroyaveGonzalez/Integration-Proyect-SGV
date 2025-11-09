@@ -1,3 +1,8 @@
+"""
+Servicio para interactuar con la API de Transprensa.
+Maneja autenticación, tokens y reintentos automáticos.
+"""
+
 import time
 import requests
 from requests.adapters import HTTPAdapter
@@ -22,14 +27,12 @@ def retry_on_failure(max_retries: int = 3, delay: int = 3):
                         time.sleep(delay)
                     else:
                         raise
-
         return wrapper
-
     return decorator
 
 
 class TransprensaService:
-    """Servicio para enviar peticiones a la API de Transprensa con manejo de token y sesión persistente."""
+    """Servicio para enviar peticiones a la API de Transprensa."""
 
     def __init__(self):
         self.repo = TransprensaModel()
@@ -56,18 +59,24 @@ class TransprensaService:
         self.usuario = trans_conf.get("usuario_login")
         self.password = trans_conf.get("usuario_password")
         self.is_test = trans_conf.get("test", "True").lower() == "true"
-        # URLs según documentación
+        
         self.base_url = (
             "https://transprensa.colombiasoftware.co/index.php"
             if self.is_test
             else "https://transprensa.colombiasoftware.net/index.php"
         )
+        
         self.token = trans_conf.get("token")
         self.cookie = trans_conf.get("cookie")
         self.api_login = "servicio.Seguridad.login"
 
     def _refresh_token(self) -> Optional[str]:
-        """Solicita un nuevo token usando el login."""
+        """
+        Solicita un nuevo token usando el login.
+
+        Returns:
+            Nuevo token o None si falla
+        """
         print("Refrescando token de Transprensa...")
         try:
             payload = {
@@ -81,7 +90,6 @@ class TransprensaService:
 
             login_url = f"{self.base_url}?api={self.api_login}"
             response = self.session.post(login_url, headers=headers, data=payload)
-
             response.raise_for_status()
 
             try:
@@ -100,7 +108,6 @@ class TransprensaService:
             if not new_token:
                 raise RuntimeError(f"No se obtuvo token en la respuesta: {data}")
 
-            # Actualizar token en MongoDB
             self.repo.update_field("transprensa_config.token", new_token)
             self.token = new_token
 
@@ -109,24 +116,26 @@ class TransprensaService:
         except Exception:
             raise
 
-    def request(
-        self, method: str, endpoint: str, data: Optional[dict] = None, **kwargs
-    ) -> Dict[str, Any]:
+    def request(self, method: str, endpoint: str, data: Optional[dict] = None, **kwargs) -> Dict[str, Any]:
         """
         Envía una petición a la API de Transprensa.
         Si el token está vencido, lo renueva y reintenta.
+
+        Args:
+            method: Método HTTP (GET, POST, etc.)
+            endpoint: Endpoint de la API
+            data: Datos a enviar en el body
+            **kwargs: Argumentos adicionales para requests
+
+        Returns:
+            Dict con respuesta de la API
         """
-        # Construir la URL correctamente
         if endpoint.startswith("http"):
             url = endpoint
         else:
-            # Construir URL base sin el endpoint de login
-            base_without_login = self.base_url.replace(
-                "?api=servicio.Seguridad.login", ""
-            )
+            base_without_login = self.base_url.replace("?api=servicio.Seguridad.login", "")
             url = f"{base_without_login}?api={endpoint}"
 
-        # Intentar hasta 2 veces (primera vez + un retry si el token está vencido)
         for attempt in range(2):
             headers = {
                 "Authorization": self.token,
@@ -140,7 +149,6 @@ class TransprensaService:
                     method, url, headers=headers, json=data, timeout=10
                 )
 
-                # Verificar si la respuesta es JSON válida
                 try:
                     json_response = response.json()
                 except ValueError:
@@ -148,44 +156,45 @@ class TransprensaService:
                         f"La API devolvió una respuesta no válida: {response.text[:100]}"
                     )
 
-                # Verificar si el token está vencido
                 if response.status_code == 401 or (
                     isinstance(json_response, dict)
+                    and not json_response.get("success")
                     and (
-                        not json_response.get("success")
-                        and (
-                            "sesión han expirado" in json_response.get("msg", "")
-                            or "token" in json_response.get("msg", "").lower()
-                        )
+                        "sesión han expirado" in json_response.get("msg", "")
+                        or "token" in json_response.get("msg", "").lower()
                     )
                 ):
-                    if attempt == 0:  # Solo intentar refrescar en el primer intento
+                    if attempt == 0:
                         self._refresh_token()
-                        continue  # Reintentar con el nuevo token
+                        continue
                     else:
                         raise RuntimeError(
                             f"Token sigue vencido después del refresh: {json_response}"
                         )
 
-                # Si llegamos aquí, la respuesta es válida
                 response.raise_for_status()
                 return json_response
 
             except requests.exceptions.RequestException:
-                if attempt == 1:  # En el último intento, relanzar la excepción
+                if attempt == 1:
                     raise
-                # En el primer intento, intentar refrescar token
                 self._refresh_token()
+                
         raise RuntimeError(
             "No se pudo completar la petición después de intentar refrescar el token"
         )
 
 
-# Singleton para TransprensaService
 _transprensa_service: Optional[TransprensaService] = None
 
 
 def get_transprensa_service() -> TransprensaService:
+    """
+    Obtiene la instancia singleton del servicio de Transprensa.
+
+    Returns:
+        TransprensaService: Instancia singleton
+    """
     global _transprensa_service
     if _transprensa_service is None:
         _transprensa_service = TransprensaService()

@@ -1,6 +1,7 @@
 from __future__ import annotations
 from dataclasses import dataclass, asdict
 from typing import Any, Dict, List, Optional
+import re
 from transprensa.services.clientService import (
     get_ciudad_codigo_by_nombre,
     get_cliente_codigo_by_nit,
@@ -42,6 +43,16 @@ def limpiar_espacios(valor: Any) -> Any:
     if isinstance(valor, str):
         return valor.strip()
     return valor
+
+
+def create_guia_number(picking, bigpedido):
+    # Extrae solo los dígitos usando expresión regular
+    solo_numeros_picking = re.sub(r"\D", "", picking or "")
+    solo_numeros_bigpedido = re.sub(r"\D", "", bigpedido or "")
+
+    # Une los dos valores
+    pedido_unido = solo_numeros_picking + solo_numeros_bigpedido
+    return pedido_unido
 
 
 # Definición de dataclasses
@@ -134,7 +145,11 @@ def mapear_guia_a_remesa(guia_data: Dict[str, Any]) -> Optional[Remesa]:
     """Mapea datos de guía consultada a Remesa."""
     try:
         dataguide, detalle = get_data_from_guia(guia_data)
-        guide_number = "0006"  # Valor temporal fijo para pruebas
+        guide_number = "0059"  # Valor temporal fijo para pruebas
+        guide_number2 = create_guia_number(
+            guia_data.get("picking", ""), guia_data.get("bigpedido", "")
+        )
+        print("Numero de guia Generado:", guide_number2)
         # destinatario_ciudad_codigo=obtener_codigo_dane(limpiar_espacios(dataguide.get("ciudad_destinatario"))),
         destinatario_ciudad_codigo = "05360000"  # Itagui Temporalmente Fijo
 
@@ -161,7 +176,7 @@ def mapear_guia_a_remesa(guia_data: Dict[str, Any]) -> Optional[Remesa]:
         detalle = Detalle(
             detalle_peso=detalle.get("peso_real", "0"),
             detalle_volumen=detalle.get("volumen", "0"),
-            detalle_valordeclarado=detalle.get("valor_declarado", "0"),
+            detalle_valordeclarado=dataguide.get("valor_declarado", "0"),
             detalle_producto_codigo=PRODUCTO_CAJAS,
             detalle_cantidad=detalle.get("unidades", ""),
             detalle_descripcion=limpiar_espacios(detalle.get("descripcion", "")),
@@ -228,15 +243,14 @@ def remesa_a_dict(remesa: Remesa) -> Dict[str, Any]:
     }
 
 
-def crear_payload_api(guias: List[Dict[str, Any]]) -> Dict[str, Any]:
+def crear_payload_api(remesas: List[Remesa]) -> Dict[str, Any]:
     """
     Crea el payload completo para enviar al API de SILOGTRAN.
 
     Args:
-        guias: Lista de diccionarios que representan las guías
+        remesas: Lista de objetos Remesa ya mapeados
 
     Returns:
         Diccionario con el formato esperado por el API
     """
-    remesas: List[Remesa] = [r for r in (mapear_guia_a_remesa(g) for g in guias) if r]
-    return {"remesas": [remesa_a_dict(r) for r in remesas]}
+    return {"remesas": [remesa_a_dict(r) for r in remesas if r]}
