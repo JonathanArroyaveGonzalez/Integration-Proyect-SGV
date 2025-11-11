@@ -22,36 +22,6 @@ def getExternalService():
     return get_transprensa_service()
 
 
-@ttl_cache(maxsize=128, ttl=900)
-def get_cliente_codigo_by_nit(nit: str) -> str:
-    """
-    Consulta el código de cliente en Transprensa por NIT.
-
-    Args:
-        nit: Número de identificación tributaria del cliente
-
-    Returns:
-        Código del cliente o cadena vacía
-    """
-    if not nit:
-        return ""
-
-    tp_client = getExternalService()
-    payload = {"cliente_documento": nit.strip()}
-
-    try:
-        resp = tp_client.request(
-            method="POST",
-            endpoint="servicio.Cliente.consultar",
-            data=payload,
-            timeout=5,
-        )
-
-        if resp.get("success") and isinstance(resp.get("data"), list) and resp["data"]:
-            return resp["data"][0].get("cliente_codigo", "")
-
-    except Exception as e:
-        return ""
 
 
 @ttl_cache(maxsize=128, ttl=900)
