@@ -1,14 +1,3 @@
-"""
-Orquestador V2 - Flujo completo de guías
-
-Ejecuta el workflow completo de una guía:
-1. Obtener datos de guía (sin y con detalle) - ASYNC
-2. Mapear a Remesa
-3. Crear remesa en Transprensa
-4. Obtener PDF
-5. Descargar y guardar PDF en background
-"""
-
 from __future__ import annotations
 import base64
 import requests
