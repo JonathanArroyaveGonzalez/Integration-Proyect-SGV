@@ -28,12 +28,6 @@ def obtener_codigo_dane(ciudad: str) -> str:
     return get_ciudad_codigo_by_nombre(ciudad.upper().strip()) or "05001000"
 
 
-def consultar_cliente_transprensa(nit: str) -> str:
-    """Consulta datos de cliente en Transprensa por NIT."""
-    if not nit:
-        return ""
-    return get_cliente_codigo_by_nit(nit.strip()) or ""
-
 
 def limpiar_espacios(valor: Any) -> Any:
     """
@@ -127,8 +121,6 @@ class Remesa:
 
 
 # Funciones de mapeo
-
-
 def get_data_from_guia(guia_data: Dict[str, Any]):
     """Extrae datos de guía según su estructura. (Con y sin detalle)"""
     # validar estructura de datos
@@ -145,14 +137,11 @@ def mapear_guia_a_remesa(guia_data: Dict[str, Any]) -> Optional[Remesa]:
     """Mapea datos de guía consultada a Remesa."""
     try:
         dataguide, detalle = get_data_from_guia(guia_data)
-        guide_number = "0059"  # Valor temporal fijo para pruebas
+        guide_number = "0089"  # Valor temporal fijo para pruebas
         guide_number2 = create_guia_number(
             guia_data.get("picking", ""), guia_data.get("bigpedido", "")
         )
         print("Numero de guia Generado:", guide_number2)
-        # destinatario_ciudad_codigo=obtener_codigo_dane(limpiar_espacios(dataguide.get("ciudad_destinatario"))),
-        destinatario_ciudad_codigo = "05360000"  # Itagui Temporalmente Fijo
-
         # Extraer datos del destinatario
         destinatario = Destinatario(
             destinatario_codigo="",
@@ -168,8 +157,8 @@ def mapear_guia_a_remesa(guia_data: Dict[str, Any]) -> Optional[Remesa]:
                 dataguide.get("telefono_destinatario", "")
             )
             or "0000000000",
-            # destinatario_ciudad_codigo=obtener_codigo_dane(limpiar_espacios(sin_detalle.get("ciudad_destinatario"))),
-            destinatario_ciudad_codigo=destinatario_ciudad_codigo,
+            
+            destinatario_ciudad_codigo=obtener_codigo_dane(limpiar_espacios(dataguide.get("ciudad_destinatario"))) or DANE_MEDELLIN,
         )
 
         # Detalle
@@ -185,7 +174,7 @@ def mapear_guia_a_remesa(guia_data: Dict[str, Any]) -> Optional[Remesa]:
         # Crear remesa completa
         remesa = Remesa(
             ciudad_codigo_origen=DANE_MEDELLIN,
-            ciudad_codigo_destino=destinatario_ciudad_codigo,
+            ciudad_codigo_destino=destinatario.destinatario_ciudad_codigo,
             tipo_servicio=TIPO_SERVICIO_PAQUETEO,
             cliente=Cliente(),  # Usar valores por defecto
             remitente=Remitente(),  # Usar valores por defecto
