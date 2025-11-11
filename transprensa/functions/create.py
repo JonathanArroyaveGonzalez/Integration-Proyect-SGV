@@ -14,7 +14,7 @@ import base64
 import requests
 import time
 import threading
-import asyncio
+
 from typing import Dict, Any, Optional
 
 from transprensa.services import clientService
@@ -37,7 +37,7 @@ def download_pdf_from_url(pdf_url: str, timeout: int = 10) -> Optional[bytes]:
         response.raise_for_status()
         return response.content
     except (requests.Timeout, requests.RequestException, Exception) as e:
-        print(f"Error descargando PDF desde {pdf_url}: {e}")
+        print(f"Error al descargar PDF desde {pdf_url}: {str(e)}")
         return None
 
 
@@ -55,34 +55,21 @@ def _process_pdf_background(
         timeout: Timeout para descargar PDF
     """
     try:
-        print(f"[BACKGROUND] Procesando PDF para remesa {remesa_num}")
-
         pdf_content = download_pdf_from_url(pdf_url, timeout=timeout)
         if not pdf_content:
-            print(
-                f"[BACKGROUND] Error: No se pudo descargar PDF para remesa {remesa_num}"
-            )
             return
 
         pdf_base64 = base64.b64encode(pdf_content).decode("utf-8")
-        print(f"[BACKGROUND] PDF descargado ({len(pdf_content)} bytes)")
-
-        save_result = clientService.save_guide_pdf(
+        clientService.save_guide_pdf(
             remesa_num=remesa_num, picking=picking, pdf_base64=pdf_base64
         )
-
-        if isinstance(save_result, dict) and save_result.get("success"):
-            print(f"✓ [BACKGROUND] PDF guardado correctamente para remesa {remesa_num}")
-        else:
-            print(f"[BACKGROUND] Error guardando PDF: {save_result}")
-
-    except Exception as e:
-        print(f"[BACKGROUND] Error procesando PDF: {e}")
+    except Exception:
+        pass
 
 
-async def execute_guide_workflow_async(picking: str, bigpedido: str) -> Dict[str, Any]:
+def execute_guide_workflow(picking: str, bigpedido: str) -> Dict[str, Any]:
     """
-    Versión ASYNC del workflow V2.
+    Ejecuta el workflow completo de forma síncrona.
 
     Args:
         picking: Código de picking
@@ -107,12 +94,9 @@ async def execute_guide_workflow_async(picking: str, bigpedido: str) -> Dict[str
         }
 
     try:
-        print(
-            f"[PASO 1] Obteniendo datos de guía: picking={picking}, bigpedido={bigpedido}"
-        )
         step1_start = time.time()
 
-        guia_comparativa = await clientService.get_guide_data(picking, bigpedido)
+        guia_comparativa = clientService.get_guide_data(picking, bigpedido)
 
         step1_time = int((time.time() - step1_start) * 1000)
         print(f"✓ Paso 1 completado en {step1_time}ms")
@@ -128,9 +112,7 @@ async def execute_guide_workflow_async(picking: str, bigpedido: str) -> Dict[str
                 "pdf_en_background": False,
             }
 
-        print("[PASO 2] Mapeando guía a Remesa")
         remesa_mapeada = mapear_guia_a_remesa(guia_comparativa)
-
         if not remesa_mapeada:
             return {
                 "success": False,
@@ -142,10 +124,24 @@ async def execute_guide_workflow_async(picking: str, bigpedido: str) -> Dict[str
                 "pdf_en_background": False,
             }
 
-        print("[PASO 3] Creando remesa en Transprensa")
         step3_start = time.time()
 
         payload = crear_payload_api([remesa_mapeada])
+
+        # Validar que el codigo ciudaciudad_codigo_origen y ciudad_codigo_destino sean diferentes
+        if (
+            remesa_mapeada.ciudad_codigo_origen
+            == remesa_mapeada.ciudad_codigo_destino
+        ):
+            return {
+                "success": False,
+                "picking": picking,
+                "bigpedido": bigpedido,
+                "remesa_numero": "",
+                "mensaje": "Error de validación: La ciudad de origen y destino no pueden ser iguales.",
+                "tiempo_ms": int((time.time() - start_time) * 1000),
+                "pdf_en_background": False,
+            }
         create_response = clientService.create_remesas(payload)
 
         step3_time = int((time.time() - step3_start) * 1000)
@@ -197,9 +193,6 @@ async def execute_guide_workflow_async(picking: str, bigpedido: str) -> Dict[str
                 "pdf_en_background": False,
             }
 
-        print(f"✓ Remesa creada: {remesa_creada_numero}")
-
-        print("[PASO 4] Obteniendo URL de PDF")
         step4_start = time.time()
 
         print_response = clientService.print_remesas([remesa_creada_numero])
@@ -234,7 +227,6 @@ async def execute_guide_workflow_async(picking: str, bigpedido: str) -> Dict[str
                 "pdf_en_background": False,
             }
 
-        print("[PASO 5-6] Iniciando procesamiento de PDF en background")
         pdf_thread = threading.Thread(
             target=_process_pdf_background,
             args=(remesa_creada_numero, picking, pdf_url),
@@ -253,7 +245,6 @@ async def execute_guide_workflow_async(picking: str, bigpedido: str) -> Dict[str
         }
 
     except Exception as e:
-        print(f"✗ Error (ASYNC): {e}")
         return {
             "success": False,
             "picking": picking,
@@ -261,41 +252,5 @@ async def execute_guide_workflow_async(picking: str, bigpedido: str) -> Dict[str
             "remesa_numero": "",
             "msg": f"Error inesperado: {str(e)}",
             "tiempo_ms": int((time.time() - start_time) * 1000),
-            "pdf_en_background": False,
-        }
-
-
-def execute_guide_workflow(picking: str, bigpedido: str) -> Dict[str, Any]:
-    """
-    Wrapper sincrónico que llama a la versión async.
-    Permite que las views Django (síncronas) puedan llamar a la función async.
-
-    Args:
-        picking: Código de picking
-        bigpedido: Número de pedido
-
-    Returns:
-        Dict con respuesta del workflow
-    """
-    try:
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-
-        result = loop.run_until_complete(
-            execute_guide_workflow_async(picking, bigpedido)
-        )
-
-        loop.close()
-        return result
-
-    except Exception as e:
-        print(f"✗ Error en wrapper sincrónico: {e}")
-        return {
-            "success": False,
-            "picking": picking,
-            "bigpedido": bigpedido,
-            "remesa_numero": "",
-            "msg": f"Error inesperado: {str(e)}",
-            "tiempo_ms": 0,
             "pdf_en_background": False,
         }

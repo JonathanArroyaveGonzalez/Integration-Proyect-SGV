@@ -7,8 +7,7 @@ from __future__ import annotations
 from typing import Dict, Any, List
 import requests
 from cachetools.func import ttl_cache
-import json as json_module
-
+import traceback
 from transprensa.services.internalService import get_internal_query_service
 from transprensa.services.transprensaService import get_transprensa_service
 
@@ -23,38 +22,6 @@ def getExternalService():
     return get_transprensa_service()
 
 
-@ttl_cache(maxsize=128, ttl=900)
-def get_cliente_codigo_by_nit(nit: str) -> str:
-    """
-    Consulta el código de cliente en Transprensa por NIT.
-
-    Args:
-        nit: Número de identificación tributaria del cliente
-
-    Returns:
-        Código del cliente o cadena vacía
-    """
-    if not nit:
-        return ""
-
-    tp_client = getExternalService()
-    payload = {"cliente_documento": nit.strip()}
-
-    try:
-        resp = tp_client.request(
-            method="POST",
-            endpoint="servicio.Cliente.consultar",
-            data=payload,
-            timeout=5,
-        )
-
-        if resp.get("success") and isinstance(resp.get("data"), list) and resp["data"]:
-            return resp["data"][0].get("cliente_codigo", "")
-
-    except Exception as e:
-        print(f"Error al consultar cliente por NIT: {e}")
-
-    return ""
 
 
 @ttl_cache(maxsize=128, ttl=900)
@@ -117,10 +84,8 @@ def get_guide_data(picking: str, bigpedido: str) -> Dict[str, Any]:
         internal_service = getInternalService()
         result = internal_service.getGuiaData(picking, bigpedido)
         return result if result else {}
-    except Exception as e:
-        print(f"Error obteniendo datos de guía: {e}")
+    except Exception:
         return {}
-
 
 
 def create_remesas(payload: Dict[str, Any]) -> Dict[str, Any]:
@@ -134,9 +99,6 @@ def create_remesas(payload: Dict[str, Any]) -> Dict[str, Any]:
         Respuesta de Transprensa (success, data, msg)
     """
     try:
-        print("  [DEBUG] Payload enviando a Transprensa:")
-        print(f"  {json_module.dumps(payload, indent=2, default=str)}")
-
         tp_client = getExternalService()
         response = tp_client.request(
             method="POST",
@@ -144,26 +106,11 @@ def create_remesas(payload: Dict[str, Any]) -> Dict[str, Any]:
             data=payload,
             timeout=10,
         )
-
-        print("  [DEBUG] Respuesta de Transprensa:")
-        print(f"  {json_module.dumps(response, indent=2, default=str)}")
-
-        return response if response else {"success": False, "data": [], "msg": "No response"}
-        
+        return (response if response else {"success": False, "data": [], "msg": "No response"})
     except requests.exceptions.HTTPError as http_err:
-        print(f"Error HTTP creando remesas: {http_err}")
-        try:
-            print("Respuesta del servidor:", http_err.response.text)
-        except Exception as ex:
-            print(f"No se pudo obtener respuesta del servidor: {ex}")
-        
-        import traceback
         traceback.print_exc()
         return {"success": False, "data": [], "msg": str(http_err)}
-        
     except Exception as e:
-        print(f"Error creando remesas: {e}")
-        import traceback
         traceback.print_exc()
         return {"success": False, "data": [], "msg": str(e)}
 
@@ -187,9 +134,12 @@ def print_remesas(remesa_numbers: List[str]) -> Dict[str, Any]:
             data=body,
             timeout=10,
         )
-        return response if response else {"success": False, "data": {}, "msg": "No response"}
+        return (
+            response
+            if response
+            else {"success": False, "data": {}, "msg": "No response"}
+        )
     except Exception as e:
-        print(f"Error imprimiendo remesas: {e}")
         return {"success": False, "data": {}, "msg": str(e)}
 
 
@@ -222,5 +172,4 @@ def save_guide_pdf(remesa_num: str, picking: str, pdf_base64: str) -> Dict[str, 
 
         return {"success": False, "message": "Respuesta inválida"}
     except Exception as e:
-        print(f"Error guardando PDF: {e}")
         return {"success": False, "message": str(e)}

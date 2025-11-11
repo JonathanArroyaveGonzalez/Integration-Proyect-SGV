@@ -13,7 +13,7 @@ from transprensa.functions.create import execute_guide_workflow
 
 
 @csrf_exempt
-@require_http_methods(["GET", "POST"])
+@require_http_methods("POST")
 def procesar_guia(request):
     """
     Procesa UNA GUÍA completamente:
@@ -22,46 +22,17 @@ def procesar_guia(request):
     3. Crea en Transprensa
     4. Obtiene PDF
     5. Descarga y guarda PDF en background
-
-    Soporta GET y POST:
-
-    GET (Query Parameters):
+    POST (Query Parameters):
         /wms/tp/v1/guia/procesar/?picking=7746&bigpedido=PD-103888
-
-    POST (Body JSON):
-        {
-            "picking": "7746",
-            "bigpedido": "PD-103888"
-        }
 
     Returns:
         JSON con resultado del procesamiento
     """
     try:
-        if request.method == "GET":
-            picking = request.GET.get("picking", "").strip()
-            bigpedido = request.GET.get("bigpedido", "").strip()
-        else:
-            body = {}
-            if request.body:
-                try:
-                    body = json.loads(request.body.decode("utf-8"))
-                except json.JSONDecodeError:
-                    return JsonResponse(
-                        {
-                            "success": False,
-                            "picking": "",
-                            "bigpedido": "",
-                            "remesa_numero": "",
-                            "pdf_saved": False,
-                            "estado": "error",
-                            "msg": "Body debe ser JSON válido",
-                        },
-                        status=400,
-                    )
+        data = json.loads(request.body)
+        picking = data.get("picking", "").strip()
+        bigpedido = data.get("bigpedido", "").strip()
 
-            picking = str(body.get("picking", "")).strip()
-            bigpedido = str(body.get("bigpedido", "")).strip()
 
         if not picking or not bigpedido:
             return JsonResponse(

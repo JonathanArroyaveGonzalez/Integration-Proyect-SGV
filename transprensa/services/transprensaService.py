@@ -59,13 +59,11 @@ class TransprensaService:
         self.usuario = trans_conf.get("usuario_login")
         self.password = trans_conf.get("usuario_password")
         self.is_test = trans_conf.get("test", "True").lower() == "true"
-        
         self.base_url = (
             "https://transprensa.colombiasoftware.co/index.php"
             if self.is_test
             else "https://transprensa.colombiasoftware.net/index.php"
         )
-        
         self.token = trans_conf.get("token")
         self.cookie = trans_conf.get("cookie")
         self.api_login = "servicio.Seguridad.login"
@@ -77,7 +75,6 @@ class TransprensaService:
         Returns:
             Nuevo token o None si falla
         """
-        print("Refrescando token de Transprensa...")
         try:
             payload = {
                 "usuario_login": self.usuario,
@@ -87,7 +84,7 @@ class TransprensaService:
                 "Content-Type": "application/x-www-form-urlencoded",
                 "Cookie": self.cookie,
             }
-
+            print("Refrescando token de Transprensa...")
             login_url = f"{self.base_url}?api={self.api_login}"
             response = self.session.post(login_url, headers=headers, data=payload)
             response.raise_for_status()
@@ -136,7 +133,8 @@ class TransprensaService:
             base_without_login = self.base_url.replace("?api=servicio.Seguridad.login", "")
             url = f"{base_without_login}?api={endpoint}"
 
-        for attempt in range(2):
+        max_retries = 2
+        for attempt in range(max_retries):
             headers = {
                 "Authorization": self.token,
                 "Content-Type": "application/json",
@@ -179,7 +177,6 @@ class TransprensaService:
                 if attempt == 1:
                     raise
                 self._refresh_token()
-                
         raise RuntimeError(
             "No se pudo completar la petición después de intentar refrescar el token"
         )
