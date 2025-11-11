@@ -37,6 +37,7 @@ def download_pdf_from_url(pdf_url: str, timeout: int = 10) -> Optional[bytes]:
         response.raise_for_status()
         return response.content
     except (requests.Timeout, requests.RequestException, Exception) as e:
+        print(f"Error al descargar PDF desde {pdf_url}: {str(e)}")
         return None
 
 

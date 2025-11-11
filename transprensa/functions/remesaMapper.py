@@ -2,10 +2,8 @@ from __future__ import annotations
 from dataclasses import dataclass, asdict
 from typing import Any, Dict, List, Optional
 import re
-from transprensa.services.clientService import (
-    get_ciudad_codigo_by_nombre,
-    get_cliente_codigo_by_nit,
-)
+from transprensa.services.clientService import  get_ciudad_codigo_by_nombre
+
 
 
 #  Constantes OSAKA
