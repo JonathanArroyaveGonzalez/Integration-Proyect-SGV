@@ -5,5 +5,5 @@ from transprensa.views.remesaView import  procesar_guia
 
 transprensa_endpoints = [
     # Endpoint Procesar Guía
-    path("guia/procesar/", procesar_guia, name="procesar_guia"),
+    path("guide/", procesar_guia, name="procesar_guia"),
 ]
