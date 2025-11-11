@@ -3,12 +3,15 @@ from dataclasses import dataclass, asdict
 from typing import Any, Dict, List, Optional
 import re
 from transprensa.services.clientService import  get_ciudad_codigo_by_nombre
+from dotenv import load_dotenv
+import os
 
+load_dotenv()
 
 
 #  Constantes OSAKA
-OSAKA_CLIENTE_CODIGO = "3245"
-OSAKA_REMITENTE_CODIGO = "2597359"
+CLIENTE_CODIGO = os.getenv("CLIENTE_CODIGO")
+REMITENTE_CODIGO = os.getenv("REMITENTE_CODIGO")
 FORMA_PAGO_CREDITO = "5"
 PRODUCTO_CAJAS = "3559"
 TIPO_SERVICIO_PAQUETEO = "2"
@@ -50,7 +53,7 @@ def create_guia_number(picking, bigpedido):
 # Definición de dataclasses
 @dataclass
 class Cliente:
-    cliente_codigo: Optional[str] = OSAKA_CLIENTE_CODIGO
+    cliente_codigo: Optional[str] = CLIENTE_CODIGO
     tipo_documentocliente_codigo: Optional[str] = ""
     cliente_documento: Optional[str] = ""
     cliente_nombre1: Optional[str] = ""
@@ -67,7 +70,7 @@ class Cliente:
 
 @dataclass
 class Remitente:
-    remitente_codigo: Optional[str] = OSAKA_REMITENTE_CODIGO
+    remitente_codigo: Optional[str] = REMITENTE_CODIGO
     tipo_documentoremitente_codigo: Optional[str] = ""
     remitente_documento: Optional[str] = ""
     remitente_nombre: Optional[str] = ""
@@ -135,11 +138,9 @@ def mapear_guia_a_remesa(guia_data: Dict[str, Any]) -> Optional[Remesa]:
     """Mapea datos de guía consultada a Remesa."""
     try:
         dataguide, detalle = get_data_from_guia(guia_data)
-        guide_number = "0089"  # Valor temporal fijo para pruebas
-        guide_number2 = create_guia_number(
-            guia_data.get("picking", ""), guia_data.get("bigpedido", "")
-        )
-        print("Numero de guia Generado:", guide_number2)
+        #guide_number = "1089"  # Valor temporal fijo para pruebas
+        guide_number = create_guia_number(guia_data.get("picking", ""), guia_data.get("bigpedido", ""))
+        print("Numero de guia Generado:", guide_number)
         # Extraer datos del destinatario
         destinatario = Destinatario(
             destinatario_codigo="",
@@ -156,9 +157,9 @@ def mapear_guia_a_remesa(guia_data: Dict[str, Any]) -> Optional[Remesa]:
             )
             or "0000000000",
             
-            destinatario_ciudad_codigo=obtener_codigo_dane(limpiar_espacios(dataguide.get("ciudad_destinatario"))) or DANE_MEDELLIN,
+            destinatario_ciudad_codigo=obtener_codigo_dane(limpiar_espacios(dataguide.get("ciudad_destinatario"))),
         )
-
+        print("Codigo DANE Destinatario:", obtener_codigo_dane(limpiar_espacios(dataguide.get("ciudad_destinatario"))))
         # Detalle
         detalle = Detalle(
             detalle_peso=detalle.get("peso_real", "0"),

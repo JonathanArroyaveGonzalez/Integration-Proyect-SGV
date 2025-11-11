@@ -1,14 +1,3 @@
-"""
-Orquestador V2 - Flujo completo de guías
-
-Ejecuta el workflow completo de una guía:
-1. Obtener datos de guía (sin y con detalle) - ASYNC
-2. Mapear a Remesa
-3. Crear remesa en Transprensa
-4. Obtener PDF
-5. Descargar y guardar PDF en background
-"""
-
 from __future__ import annotations
 import base64
 import requests
@@ -129,7 +118,7 @@ def execute_guide_workflow(picking: str, bigpedido: str) -> Dict[str, Any]:
         payload = crear_payload_api([remesa_mapeada])
 
         # Validar que el codigo ciudaciudad_codigo_origen y ciudad_codigo_destino sean diferentes
-        if (
+        """if (
             remesa_mapeada.ciudad_codigo_origen
             == remesa_mapeada.ciudad_codigo_destino
         ):
@@ -141,7 +130,7 @@ def execute_guide_workflow(picking: str, bigpedido: str) -> Dict[str, Any]:
                 "mensaje": "Error de validación: La ciudad de origen y destino no pueden ser iguales.",
                 "tiempo_ms": int((time.time() - start_time) * 1000),
                 "pdf_en_background": False,
-            }
+            }"""
         create_response = clientService.create_remesas(payload)
 
         step3_time = int((time.time() - step3_start) * 1000)

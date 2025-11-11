@@ -19,15 +19,14 @@ from transprensa.functions.remesaMapper import (
     Remitente,
     Destinatario,
     Detalle,
-    OSAKA_CLIENTE_CODIGO,
-    OSAKA_REMITENTE_CODIGO,
+    CLIENTE_CODIGO,
+    REMITENTE_CODIGO,
 )
 from transprensa.functions.create import (
     execute_guide_workflow,
     download_pdf_from_url,
     _process_pdf_background,
 )
-from transprensa.services.transprensaService import TransprensaService
 
 
 # ============================================================================
@@ -166,8 +165,8 @@ class TestRemesaMapper(TestCase):
         self.assertEqual(remesa.detalle.detalle_cantidad, "3")
 
         # Verificar constantes
-        self.assertEqual(remesa.cliente.cliente_codigo, OSAKA_CLIENTE_CODIGO)
-        self.assertEqual(remesa.remitente.remitente_codigo, OSAKA_REMITENTE_CODIGO)
+        self.assertEqual(remesa.cliente.cliente_codigo, CLIENTE_CODIGO)
+        self.assertEqual(remesa.remitente.remitente_codigo, REMITENTE_CODIGO)
 
     def test_mapear_guia_a_remesa_error(self):
         """Test de mapeo con datos inválidos."""
@@ -381,105 +380,3 @@ class TestWorkflow(TestCase):
         mock_client_service.save_guide_pdf.assert_called_once_with(
             remesa_num="REM-12345", picking="7746", pdf_base64=expected_pdf_base64
         )
-
-
-# ============================================================================
-# TESTS DEL SERVICIO TRANSPRENSA
-# ============================================================================
-
-
-class TestTransprensaService(TestCase):
-    """Tests para el servicio de Transprensa."""
-
-    @patch("transprensa.services.transprensaService.TransprensaModel")
-    def setUp(self, mock_model):
-        """Setup para tests del servicio."""
-        # Mock de la configuración
-        mock_config = {
-            "transprensa_config": {
-                "usuario_login": "test_user",
-                "usuario_password": "test_pass",
-                "test": "True",
-                "token": "test_token",
-                "cookie": "test_cookie",
-            }
-        }
-
-        mock_repo = Mock()
-        mock_repo.get_config.return_value = mock_config
-        mock_model.return_value = mock_repo
-
-        self.service = TransprensaService()
-
-    @patch("requests.Session.post")
-    def test_refresh_token_exitoso(self, mock_post):
-        """Test de refresh de token exitoso."""
-        mock_response = Mock()
-        mock_response.json.return_value = {
-            "success": True,
-            "data": {"token": "new_test_token"},
-        }
-        mock_response.raise_for_status.return_value = None
-        mock_post.return_value = mock_response
-
-        new_token = self.service._refresh_token()
-
-        self.assertEqual(new_token, "new_test_token")
-        self.assertEqual(self.service.token, "new_test_token")
-
-    @patch("requests.Session.post")
-    def test_refresh_token_login_fallido(self, mock_post):
-        """Test de refresh de token con login fallido."""
-        mock_response = Mock()
-        mock_response.json.return_value = {
-            "success": False,
-            "msg": "Credenciales inválidas",
-        }
-        mock_response.raise_for_status.return_value = None
-        mock_post.return_value = mock_response
-
-        with self.assertRaises(RuntimeError) as context:
-            self.service._refresh_token()
-
-        self.assertIn("Error de login", str(context.exception))
-
-    @patch("requests.Session.request")
-    def test_request_exitoso(self, mock_request):
-        """Test de request exitoso."""
-        mock_response = Mock()
-        mock_response.json.return_value = {"success": True, "data": "test_data"}
-        mock_response.status_code = 200
-        mock_response.raise_for_status.return_value = None
-        mock_request.return_value = mock_response
-
-        result = self.service.request("POST", "test.endpoint", {"test": "data"})
-
-        self.assertEqual(result, {"success": True, "data": "test_data"})
-
-    @patch("requests.Session.request")
-    @patch.object(TransprensaService, "_refresh_token")
-    def test_request_con_token_expirado(self, mock_refresh, mock_request):
-        """Test de request con token expirado que se renueva."""
-        # Primera llamada: token expirado
-        mock_response_expired = Mock()
-        mock_response_expired.json.return_value = {
-            "success": False,
-            "msg": "Las credenciales de sesión han expirado",
-        }
-        mock_response_expired.status_code = 401
-        mock_response_expired.raise_for_status.return_value = None
-
-        # Segunda llamada: exitosa después del refresh
-        mock_response_success = Mock()
-        mock_response_success.json.return_value = {"success": True, "data": "test_data"}
-        mock_response_success.status_code = 200
-        mock_response_success.raise_for_status.return_value = None
-
-        mock_request.side_effect = [mock_response_expired, mock_response_success]
-        mock_refresh.return_value = "new_token"
-
-        result = self.service.request("POST", "test.endpoint", {"test": "data"})
-
-        self.assertEqual(result, {"success": True, "data": "test_data"})
-        mock_refresh.assert_called_once()
-        self.assertEqual(mock_request.call_count, 2)

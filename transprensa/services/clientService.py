@@ -22,8 +22,6 @@ def getExternalService():
     return get_transprensa_service()
 
 
-
-
 @ttl_cache(maxsize=128, ttl=900)
 def get_ciudad_codigo_by_nombre(nombre_ciudad: str) -> str:
     """
@@ -106,10 +104,32 @@ def create_remesas(payload: Dict[str, Any]) -> Dict[str, Any]:
             data=payload,
             timeout=10,
         )
-        return (response if response else {"success": False, "data": [], "msg": "No response"})
+        return (
+            response
+            if response
+            else {"success": False, "data": [], "msg": "No response"}
+        )
     except requests.exceptions.HTTPError as http_err:
+        # Intenta extraer el mensaje de validación del response
+        error_msg = str(http_err)
+        validation_data = []
+
+        if hasattr(http_err, "response") and http_err.response is not None:
+            try:
+                error_content = http_err.response.json()
+                if isinstance(error_content, dict):
+                    # Si la respuesta tiene estructura de Transprensa, extraer datos
+                    if "data" in error_content:
+                        validation_data = error_content["data"]
+                    error_msg = error_content.get("msg", str(http_err))
+                print(f"Error HTTP con contenido de respuesta: {error_content}")
+            except (ValueError, TypeError):
+                print(
+                    f"Error HTTP sin JSON válido: {http_err.response.text[:200] if http_err.response else 'Sin respuesta'}"
+                )
+
         traceback.print_exc()
-        return {"success": False, "data": [], "msg": str(http_err)}
+        return {"success": False, "data": validation_data, "msg": error_msg}
     except Exception as e:
         traceback.print_exc()
         return {"success": False, "data": [], "msg": str(e)}
