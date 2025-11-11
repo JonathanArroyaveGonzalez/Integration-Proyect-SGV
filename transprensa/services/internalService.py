@@ -1,7 +1,3 @@
-"""
-Servicio de consultas internas para WMS y Transprensa.
-"""
-
 from typing import Dict, Any, Optional
 from wmsAdapterV2.functions.carrier.save_guide import save_guide
 from wmsAdapterV2.functions.carrier.cancel_guide import cancel_guide
@@ -14,7 +10,7 @@ database_name_wms = global_settings.DATABASE_NAME
 
 
 class InternalQueryService:
-    """Servicio para consultas internas a WMS y Transprensa."""
+    """Servicio de consultas internas para wmsAdapterV2."""
 
     def __init__(self, *, db_name: str= database_name_wms):
         """
@@ -22,7 +18,6 @@ class InternalQueryService:
 
         Args:
             db_name: Nombre de la base de datos para wmsAdapterV2
-            transprensa_client: Cliente para consumir WS de Transprensa
         """
         self.db_name = db_name
 
