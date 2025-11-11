@@ -118,7 +118,7 @@ def execute_guide_workflow(picking: str, bigpedido: str) -> Dict[str, Any]:
         payload = crear_payload_api([remesa_mapeada])
 
         # Validar que el codigo ciudaciudad_codigo_origen y ciudad_codigo_destino sean diferentes
-        if (
+        """if (
             remesa_mapeada.ciudad_codigo_origen
             == remesa_mapeada.ciudad_codigo_destino
         ):
@@ -130,7 +130,7 @@ def execute_guide_workflow(picking: str, bigpedido: str) -> Dict[str, Any]:
                 "mensaje": "Error de validación: La ciudad de origen y destino no pueden ser iguales.",
                 "tiempo_ms": int((time.time() - start_time) * 1000),
                 "pdf_en_background": False,
-            }
+            }"""
         create_response = clientService.create_remesas(payload)
 
         step3_time = int((time.time() - step3_start) * 1000)

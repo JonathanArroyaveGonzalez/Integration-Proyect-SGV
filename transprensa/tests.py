@@ -400,6 +400,7 @@ class TestTransprensaService(TestCase):
                 "usuario_login": "test_user",
                 "usuario_password": "test_pass",
                 "test": "True",
+                "base_url": "https://test.transprensa.com/index.php?api=servicio.Seguridad.login",
                 "token": "test_token",
                 "cookie": "test_cookie",
             }
@@ -407,6 +408,7 @@ class TestTransprensaService(TestCase):
 
         mock_repo = Mock()
         mock_repo.get_config.return_value = mock_config
+        mock_repo.update_field.return_value = None  # Mock del método update_field
         mock_model.return_value = mock_repo
 
         self.service = TransprensaService()
@@ -414,6 +416,9 @@ class TestTransprensaService(TestCase):
     @patch("requests.Session.post")
     def test_refresh_token_exitoso(self, mock_post):
         """Test de refresh de token exitoso."""
+        # Asegurar que la configuración esté cargada
+        self.service._ensure_config_loaded()
+
         mock_response = Mock()
         mock_response.json.return_value = {
             "success": True,
@@ -430,6 +435,9 @@ class TestTransprensaService(TestCase):
     @patch("requests.Session.post")
     def test_refresh_token_login_fallido(self, mock_post):
         """Test de refresh de token con login fallido."""
+        # Asegurar que la configuración esté cargada
+        self.service._ensure_config_loaded()
+
         mock_response = Mock()
         mock_response.json.return_value = {
             "success": False,
@@ -446,6 +454,9 @@ class TestTransprensaService(TestCase):
     @patch("requests.Session.request")
     def test_request_exitoso(self, mock_request):
         """Test de request exitoso."""
+        # Asegurar que la configuración esté cargada
+        self.service._ensure_config_loaded()
+
         mock_response = Mock()
         mock_response.json.return_value = {"success": True, "data": "test_data"}
         mock_response.status_code = 200
@@ -460,6 +471,9 @@ class TestTransprensaService(TestCase):
     @patch.object(TransprensaService, "_refresh_token")
     def test_request_con_token_expirado(self, mock_refresh, mock_request):
         """Test de request con token expirado que se renueva."""
+        # Asegurar que la configuración esté cargada
+        self.service._ensure_config_loaded()
+
         # Primera llamada: token expirado
         mock_response_expired = Mock()
         mock_response_expired.json.return_value = {

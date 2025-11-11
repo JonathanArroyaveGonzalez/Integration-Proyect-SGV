@@ -27,7 +27,9 @@ def retry_on_failure(max_retries: int = 3, delay: int = 3):
                         time.sleep(delay)
                     else:
                         raise
+
         return wrapper
+
     return decorator
 
 
@@ -113,7 +115,9 @@ class TransprensaService:
         except Exception:
             raise
 
-    def request(self, method: str, endpoint: str, data: Optional[dict] = None, **kwargs) -> Dict[str, Any]:
+    def request(
+        self, method: str, endpoint: str, data: Optional[dict] = None, **kwargs
+    ) -> Dict[str, Any]:
         """
         Envía una petición a la API de Transprensa.
         Si el token está vencido, lo renueva y reintenta.
@@ -130,7 +134,9 @@ class TransprensaService:
         if endpoint.startswith("http"):
             url = endpoint
         else:
-            base_without_login = self.base_url.replace("?api=servicio.Seguridad.login", "")
+            base_without_login = self.base_url.replace(
+                "?api=servicio.Seguridad.login", ""
+            )
             url = f"{base_without_login}?api={endpoint}"
 
         max_retries = 2
@@ -169,6 +175,8 @@ class TransprensaService:
                         raise RuntimeError(
                             f"Token sigue vencido después del refresh: {json_response}"
                         )
+                if response.status_code == 400 and isinstance(json_response, dict):
+                    return json_response
 
                 response.raise_for_status()
                 return json_response
